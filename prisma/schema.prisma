@@ -1,0 +1,1244 @@
+// NetSifr platform — Phase 1 (learning module) schema.
+// See docs/plan.md for the architecture this implements and why it's shaped
+// this way ahead of the later Events/Volunteering/Community/Recognition phases.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================================================
+// Identity & tenancy
+// ============================================================================
+// User is a global person-level identity, not scoped to one organization —
+// a person can belong to several orgs, and login identity (Credential) is
+// global so "which org is this email in" is never ambiguous at login.
+
+model Organization {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  /// IANA timezone name (e.g. "Asia/Karachi"), used to interpret calendar-only
+  /// fields (CohortSession dates, etc.) as "the day it is for this NGO".
+  timezone  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships            OrganizationMembership[]
+  topics                 Topic[]
+  initiatives            Initiative[]
+  opportunities          Opportunity[]
+  opportunityCoOrgs      OpportunityOrganization[]
+  courses                Course[]
+  cohorts                Cohort[]
+  enrolments             Enrolment[]
+  contributionEvents     ContributionEvent[]
+  auditEvents            AuditEvent[]
+  mediaAssets            MediaAsset[]
+  locations              Location[]
+  events                 Event[]
+  eventOccurrences       EventOccurrence[]
+  volunteerOpportunities VolunteerOpportunity[]
+  skills                 Skill[]
+}
+
+enum OrgRole {
+  OWNER
+  ADMIN
+  COORDINATOR
+  MEMBER
+}
+
+enum MembershipStatus {
+  ACTIVE
+  SUSPENDED
+  LEFT
+}
+
+/// Org-level access. Resource-scoped roles (facilitator on one cohort, etc.)
+/// live in their own membership tables, never folded into this org-wide role.
+model OrganizationMembership {
+  id             String           @id @default(uuid())
+  userId         String
+  organizationId String
+  role           OrgRole
+  status         MembershipStatus @default(ACTIVE)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+model User {
+  id          String     @id @default(uuid())
+  name        String
+  /// Index into a fixed client-side avatar palette (matches the prototype's
+  /// AVATARS array) — not a free-form upload in Phase 1.
+  avatarKey   Int        @default(0)
+  personaId   String?
+  /// Null means onboarding hasn't been completed — drives the redirect to
+  /// /onboarding vs /programs.
+  onboardedAt DateTime?
+  status      UserStatus @default(ACTIVE)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  persona Persona? @relation(fields: [personaId], references: [id])
+
+  organizationMemberships      OrganizationMembership[]
+  credentials                  Credential[]
+  personaQuizAnswers           PersonaQuizAnswer[]
+  topics                       UserTopic[]
+  enrolments                   Enrolment[]
+  cohortStaffMemberships       CohortStaffMembership[]
+  createdInvitations           Invitation[]             @relation("InvitationCreatedBy")
+  acceptedInvitations          Invitation[]             @relation("InvitationAcceptedBy")
+  playbackSessions             PlaybackSession[]
+  attendanceRecords            AttendanceRecord[]
+  attendanceOverridesGiven     AttendanceRecord[]       @relation("AttendanceOverriddenBy")
+  readingProgress              ReadingProgress[]
+  quizAttempts                 QuizAttempt[]
+  submissions                  Submission[]
+  gradesGiven                  Grade[]                  @relation("GradeGradedBy")
+  contributionEvents           ContributionEvent[]      @relation("ContributionEventUser")
+  contributionVerifications    ContributionEvent[]      @relation("ContributionEventVerifiedBy")
+  auditEvents                  AuditEvent[]             @relation("AuditEventActor")
+  uploadedMedia                MediaAsset[]             @relation("MediaAssetUploader")
+  ownedOpportunities           Opportunity[]            @relation("OpportunityOwner")
+  eventRegistrations           EventRegistration[]
+  eventCheckIns                EventCheckIn[]           @relation("EventCheckInUser")
+  eventCheckInsGiven           EventCheckIn[]           @relation("EventCheckInGivenBy")
+  eventFeedback                EventFeedback[]
+  volunteerApplications        VolunteerApplication[]
+  volunteerApplicationsDecided VolunteerApplication[]   @relation("VolunteerApplicationDecidedBy")
+  shiftSignups                 ShiftSignup[]
+  serviceLogs                  ServiceLog[]
+  serviceVerificationsGiven    ServiceVerification[]    @relation("ServiceVerifiedBy")
+  skills                       UserSkill[]
+}
+
+enum CredentialType {
+  EMAIL_PASSWORD
+  PHONE_OTP
+}
+
+/// Login identity. Unique on (type, identifier) GLOBALLY, not per-org — see
+/// Identity & tenancy note above. secretHash is null for OTP-type rows
+/// (no stored secret; a code is generated and verified per attempt).
+model Credential {
+  id         String         @id @default(uuid())
+  userId     String
+  type       CredentialType
+  identifier String
+  secretHash String?
+  verifiedAt DateTime?
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  user                    User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passwordResetTokens     PasswordResetToken[]
+  emailVerificationTokens EmailVerificationToken[]
+
+  @@unique([type, identifier])
+}
+
+model PasswordResetToken {
+  id           String    @id @default(uuid())
+  credentialId String
+  tokenHash    String    @unique
+  expiresAt    DateTime
+  usedAt       DateTime?
+  createdAt    DateTime  @default(now())
+
+  credential Credential @relation(fields: [credentialId], references: [id], onDelete: Cascade)
+}
+
+model EmailVerificationToken {
+  id           String    @id @default(uuid())
+  credentialId String
+  tokenHash    String    @unique
+  expiresAt    DateTime
+  usedAt       DateTime?
+  createdAt    DateTime  @default(now())
+
+  credential Credential @relation(fields: [credentialId], references: [id], onDelete: Cascade)
+}
+
+// ============================================================================
+// Persona & taxonomy
+// ============================================================================
+
+/// Seeded lookup, not a hardcoded enum, so copy/color can change as data.
+model Persona {
+  id         String @id @default(uuid())
+  key        String @unique
+  name       String
+  glyph      String
+  colorToken String
+
+  users User[]
+}
+
+/// Raw onboarding answers are kept (not just the derived persona) so the
+/// majority-vote can be recomputed if the quiz or mapping ever changes.
+model PersonaQuizAnswer {
+  id            String   @id @default(uuid())
+  userId        String
+  questionIndex Int
+  optionIndex   Int
+  createdAt     DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, questionIndex])
+}
+
+model Topic {
+  id             String @id @default(uuid())
+  organizationId String
+  slug           String
+  label          String
+
+  organization  Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  users         UserTopic[]
+  opportunities OpportunityTopic[]
+
+  @@unique([organizationId, slug])
+}
+
+model UserTopic {
+  userId  String
+  topicId String
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@id([userId, topicId])
+}
+
+// ============================================================================
+// Product catalogue: Initiative / Opportunity
+// ============================================================================
+// Opportunity is 1:1 with the joinable *instance* (Cohort for courses), not
+// the reusable identity (Course) — mirrors Event<->EventOccurrence and
+// VolunteerOpportunity<->Shift in later phases. Only type=COURSE is used in
+// Phase 1; the others are reserved.
+
+model Initiative {
+  id             String   @id @default(uuid())
+  organizationId String
+  title          String
+  description    String?
+  createdAt      DateTime @default(now())
+
+  organization  Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  opportunities Opportunity[]
+}
+
+enum OpportunityType {
+  COURSE
+  EVENT
+  VOLUNTEERING
+  ACTION_PROJECT
+}
+
+enum OpportunityVisibility {
+  PUBLIC
+  ORG_ONLY
+  INVITE_ONLY
+}
+
+enum OpportunityStatus {
+  DRAFT
+  LIVE
+  ARCHIVED
+}
+
+enum LocationMode {
+  ONLINE
+  PHYSICAL
+  HYBRID
+}
+
+/// The common discoverable envelope every activity type shares. Phase 1 sets
+/// visibility=INVITE_ONLY on every row it creates (see plan: /discover and
+/// self-service applications are a Phase 2+ concept) — the field exists now
+/// so that default doesn't require a migration to change later.
+model Opportunity {
+  id                  String                @id @default(uuid())
+  organizationId      String
+  initiativeId        String?
+  type                OpportunityType
+  title               String
+  slug                String
+  summary             String?
+  coverMediaId        String?
+  visibility          OpportunityVisibility @default(INVITE_ONLY)
+  status              OpportunityStatus     @default(DRAFT)
+  applicationOpensAt  DateTime?
+  applicationClosesAt DateTime?
+  startsAt            DateTime?
+  endsAt              DateTime?
+  capacity            Int?
+  locationMode        LocationMode          @default(ONLINE)
+  locationId          String?
+  ownerUserId         String
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  initiative   Initiative?  @relation(fields: [initiativeId], references: [id])
+  coverMedia   MediaAsset?  @relation(fields: [coverMediaId], references: [id])
+  location     Location?    @relation(fields: [locationId], references: [id])
+  owner        User         @relation("OpportunityOwner", fields: [ownerUserId], references: [id])
+
+  coHosts              OpportunityOrganization[]
+  topics               OpportunityTopic[]
+  cohort               Cohort?
+  eventOccurrence      EventOccurrence?
+  volunteerOpportunity VolunteerOpportunity?
+
+  @@unique([organizationId, slug])
+}
+
+enum OpportunityOrgRole {
+  OWNER
+  CO_HOST
+  PARTNER
+  SPONSOR
+}
+
+/// Lets an activity be "hosted by NetSifr and Partner X" — only the owning
+/// org controls it by default (see Opportunity.organizationId), partner
+/// access via this table is explicit and, in Phase 1, unused beyond the
+/// single OWNER row created alongside every Opportunity.
+model OpportunityOrganization {
+  id             String             @id @default(uuid())
+  opportunityId  String
+  organizationId String
+  role           OpportunityOrgRole
+
+  opportunity  Opportunity  @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([opportunityId, organizationId])
+}
+
+model OpportunityTopic {
+  opportunityId String
+  topicId       String
+
+  opportunity Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  topic       Topic       @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@id([opportunityId, topicId])
+}
+
+// ============================================================================
+// Learning: Course -> CourseVersion -> Cohort -> Enrolment
+// ============================================================================
+
+model Course {
+  id             String   @id @default(uuid())
+  organizationId String
+  title          String
+  description    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  versions     CourseVersion[]
+}
+
+/// Immutable once "locked" — lockedAt is set the first time any activity
+/// (attendance/quiz attempt/submission) is recorded against a Cohort running
+/// this version. Editing content after that must create a new CourseVersion;
+/// enforcement is application-level (see src/modules/learning), not a DB
+/// constraint, since "has activity" is a cross-table check.
+model CourseVersion {
+  id            String    @id @default(uuid())
+  courseId      String
+  versionNumber Int
+  lockedAt      DateTime?
+  createdAt     DateTime  @default(now())
+
+  course  Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  weeks   Week[]
+  cohorts Cohort[]
+
+  @@unique([courseId, versionNumber])
+}
+
+/// Pure curriculum structure — no calendar dates here (see CohortSession):
+/// two cohorts running the same CourseVersion need different concrete dates
+/// for "week 3", so a date can't live on this shared, immutable row.
+model Week {
+  id              String @id @default(uuid())
+  courseVersionId String
+  orderIndex      Int
+  title           String
+
+  courseVersion CourseVersion   @relation(fields: [courseVersionId], references: [id], onDelete: Cascade)
+  modules       Module[]
+  sessions      CohortSession[]
+
+  @@unique([courseVersionId, orderIndex])
+}
+
+enum ModuleType {
+  RECORDING
+  READING
+  QUIZ
+  ASSIGNMENT
+}
+
+/// Shared base + 1:1 discriminated side tables (RecordingModule etc.) — keeps
+/// the Week -> Module list query simple while each type keeps its own typed,
+/// validated shape. "Exactly one matching side-table row" is enforced
+/// transactionally in the upsertModule action, not by the type column alone.
+model Module {
+  id          String     @id @default(uuid())
+  weekId      String
+  type        ModuleType
+  title       String
+  orderIndex  Int
+  isPublished Boolean    @default(false)
+  /// Nullable scheduled-release timestamp. Not acted on by any Phase 1 code
+  /// yet (publish/unpublish is manual) — present now so scheduled release is
+  /// a fast follow, not a migration.
+  releaseAt   DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  week Week @relation(fields: [weekId], references: [id], onDelete: Cascade)
+
+  recording  RecordingModule?
+  reading    ReadingModule?
+  quiz       QuizModule?
+  assignment AssignmentModule?
+
+  @@unique([weekId, orderIndex])
+}
+
+model RecordingModule {
+  moduleId              String @id
+  driveFileId           String
+  /// Overrides Program/Cohort.attendanceUnlockMinutes for this recording
+  /// specifically, if set.
+  unlockMinutesOverride Int?
+
+  module            Module             @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  playbackSessions  PlaybackSession[]
+  attendanceRecords AttendanceRecord[]
+}
+
+model ReadingModule {
+  moduleId         String @id
+  contentUrl       String
+  estimatedMinutes Int?
+
+  module   Module            @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  progress ReadingProgress[]
+}
+
+model AssignmentModule {
+  moduleId     String   @id
+  prompt       String
+  softDeadline DateTime
+
+  module      Module       @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  submissions Submission[]
+}
+
+model QuizModule {
+  moduleId String @id
+  title    String
+
+  module    Module         @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  questions QuizQuestion[]
+  attempts  QuizAttempt[]
+}
+
+model QuizQuestion {
+  id           String @id @default(uuid())
+  quizModuleId String
+  orderIndex   Int
+  prompt       String
+
+  quizModule QuizModule   @relation(fields: [quizModuleId], references: [moduleId], onDelete: Cascade)
+  options    QuizOption[]
+  answers    QuizAnswer[]
+
+  @@unique([quizModuleId, orderIndex])
+}
+
+/// Single-correct-answer MCQ (matches the prototype's `correct: <index>` per
+/// question) — isCorrect lives directly on the option rather than a separate
+/// CorrectAnswer table, which is the simplest shape for the actual
+/// requirement (no multi-select questions observed).
+model QuizOption {
+  id         String  @id @default(uuid())
+  questionId String
+  orderIndex Int
+  label      String
+  isCorrect  Boolean @default(false)
+
+  question QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  answers  QuizAnswer[]
+
+  @@unique([questionId, orderIndex])
+}
+
+enum CohortStatus {
+  DRAFT
+  LIVE
+  ARCHIVED
+}
+
+/// The scheduled delivery — Enrolment, deadlines, staff, and attendance all
+/// attach here, not to the reusable Course. organizationId is denormalized
+/// from this cohort's 1:1 Opportunity row for straightforward tenant-scoped
+/// queries/indexing; kept in sync by the Server Actions that create/manage
+/// cohorts (see src/modules/learning), not a DB constraint.
+model Cohort {
+  id                      String       @id @default(uuid())
+  courseVersionId         String
+  opportunityId           String       @unique
+  organizationId          String
+  cohortLabel             String
+  /// Calendar date (see CohortSession) — the day the cohort starts, in the
+  /// organization's timezone.
+  startsAt                DateTime     @db.Date
+  attendanceUnlockMinutes Int          @default(10)
+  status                  CohortStatus @default(DRAFT)
+  createdAt               DateTime     @default(now())
+  updatedAt               DateTime     @updatedAt
+
+  courseVersion CourseVersion @relation(fields: [courseVersionId], references: [id])
+  opportunity   Opportunity   @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  organization  Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  sessions           CohortSession[]
+  staffMemberships   CohortStaffMembership[]
+  enrolments         Enrolment[]
+  invitations        Invitation[]
+  contributionEvents ContributionEvent[]
+
+  @@index([organizationId, status])
+}
+
+/// Per-cohort calendar instantiation of a curriculum Week — one row per
+/// week, auto-created when a Cohort is created (dates auto-filled as
+/// cohort.startsAt + 7*orderIndex at creation time only), then
+/// independently editable per session so a holiday in *this* cohort doesn't
+/// touch the shared curriculum or any other cohort. Anything date-driven
+/// (current week, attendance-% denominator, "this week's recording") reads
+/// this table, not Week.
+model CohortSession {
+  id       String   @id @default(uuid())
+  cohortId String
+  weekId   String
+  startsOn DateTime @db.Date
+  endsOn   DateTime @db.Date
+
+  cohort Cohort @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  week   Week   @relation(fields: [weekId], references: [id], onDelete: Cascade)
+
+  @@unique([cohortId, weekId])
+}
+
+enum CohortStaffRole {
+  FACILITATOR
+}
+
+/// The facilitator-role seam. v1 never inserts rows here — org-wide Admins
+/// get their authority from OrganizationMembership.role, checked globally.
+/// The facilitator fast-follow is then a pure additive check in the
+/// authorization helper, not a data migration.
+model CohortStaffMembership {
+  id       String          @id @default(uuid())
+  userId   String
+  cohortId String
+  role     CohortStaffRole
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cohort Cohort @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, cohortId])
+}
+
+enum EnrolmentStatus {
+  ACTIVE
+  COMPLETED
+  WITHDRAWN
+}
+
+/// Account (User) vs enrolment (this table) are deliberately separate — a
+/// profile is set up once, enrolment is per cohort. Created ONLY on
+/// Invitation acceptance; there is no INVITED/DECLINED state here (that
+/// lives on Invitation) — see Invitation below.
+model Enrolment {
+  id             String          @id @default(uuid())
+  userId         String
+  cohortId       String
+  organizationId String
+  status         EnrolmentStatus @default(ACTIVE)
+  enrolledAt     DateTime        @default(now())
+  completedAt    DateTime?
+  withdrawnAt    DateTime?
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cohort       Cohort       @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, cohortId])
+  @@index([cohortId, status])
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
+  REVOKED
+}
+
+/// Fully separate from Enrolment (an invite can expire unused; an enrolment
+/// only exists once accepted). tokenHash only — the raw token is returned
+/// once at creation for the admin to copy/send, never persisted in plaintext
+/// (same pattern as PasswordResetToken). Acceptance requires the signed-in
+/// user's *verified* email to match normalizedEmail, which is what stops a
+/// forwarded invite link being accepted by the wrong account.
+model Invitation {
+  id               String           @id @default(uuid())
+  cohortId         String
+  normalizedEmail  String
+  tokenHash        String           @unique
+  status           InvitationStatus @default(PENDING)
+  expiresAt        DateTime
+  acceptedByUserId String?
+  createdByUserId  String
+  createdAt        DateTime         @default(now())
+
+  cohort         Cohort @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  acceptedByUser User?  @relation("InvitationAcceptedBy", fields: [acceptedByUserId], references: [id])
+  createdByUser  User   @relation("InvitationCreatedBy", fields: [createdByUserId], references: [id])
+
+  @@index([cohortId, status])
+}
+
+// ============================================================================
+// Attendance (engagement proxy — see plan for why it's named this way)
+// ============================================================================
+
+/// One row per (user, recordingModule) while a viewing session is open.
+/// endedAt marks it inactive. A partial unique index enforcing "one active
+/// session per (userId, recordingModuleId)" is added by hand in the initial
+/// migration (Prisma's schema DSL has no partial-unique-index syntax) — see
+/// the migration SQL for the `WHERE "endedAt" IS NULL` clause. The heartbeat
+/// endpoint validates the nonce belongs to the caller's current session
+/// before accepting a delta, which is what stops multi-tab/replay races.
+model PlaybackSession {
+  id                String    @id @default(uuid())
+  userId            String
+  recordingModuleId String
+  nonce             String    @unique
+  startedAt         DateTime  @default(now())
+  lastHeartbeatAt   DateTime  @default(now())
+  endedAt           DateTime?
+
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recordingModule RecordingModule @relation(fields: [recordingModuleId], references: [moduleId], onDelete: Cascade)
+}
+
+enum AttendanceConfirmationMethod {
+  ENGAGEMENT_PROXY
+  ADMIN_OVERRIDE
+  LIVE_ATTENDANCE
+}
+
+/// Deliberately NOT named "watched"/"attended" throughout — Google Drive
+/// exposes no supported playback API, so this can only ever measure
+/// engaged/open time as a proxy, never confirm the recording actually played.
+/// See docs/plan.md's "known, deliberate limitation" section.
+model AttendanceRecord {
+  id                           String                        @id @default(uuid())
+  userId                       String
+  recordingModuleId            String
+  engagedSeconds               Int                           @default(0)
+  engagementThresholdReachedAt DateTime?
+  attendanceConfirmedAt        DateTime?
+  attendanceConfirmationMethod AttendanceConfirmationMethod?
+  overriddenByUserId           String?
+  overrideNote                 String?
+  createdAt                    DateTime                      @default(now())
+  updatedAt                    DateTime                      @updatedAt
+
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recordingModule RecordingModule @relation(fields: [recordingModuleId], references: [moduleId], onDelete: Cascade)
+  overriddenBy    User?           @relation("AttendanceOverriddenBy", fields: [overriddenByUserId], references: [id])
+
+  @@unique([userId, recordingModuleId])
+}
+
+model ReadingProgress {
+  id              String   @id @default(uuid())
+  userId          String
+  readingModuleId String
+  markedReadAt    DateTime @default(now())
+
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  readingModule ReadingModule @relation(fields: [readingModuleId], references: [moduleId], onDelete: Cascade)
+
+  @@unique([userId, readingModuleId])
+}
+
+// ============================================================================
+// Quiz attempts & assignment submissions
+// ============================================================================
+
+/// Max 2 attempts (matches the prototype's "one retake"), enforced at the
+/// application layer (reject a 3rd attempt), not by a DB check.
+model QuizAttempt {
+  id            String   @id @default(uuid())
+  userId        String
+  quizModuleId  String
+  attemptNumber Int
+  scorePercent  Int
+  submittedAt   DateTime @default(now())
+
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quizModule QuizModule   @relation(fields: [quizModuleId], references: [moduleId], onDelete: Cascade)
+  answers    QuizAnswer[]
+
+  @@unique([userId, quizModuleId, attemptNumber])
+}
+
+model QuizAnswer {
+  id               String @id @default(uuid())
+  attemptId        String
+  questionId       String
+  selectedOptionId String
+
+  attempt        QuizAttempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question       QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  selectedOption QuizOption   @relation(fields: [selectedOptionId], references: [id])
+
+  @@unique([attemptId, questionId])
+}
+
+/// attemptNumber mirrors the quiz retake shape: a 2nd attempt is only
+/// permitted (application-enforced) after the 1st attempt's Grade is
+/// NEEDS_WORK — see docs/plan.md's "Resubmission after grading" default.
+model Submission {
+  id                 String   @id @default(uuid())
+  userId             String
+  assignmentModuleId String
+  attemptNumber      Int
+  bodyText           String
+  submittedAt        DateTime @default(now())
+  /// Computed once at submit time against the module's softDeadline and
+  /// stored, not recomputed later, so a later deadline edit can't
+  /// retroactively relabel history.
+  isLate             Boolean
+
+  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assignmentModule AssignmentModule @relation(fields: [assignmentModuleId], references: [moduleId], onDelete: Cascade)
+  grade            Grade?
+
+  @@unique([userId, assignmentModuleId, attemptNumber])
+}
+
+enum GradeLabel {
+  NEEDS_WORK
+  GOOD
+  EXCELLENT
+}
+
+model Grade {
+  id             String     @id @default(uuid())
+  submissionId   String     @unique
+  label          GradeLabel
+  feedback       String
+  gradedByUserId String
+  gradedAt       DateTime   @default(now())
+
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  gradedBy   User       @relation("GradeGradedBy", fields: [gradedByUserId], references: [id])
+}
+
+// ============================================================================
+// Events (Phase 2) — Event -> EventOccurrence mirrors Course -> Cohort:
+// Event is the reusable identity, EventOccurrence is the scheduled,
+// joinable instance an Opportunity/EventRegistration attaches to. Unlike
+// Courses (invite-only), Events are self-service — discoverable and
+// registerable from /discover — which is the whole reason the two
+// activity types are modeled separately (see docs/plan.md).
+// ============================================================================
+
+model Event {
+  id             String   @id @default(uuid())
+  organizationId String
+  title          String
+  description    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  occurrences  EventOccurrence[]
+}
+
+enum EventOccurrenceStatus {
+  DRAFT
+  LIVE
+  COMPLETED
+  CANCELLED
+}
+
+/// startsAt/endsAt are real instants (unlike CohortSession's calendar-only
+/// dates) since an event happens at a specific time, not just "on a day".
+/// checkInToken is the opaque value embedded in the QR/check-in URL — one
+/// per occurrence, not per registration (see docs/plan.md's check-in
+/// default), so it never needs to be looked up by anything other than
+/// itself.
+model EventOccurrence {
+  id             String                @id @default(uuid())
+  eventId        String
+  opportunityId  String                @unique
+  organizationId String
+  startsAt       DateTime
+  endsAt         DateTime
+  locationMode   LocationMode          @default(ONLINE)
+  locationId     String?
+  capacity       Int?
+  status         EventOccurrenceStatus @default(DRAFT)
+  checkInToken   String                @unique
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  event        Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  opportunity  Opportunity  @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  location     Location?    @relation(fields: [locationId], references: [id])
+
+  registrations EventRegistration[]
+  checkIns      EventCheckIn[]
+  feedback      EventFeedback[]
+
+  @@index([organizationId, status])
+}
+
+enum EventRegistrationStatus {
+  REGISTERED
+  WAITLISTED
+  CANCELLED
+}
+
+/// Registering past capacity creates a WAITLISTED row instead of failing;
+/// cancelling a REGISTERED row promotes the oldest WAITLISTED row
+/// transactionally (see src/modules/events/registration.ts) — capacity
+/// itself is never checked again after promotion, since the promoted row
+/// is filling the exact seat that just opened.
+model EventRegistration {
+  id                String                  @id @default(uuid())
+  userId            String
+  eventOccurrenceId String
+  organizationId    String
+  status            EventRegistrationStatus @default(REGISTERED)
+  registeredAt      DateTime                @default(now())
+  cancelledAt       DateTime?
+
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventOccurrence EventOccurrence @relation(fields: [eventOccurrenceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventOccurrenceId])
+  @@index([eventOccurrenceId, status])
+}
+
+/// Reuses AttendanceConfirmationMethod's LIVE_ATTENDANCE (self-check-in via
+/// the occurrence's QR token, inside the check-in window) and ADMIN_OVERRIDE
+/// (manual, from the registrations roster) — Phase 1's schema comment
+/// already reserved LIVE_ATTENDANCE for exactly this.
+model EventCheckIn {
+  id                String                       @id @default(uuid())
+  userId            String
+  eventOccurrenceId String
+  checkedInAt       DateTime                     @default(now())
+  method            AttendanceConfirmationMethod
+  checkedInByUserId String?
+
+  user            User            @relation("EventCheckInUser", fields: [userId], references: [id], onDelete: Cascade)
+  eventOccurrence EventOccurrence @relation(fields: [eventOccurrenceId], references: [id], onDelete: Cascade)
+  checkedInBy     User?           @relation("EventCheckInGivenBy", fields: [checkedInByUserId], references: [id])
+
+  @@unique([userId, eventOccurrenceId])
+}
+
+/// Requires an EventCheckIn row to exist first (enforced in
+/// src/modules/events/feedback.ts) — feedback about an event you didn't
+/// attend isn't meaningful.
+model EventFeedback {
+  id                String   @id @default(uuid())
+  userId            String
+  eventOccurrenceId String
+  rating            Int
+  comment           String?
+  submittedAt       DateTime @default(now())
+
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventOccurrence EventOccurrence @relation(fields: [eventOccurrenceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventOccurrenceId])
+}
+
+// ============================================================================
+// Volunteering (Phase 3) — VolunteerOpportunity is the discoverable, apply-to
+// unit (1:1 with a PUBLIC Opportunity envelope, like EventOccurrence); Shifts
+// are optional scheduling sub-slots accepted volunteers sign up for. The one
+// long lifecycle string in docs/plan.md is three superimposed lifecycles:
+// opportunity status, application status, and shift-signup status. See the
+// Phase 3 decisions note in docs/plan.md.
+// ============================================================================
+
+enum VolunteerOpportunityStatus {
+  DRAFT
+  OPEN
+  CLOSED
+  ARCHIVED
+}
+
+model VolunteerOpportunity {
+  id             String                     @id @default(uuid())
+  opportunityId  String                     @unique
+  organizationId String
+  title          String
+  description    String?
+  locationMode   LocationMode               @default(ONLINE)
+  locationId     String?
+  /// Optional application deadline; null = open until CLOSED by an admin.
+  applyByDate    DateTime?
+  status         VolunteerOpportunityStatus @default(DRAFT)
+  createdAt      DateTime                   @default(now())
+  updatedAt      DateTime                   @updatedAt
+
+  opportunity  Opportunity  @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  location     Location?    @relation(fields: [locationId], references: [id])
+
+  applications      VolunteerApplication[]
+  shifts            VolunteerShift[]
+  serviceLogs       ServiceLog[]
+  skillRequirements OpportunitySkillRequirement[]
+
+  @@index([organizationId, status])
+}
+
+enum VolunteerApplicationStatus {
+  APPLIED
+  SHORTLISTED
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+}
+
+/// Apply-to-opportunity (not per-shift). Only an ACCEPTED application lets a
+/// user sign up for shifts or log hours — the trust boundary, mirroring how
+/// Enrolment gates course content.
+model VolunteerApplication {
+  id                     String                     @id @default(uuid())
+  volunteerOpportunityId String
+  userId                 String
+  organizationId         String
+  status                 VolunteerApplicationStatus @default(APPLIED)
+  message                String?
+  appliedAt              DateTime                   @default(now())
+  decidedAt              DateTime?
+  decidedByUserId        String?
+
+  volunteerOpportunity VolunteerOpportunity @relation(fields: [volunteerOpportunityId], references: [id], onDelete: Cascade)
+  user                 User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  decidedBy            User?                @relation("VolunteerApplicationDecidedBy", fields: [decidedByUserId], references: [id])
+
+  @@unique([userId, volunteerOpportunityId])
+  @@index([volunteerOpportunityId, status])
+}
+
+model VolunteerShift {
+  id                     String   @id @default(uuid())
+  volunteerOpportunityId String
+  organizationId         String
+  title                  String
+  startsAt               DateTime
+  endsAt                 DateTime
+  capacity               Int?
+  createdAt              DateTime @default(now())
+
+  volunteerOpportunity VolunteerOpportunity @relation(fields: [volunteerOpportunityId], references: [id], onDelete: Cascade)
+  signups              ShiftSignup[]
+
+  @@index([volunteerOpportunityId])
+}
+
+enum ShiftSignupStatus {
+  SIGNED_UP
+  CONFIRMED
+  ATTENDED
+  NO_SHOW
+  CANCELLED
+}
+
+model ShiftSignup {
+  id         String            @id @default(uuid())
+  shiftId    String
+  userId     String
+  status     ShiftSignupStatus @default(SIGNED_UP)
+  signedUpAt DateTime          @default(now())
+
+  shift VolunteerShift @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  user  User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, shiftId])
+  @@index([shiftId, status])
+}
+
+enum ServiceLogStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+/// A volunteer's filed hours (mirrors Submission). Verification is a separate
+/// row (mirrors Grade) so the approval carries its own actor/timestamp/note.
+/// Points are written to ContributionEvent only when a VERIFIED verification
+/// exists, keyed by this log's id.
+model ServiceLog {
+  id                     String           @id @default(uuid())
+  userId                 String
+  volunteerOpportunityId String
+  shiftId                String?
+  organizationId         String
+  hours                  Float
+  note                   String?
+  occurredOn             DateTime         @db.Date
+  status                 ServiceLogStatus @default(PENDING)
+  loggedAt               DateTime         @default(now())
+
+  user                 User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  volunteerOpportunity VolunteerOpportunity @relation(fields: [volunteerOpportunityId], references: [id], onDelete: Cascade)
+  verification         ServiceVerification?
+
+  @@index([volunteerOpportunityId, status])
+  @@index([userId])
+}
+
+enum ServiceVerificationStatus {
+  VERIFIED
+  REJECTED
+}
+
+model ServiceVerification {
+  id               String                    @id @default(uuid())
+  serviceLogId     String                    @unique
+  status           ServiceVerificationStatus
+  note             String?
+  verifiedByUserId String
+  verifiedAt       DateTime                  @default(now())
+
+  serviceLog ServiceLog @relation(fields: [serviceLogId], references: [id], onDelete: Cascade)
+  verifiedBy User       @relation("ServiceVerifiedBy", fields: [verifiedByUserId], references: [id])
+}
+
+// ============================================================================
+// Skills taxonomy (Phase 3) — advisory in Phase 3 (shown as a match hint),
+// not a hard application gate; that's a Phase 6 recommendation concern.
+// ============================================================================
+
+model Skill {
+  id             String @id @default(uuid())
+  organizationId String
+  slug           String
+  label          String
+
+  organization Organization                  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  users        UserSkill[]
+  requirements OpportunitySkillRequirement[]
+
+  @@unique([organizationId, slug])
+}
+
+model UserSkill {
+  userId  String
+  skillId String
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill Skill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@id([userId, skillId])
+}
+
+model OpportunitySkillRequirement {
+  volunteerOpportunityId String
+  skillId                String
+
+  volunteerOpportunity VolunteerOpportunity @relation(fields: [volunteerOpportunityId], references: [id], onDelete: Cascade)
+  skill                Skill                @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@id([volunteerOpportunityId, skillId])
+}
+
+// ============================================================================
+// Recognition — immutable contribution ledger (see plan for why this
+// replaces a single hardcoded points formula ahead of Events/Volunteering)
+// ============================================================================
+
+enum ContributionType {
+  ATTENDANCE_CONFIRMED
+  READING_COMPLETED
+  QUIZ_SCORED
+  ASSIGNMENT_SUBMITTED
+  ASSIGNMENT_GRADED
+  EVENT_ATTENDED
+  VOLUNTEER_HOURS_VERIFIED
+}
+
+enum ContributionVerificationStatus {
+  AUTO
+  ADMIN_VERIFIED
+}
+
+/// Written transactionally alongside the source event (attendance confirmed,
+/// quiz scored, etc.), keyed by idempotencyKey so retries can't double-count.
+/// Total points = SUM(points) over this table for a user (± cohort filter) —
+/// simpler and more future-proof than recomputing from 4 different tables on
+/// every read, and it's the shape that survives Events/Volunteering later.
+model ContributionEvent {
+  id                  String                         @id @default(uuid())
+  userId              String
+  organizationId      String
+  /// Denormalized from the source activity so per-program point/streak totals
+  /// (Home) can filter the ledger directly, alongside the org-wide totals
+  /// (Me) that read across all of a user's cohorts. Null once a source type
+  /// (e.g. a future Event) isn't cohort-scoped.
+  cohortId            String?
+  type                ContributionType
+  sourceType          String
+  sourceId            String
+  points              Int
+  occurredAt          DateTime                       @default(now())
+  verificationStatus  ContributionVerificationStatus @default(AUTO)
+  verifiedByUserId    String?
+  pointsPolicyVersion Int                            @default(1)
+  idempotencyKey      String                         @unique
+  createdAt           DateTime                       @default(now())
+
+  user         User         @relation("ContributionEventUser", fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  cohort       Cohort?      @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  verifiedBy   User?        @relation("ContributionEventVerifiedBy", fields: [verifiedByUserId], references: [id])
+
+  @@index([organizationId, userId])
+  @@index([cohortId, userId])
+}
+
+// ============================================================================
+// Cross-cutting infra
+// ============================================================================
+
+/// Every admin override, grade, publish/archive, and role change writes one
+/// row — built alongside the Phase 1 admin actions, not bolted on after.
+model AuditEvent {
+  id             String   @id @default(uuid())
+  organizationId String
+  actorUserId    String
+  action         String
+  targetType     String
+  targetId       String
+  metadata       Json?
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  actor        User         @relation("AuditEventActor", fields: [actorUserId], references: [id])
+
+  @@index([organizationId, createdAt])
+}
+
+enum MediaKind {
+  IMAGE
+  VIDEO
+  DOCUMENT
+  OTHER
+}
+
+/// Reserved for profile images, opportunity cover images, and future
+/// submission attachments — Phase 1 barely uses this, but it's created now
+/// so later phases don't need a migration just to attach a cover image.
+model MediaAsset {
+  id             String    @id @default(uuid())
+  organizationId String
+  uploaderUserId String?
+  url            String
+  kind           MediaKind
+  createdAt      DateTime  @default(now())
+
+  organization  Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  uploader      User?         @relation("MediaAssetUploader", fields: [uploaderUserId], references: [id])
+  opportunities Opportunity[]
+}
+
+/// Reserved for physical/online/hybrid activities — Phase 1 courses are
+/// online-only in practice, but the shape exists now for Phase 2 events.
+model Location {
+  id             String       @id @default(uuid())
+  organizationId String
+  mode           LocationMode
+  address        String?
+  city           String?
+  country        String?
+  lat            Float?
+  lng            Float?
+  createdAt      DateTime     @default(now())
+
+  organization           Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  opportunities          Opportunity[]
+  eventOccurrences       EventOccurrence[]
+  volunteerOpportunities VolunteerOpportunity[]
+}
+
+/// Simple polling-worker outbox for notifications and ContributionEvent
+/// fan-out — beats firing side effects inline inside request handlers, which
+/// tends to quietly drop emails/notifications under load.
+model OutboxEvent {
+  id          String    @id @default(uuid())
+  type        String
+  payload     Json
+  processedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([processedAt])
+}
+
+/// Backs the login/password-reset/invitation/heartbeat rate limits — a
+/// single-instance-appropriate DB-backed limiter (see src/lib/rate-limit.ts).
+/// key is the action+identifier bucket (e.g. "login:email:alice@x.org"),
+/// windowStart is the fixed-size window start this count belongs to.
+model RateLimitBucket {
+  id          String   @id @default(uuid())
+  key         String
+  windowStart DateTime
+  count       Int      @default(1)
+  updatedAt   DateTime @updatedAt
+
+  @@unique([key, windowStart])
+}

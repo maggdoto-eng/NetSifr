@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  body { margin: 0; background: #E9E5DA; }
+  a { color: #FF6A45; text-decoration: none; }
+  a:hover { color: #123B2E; }
+  * { box-sizing: border-box; }
+</style>
+</helmet>
+
+<div style="font-family: Inter, sans-serif; color: #10241E; background: #E9E5DA; padding: 56px 64px 120px; display: flex; flex-direction: column; gap: 72px">
+
+  <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 40px; flex-wrap: wrap; border-bottom: 2px solid #10241E; padding-bottom: 24px">
+    <div style="display: flex; flex-direction: column; gap: 10px">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: #4A6258">NetSifr / CRGC — Learning Platform</div>
+      <div style="font-family: Archivo, sans-serif; font-weight: 800; font-size: 52px; line-height: 1; letter-spacing: -0.03em">Climate, Gender &amp; Community Support</div>
+      <div style="font-size: 16px; color: #4A6258; max-width: 720px">Cohort 1 · 8 weeks · 42 participants. Five core screens, desktop and mobile, with v2–v4 states visible as locked previews.</div>
+    </div>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; padding: 8px 14px; border-radius: 999px; background: #123B2E; color: #86E5BC">UNODC</div>
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; padding: 8px 14px; border-radius: 999px; background: #123B2E; color: #86E5BC">ERASMUS+</div>
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; padding: 8px 14px; border-radius: 999px; background: #123B2E; color: #86E5BC">SSUET</div>
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; padding: 8px 14px; border-radius: 999px; background: #123B2E; color: #86E5BC">TI PAKISTAN</div>
+    </div>
+  </div>
+
+  <!-- ============ 1. ONBOARDING ============ -->
+  <section data-screen-label="01 Onboarding wizard" style="display: flex; flex-direction: column; gap: 28px">
+    <div style="display: flex; align-items: baseline; gap: 16px">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 8px; background: #FF6A45; color: #FFF7F2">01</div>
+      <div style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 30px; letter-spacing: -0.02em">Invite &amp; onboarding wizard</div>
+      <div style="font-size: 14px; color: #4A6258">Warm, personal — deliberately unlike the dashboard.</div>
+    </div>
+
+    <div style="display: flex; gap: 28px; flex-wrap: wrap; align-items: flex-start">
+
+      <!-- Step 1 mobile: welcome -->
+      <div style="width: 390px; height: 780px; flex: none; border-radius: 38px; overflow: hidden; background: #0B241C; box-shadow: 0 24px 60px rgba(11,36,28,0.28); position: relative; display: flex; flex-direction: column">
+        <div style="position: absolute; inset: 0; background: repeating-radial-gradient(circle at 12% 96%, rgba(134,229,188,0) 0 38px, rgba(134,229,188,0.16) 38px 39.5px); pointer-events: none"></div>
+        <div style="position: relative; padding: 26px 28px 0; display: flex; align-items: center; justify-content: space-between">
+          <div style="font-family: Archivo, sans-serif; font-weight: 800; font-size: 17px; color: #F5F2EA; letter-spacing: -0.01em">NetSifr</div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #86E5BC">STEP 1 / 4</div>
+        </div>
+        <div style="position: relative; padding: 0 28px; margin-top: 28px">
+          <div style="height: 178px; border-radius: 22px; background: repeating-linear-gradient(45deg, #123B2E 0 10px, #16493a 10px 20px); display: flex; align-items: center; justify-content: center; border: 1px solid rgba(134,229,188,0.35)">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 12px">
+              <div style="width: 52px; height: 52px; border-radius: 999px; background: #FF6A45; display: flex; align-items: center; justify-content: center; color: #FFF7F2; font-size: 18px">▶</div>
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #86E5BC">WELCOME VIDEO · 0:48</div>
+            </div>
+          </div>
+        </div>
+        <div style="position: relative; padding: 30px 28px 0; display: flex; flex-direction: column; gap: 14px">
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; color: #86E5BC">COHORT 1 · OCT–DEC 2026</div>
+          <div style="font-family: Archivo, sans-serif; font-weight: 800; font-size: 42px; line-height: 0.98; letter-spacing: -0.035em; color: #F5F2EA">You're in,<br />Ayesha.</div>
+          <div style="font-size: 15px; line-height: 1.55; color: rgba(245,242,234,0.72)">Eight weeks on climate, gender and community power — with 41 other people doing this work across Pakistan. Two minutes to set up.</div>
+        </div>
+        <div style="position: relative; margin-top: auto; padding: 0 28px 34px; display: flex; flex-direction: column; gap: 16px">
+          <div style="display: flex; gap: 7px">
+            <div style="height: 5px; flex: 1; border-radius: 999px; background: #86E5BC"></div>
+            <div style="height: 5px; flex: 1; border-radius: 999px; background: rgba(245,242,234,0.18)"></div>
+            <div style="height: 5px; flex: 1; border-radius: 999px; background: rgba(245,242,234,0.18)"></div>
+            <div style="height: 5px; flex: 1; border-radius: 999px; background: rgba(245,242,234,0.18)"></div>
+          </div>
+          <div style="height: 60px; border-radius: 18px; background: #FF6A45; color: #FFF7F2; display: flex; align-items: center; justify-content: center; font-family: Archivo, sans-serif; font-weight: 700; font-size: 18px" style-hover="background: #ff7f5f">Let's go →</div>
+        </div>
+      </div>
+
+      <!-- Step 2 mobile: identity -->
+      <div style="width: 390px; height: 780px; flex: none; border-radius: 38px; overflow: hidden; background: #F5F2EA; box-shadow: 0 24px 60px rgba(11,36,28,0.18); display: flex; flex-direction: column">
+        <div style="padding: 26px 28px 0; display: flex; align-items: center; justify-content: space-between">
+          <div style="font-family: Archivo, sans-serif; font-weight: 800; font-size: 17px; color: #10241E">NetSifr</div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #4A6258">STEP 2 / 4</div>
+        </div>
+        <div style="padding: 18px 28px 0; display: flex; gap: 7px">
+          <div style="height: 5px; flex: 1; border-radius: 999px; background: #123B2E"></div>
+          <div style="height: 5px; flex: 1; border-radius: 999px; background: #123B2E"></div>
+          <div style="height: 5px; flex: 1; border-radius: 999px; background: rgba(18,59,46,0.14)"></div>
+          <div style="height: 5px; flex: 1; border-radius: 999px; background: rgba(18,59,46,0.14)"></div>
+        </div>
+        <div style="padding: 34px 28px 0; display: flex; flex-direction: column; gap: 8px">
+          <div style="font-family: Archivo, sans-serif; font-weight: 800; font-size: 34px; line-height: 1.02; letter-spacing: -0.03em">Who's joining us?</div>
+          <div style="font-size: 15px; color: #4A6258; line-height: 1.5">This is what your cohort will see.</div>
+        </div>
+        <div style="padding: 26px 28px 0; display: flex; flex-direction: column; gap: 10px">
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #4A6258">FULL NAME</div>
+          <div style="height: 58px; border-radius: 16px; background: #FFFFFF; border: 2px solid #123B2E; display: flex; align-items: center; padding: 0 18px; font-size: 17px; font-weight: 500">Ayesha Tariq</div>
+        </div>
+        <div style="padding: 24px 28px 0; display: flex; flex-direction: column; gap: 12px">
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #4A6258">PICK AN AVATAR — OR UPLOAD</div>
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px">
+            <div style="aspect-ratio: 1; border-radius: 999px; background: #86E5BC; border: 3px solid #123B2E; display: flex; align-items: center; justify-content: center"><div style="width: 26px; height: 26px; border-radius: 999px; background: #123B2E"></div></div>
+            <div style="aspect-ratio: 1; border-radius: 999px; background: #FF6A45; display: flex; align-items: center; justify-content: center"><div style="width: 26px; height: 26px; background: #FFF7F2"></div></div>
+            <div style="aspect-ratio: 1; border-radius: 999px; background: #123B2E; display: flex; align-items: center; justify-content: center"><div style="width: 26px; height: 26px; border-radius: 999px 999px 4px 4px; background: #86E5BC"></div></div>
+            <div style="aspect-ratio: 1; border-radius: 999px; background: #E3D9C2; display: flex; align-items: center; justify-content: center"><div style="width: 26px; height: 26px; transform: rotate(45deg); background: #123B2E"></div></div>
+            <div style="aspect-ratio: 1; border-radius: 999px; background: #123B2E; display: flex; align-items: center; justify-content: center"><div style="width: 26px; height: 26px; border-radius: 4px; background: #FF6A45"></div></div>
+            <div style="aspect-ratio: 1; border-radius: 999px; background: #86E5BC; display: flex; align-items: center; justify-content: center"><div style="width: 26px; height: 26px; transform: rotate(45deg); border-radius: 4px; background: #FF6A45"></div></div>
+            <div style="aspect-ratio: 1; border-radius: 999px; background: #FF6A45; display: flex; align-items: center; justify-content: center"><div style="width: 26px; height: 26px; border-radius: 999px; border: 5px solid #FFF7F2"></div></div>
+            <div style="aspect-ratio: 1; border-radius: 999px; border: 2px dashed #4A6258; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #4A6258">+</div>
+          </div>
+        </div>
+        <div style="margin-top: auto; padding: 0 28px 34px; display: flex; gap: 12px">
+          <div style="width: 60px; height: 60px; border-radius: 18px; border: 2px solid #123B2E; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #123B2E">←</div>
+          <div style="flex: 1; height: 60px; border-radius: 18px; background: #123B2E; color: #F5F2EA; display: flex; align-items: center; justify-content: center; font-family: Archivo, sans-serif; font-weight: 700; font-size: 18px">Continue</div>
+        </div>
+      </div>
+
+      <!-- Step 3 mobile: persona quiz -->
+      <div style="width: 390px; height: 780px; flex: none; border-radius: 38px; overflow: hidden; background: #F5F2EA; box-shadow: 0 24px 60px rgba(11,36,28,0.18); display: flex; flex-direction: column">
+        <div style="padding: 26px 28px 0; display: flex; align-items: center; justify-content: space-between">
+          <div style="font-family: Archivo, sans-serif; font-weight: 800; font-size: 17px; color: #10241E">NetSifr</div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #4A6258">STEP 3 / 4</div>
+        </div>
+        <div style="padding: 18px 28px 0; display: flex; gap: 7px">
+          <div style="height: 5px; flex: 1; border-radius: 999px; background: #123B2E"></div>
+          <div style="height: 5px; flex: 1; border-radius: 999px; background: #123B2E"></div>
+          <div style="height: 5px; flex: 1; border-radius: 999px; background: #123B2E"></div>
+          <div style="height: 5px; flex: 1; border-radius: 999px; background: rgba(18,59,46,0.14)"></div>
+        </div>
+        <div style="padding: 30px 28px 0; display: flex; flex-direction: column; gap: 8px">
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #FF6A45">YOUR CLIMATE PERSONA · Q1 OF 3</div>
+          <div style="font-family: Archivo, sans-serif; font-weight: 800; font-size: 32px; line-height: 1.04; letter-spacing: -0.03em; text-wrap: pretty">What pulls you into this work?</div>
+        </div>
+        <div style="padding: 24px 28px 0; display: flex; flex-direction: column; gap: 14px">
+          <div style="padding: 20px; border-radius: 20px; background: #FFFFFF; border: 2px solid #10241E; box-shadow: 4px 4px 0 #10241E; display: flex; gap: 16px; align-items: center">
+            <div style="width: 44px; height: 44px; border-radius: 12px; background: #86E5BC; flex: none"></div>
+            <div style="display: flex; flex-direction: column; gap: 3px">
+              <div style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 18px">Policy &amp; systems</div>
+              <div style="font-size: 13px; color: #4A6258">Rules, budgets, who decides</div>
+            </div>
+          </div>
+          <div style="padding: 20px; border-radius: 20px; background: #FFFFFF; border: 2px solid rgba(16,36,30,0.16); display: flex; gap: 16px; align-items: center">
+            <div style="width: 44px; height: 44px; border-radius: 12px; background: #FF6A45; flex: none"></div>
+            <div style="display: flex; flex-direction: column; gap: 3px">
+              <div style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 18px">Ground action</div>
+              <div style="font-size: 13px; color: #4A6258">Organising, mutual aid, field work</div>
+            </div>
+          </div>
+          <div style="padding: 20px; border-radius: 20px; background: #FFFFFF; border: 2px solid rgba(16,36,30,0.16); display: flex; gap: 16px; align-items: center">
+            <div style="width: 44px; height: 44px; border-radius: 12px; background: #123B2E; flex: none"></div>
+            <div style="display: flex; flex-direction: column; gap: 3px">
+              <div style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 18px">Storytelling</div>
+              <div style="font-size: 13px; color: #4A6258">Media, research, making it land</div>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top: auto; padding: 0 28px 34px; display: flex; flex-direction: column; gap: 12px">
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: #4A6258; text-align: center">NO WRONG ANSWERS — THIS IS JUST YOUR TAG</div>
+          <div style="height: 60px; border-radius: 18px; background: #123B2E; color: #F5F2EA; display: flex; align-items: center; justify-content: center; font-family: Archivo, sans-serif; font-weight: 700; font-size: 18px">Next question</div>
+        </div>
+      </div>
+
+      <!-- Step 4 mobile: reveal + interests -->
+      <div style="width: 390px; height: 780px; flex: none; border-radius: 38px; overflow: hidden; background: #F5F2EA; box-shadow: 0 24px 60px rgba(11,36,28,0.18); display: flex; flex-direction: column">
+        <div style="background: #0B241C; padding: 26px 28px 30px; position: relative; overflow: hidden">
+          <div style="position: absolute; inset: 0; background: repeating-radial-gradient(circle at 82% 10%, rgba(134,229,188,0) 0 30px, rgba(134,229,188,0.18) 30px 31.5px)"></div>
+          <div style="position: relative; display: flex; align-items: center; justify-content: space-between">
+            <div style="font-family: Archivo, sans-serif; font-weight: 800; font-size: 17px; color: #F5F2EA">NetSifr</div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #86E5BC">STEP 4 / 4</div>
+          </div>
+          <div style="position: relative; margin-top: 26px; display: flex; align-items: center; gap: 16px">
+            <div style="width: 74px; height: 74px; border-radius: 999px; background: #86E5BC; border: 3px solid #F5F2EA; display: flex; align-items: center; justify-content: center; flex: none"><div style="width: 32px; height: 32px; border-radius: 999px; background: #123B2E"></div></div>
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #86E5BC">YOU ARE A</div>
+              <div style="font-family: Archivo, sans-serif; font-weight: 800; font-size: 27px; letter-spacing: -0.025em; color: #F5F2EA; line-height: 1">Policy Navigator</div>
+            </div>
+          </div>
+        </div>
+        <div style="padding: 28px 28px 0; display: flex; flex-direction: column; gap: 8px">
+          <div style="font-family: Archivo, sans-serif; font-weight: 800; font-size: 28px; line-height: 1.05; letter-spacing: -0.028em">Last thing — what are you here for?</div>
+          <div style="font-size: 14px; color: #4A6258">Pick any. We'll surface these first.</div>
+        </div>
+        <div style="padding: 22px 28px 0; display: flex; flex-wrap: wrap; gap: 10px">
+          <div style="padding: 11px 17px; border-radius: 999px; background: #123B2E; color: #F5F2EA; font-size: 14px; font-weight: 500">Gender equity ✓</div>
+          <div style="padding: 11px 17px; border-radius: 999px; border: 1.5px solid rgba(16,36,30,0.22); font-size: 14px">Climate finance</div>
+          <div style="padding: 11px 17px; border-radius: 999px; background: #123B2E; color: #F5F2EA; font-size: 14px; font-weight: 500">Youth advocacy ✓</div>
+          <div style="padding: 11px 17px; border-radius: 999px; border: 1.5px solid rgba(16,36,30,0.22); font-size: 14px">Disaster response</div>
+          <div style="padding: 11px 17px; border-radius: 999px; border: 1.5px solid rgba(16,36,30,0.22); font-size: 14px">Water &amp; heat</div>
+          <div style="padding: 11px 17px; border-radius: 999px; background: #123B2E; color: #F5F2EA; font-size: 14px; font-weight: 500">Local government ✓</div>
+          <div style="padding: 11px 17px; border-radius: 999px; border: 1.5px solid rgba(16,36,30,0.22); font-size: 14px">Care work</div>
+          <div style="padding: 11px 17px; border-radius: 999px; border: 1.5px solid rgba(16,36,30,0.22); font-size: 14px">Storytelling</div>
+        </div>
+        <div style="margin-top: auto; padding: 0 28px 34px">
+          <div style="height: 60px; border-radius: 18px; background: #FF6A45; color: #FFF7F2; display: flex; align-items: center; justify-content: center; font-family: Archivo, sans-serif; font-weight: 700; font-size: 18px">Enter the cohort →</div>
+        </div>
+      </div>
+
+      <!-- Desktop onboarding -->
+      <div style="width: 1180px; height: 780px; flex: none; border-radius: 24px; overflow: hidden; background: #F5F2EA; box-shadow: 0 24px 60px rgba(11,36,28,0.18); display: flex">
+        <div style="width: 430px; background: #0B241C; padding: 44px 40px; position: relative; overflow: hidden; display: flex; flex-direction: column">
+          <div style="position: absolute; inset: 0; background: repeating-radial-gradient(circle at 8% 92%, rgba(134,229,188,0) 0 46px, rgba(134,229,188,0.15) 46px 47.5px)"></div>
+          <div style="position: relative; font-family: Archivo, sans-serif; font-weight: 800; font-size: 22px; color: #F5F2EA">NetSifr</div>
+          <div style="position: relative; margin-top: 52px; display: flex; flex-direction: column; gap: 14px">
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; color: #86E5BC">YOU'VE BEEN INVITED TO</div>
+            <div style="font-family: Archivo, sans-serif; font-weight: 800; font-size: 38px; line-height: 1.04; letter-spacing: -0.03em; color: #F5F2EA">Climate, Gender &amp; Community Support</div>
+            <div style="font-size: 15px; color: rgba(245,242,234,0.7); line-height: 1.6">Cohort 1 · 8 weekly sessions · Oct 6 – Dec 1, 2026. Run by NetSifr &amp; CRGC with UNODC and Erasmus+.</div>
+          </div>
+          <div style="position: relative; margin-top: auto; display: flex; flex-direction: column; gap: 18px">
+            <div style="display: flex; align-items: center; gap: 14px"><div style="width: 26px; height: 26px; border-radius: 999px; background: #86E5BC; color: #0B241C; font-size: 13px; display: flex; align-items: center; justify-content: center; font-weight: 700">✓</div><div style="font-size: 15px; color: rgba(245,242,234,0.55)">Welcome</div></div>
+            <div style="display: flex; align-items: center; gap: 14px"><div style="width: 26px; height: 26px; border-radius: 999px; background: #86E5BC; color: #0B241C; font-size: 13px; display: flex; align-items: center; justify-content: center; font-weight: 700">✓</div><div style="font-size: 15px; color: rgba(245,242,234,0.55)">Your identity</div></div>
+            <div style="display: flex; align-items: center; gap: 14px"><div style="width: 26px; height: 26px; border-radius: 999px; background: #FF6A45"></div><div style="font-size: 15px; color: #F5F2EA; font-weight: 600">Your climate persona</div></div>
+            <div style="display: flex; align-items: center; gap: 14px"><div style="width: 26px; height: 26px; border-radius: 999px; border: 2px solid rgba(245,242,234,0.3)"></div><div style="font-size: 15px; color: rgba(245,242,234,0.4)">Interests</div></div>
+          </div>
+        </div>
+        <div style="flex: 1; padding: 56px 60px; display: flex; flex-direction: column">
+          <div style="display: flex; align-items: center; justify-content: space-between">
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; color: #FF6A45">QUESTION {{ q }} OF 3</div>
+            <div style="display: flex; gap: 7px; width: 200px">
+              <div style="height: 5px; flex: 1; border-radius: 999px; background: #123B2E"></div>
+              <div style="height: 5px; flex: 1; border-radius: 999px; background: rgba(18,59,46,0.14)"></div>
+              <div style="height: 5px; flex: 1; border-radius: 999px; background: rgba(18,59,46,0.14)"></div>
+            </div>
+          </div>
+          <div style="margin-top: 22px; font-family: Archivo, sans-serif; font-weight: 800; font-size: 46px; line-height: 1.05; letter-spacing: -0.035em; max-width: 560px; text-wrap: pretty">{{ personaQuestion }}</div>
+          <div style="margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px">
+            <sc-for list="{{ personaOptions }}" as="opt" hint-placeholder-count="3">
+              <div onClick="{{ opt.pick }}" style="{{ opt.cardStyle }}">
+                <div style="{{ opt.swatchStyle }}"></div>
+                <div style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 20px; line-height: 1.15">{{ opt.title }}</div>
+                <div style="font-size: 14px; color: #4A6258; line-height: 1.45">{{ opt.desc }}</div>
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #4A6258; margin-top: auto">{{ opt.tag }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="margin-top: auto; display: flex; align-items: center; justify-content: space-between">
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: #4A6258">NOT GRADED — THIS BECOMES YOUR COHORT TAG</div>
+            <div onClick="{{ nextQ }}" style="padding: 18px 34px; border-radius: 16px; background: #123B2E; color: #F5F2EA; font-family: Archivo, sans-serif; font-weight: 700; font-size: 17px; cursor: pointer" style-hover="background: #10241E">Continue →</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 2. DASHBOARD ============ -->
+  <section data-screen-label="02 Participant dashboard" style="display: flex; flex-direction: column; gap: 28px">
+    <div style="display: flex; align-items: baseline; gap: 16px">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 8px; background: #FF6A45; color: #FFF7F2">02</div>
+      <div style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 30px; letter-spacing: -0.02em">Participant dashboard</div>
+      <div style="font-size: 14px; color: #4A6258">Clean and functional. Mono for every number.</div>
+    </div>
+
+    <div style="display: flex; gap: 28px; flex-wrap: wrap; align-items: flex-start">
+      <!-- Desktop dashboard -->
+      <div style="width: 1360px; height: 990px; flex: none; border-radius: 24px; overflow: hidden; background: #F5F2EA; box-shadow: 0 24px 60px rgba(11,36,28,0.18); display: flex; flex-direction: column">
+        <div style="height: 72px; background: #0B241C; display: flex; align-items: center; justify-content: space-between; padding: 0 30px; flex: none">
+          <div style="display: flex; align-items: center; gap: 30px">
+            <div style="font-family: Archivo, sans-serif; font-weight: 800; font-size: 19px; color: #F5F2EA">NetSifr</div>
+            <div style="display: flex; gap: 8px">
+              <div style="padding: 8px 16px; border-radius: 10px; background: rgba(134,229,188,0.16); color: #86E5BC; font-size: 14px; font-weight: 500">Dashboard</div>
+              <div style="padding: 8px 16px; border-radius: 10px; color: rgba(245,242,234,0.6); font-size: 14px">Sessions</div>
+              <div style="padding: 8px 16px; border-radius: 10px; color: rgba(245,242,234,0.6); font-size: 14px">Cohort</div>
+              <div style="padding: 8px 16px; border-radius: 10px; color: rgba(245,242,234,0.6); font-size: 14px">My progress</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 14px">
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: #86E5BC; padding: 7px 12px; border-radius: 999px; border: 1px solid rgba(134,229,188,0.35)">POLICY NAVIGATOR</div>
+            <div style="width: 38px; height: 38px; border-radius: 999px; background: #86E5BC; display: flex; align-items: center; justify-content: center"><div style="width: 16px; height: 16px; border-radius: 999px; background: #123B2E"></div></div>
+          </div>
+        </div>
+
+        <div style="flex: 1; display: flex; gap: 26px; padding: 30px; overflow: hidden">
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 22px; min-width: 0">
+            <div style="display: flex; align-items: baseline; justify-content: space-between">
+              <div style="font-family: Archivo, sans-serif; font-weight: 800; font-size: 34px; letter-spacing: -0.03em">Salaam, Ayesha</div>
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4A6258">WEEK 3 OF 8 · NEXT LIVE SESSION TUE 19:00 PKT</div>
+            </div>
+
+            <div style="border-radius: 22px; background: #0B241C; padding: 26px; display: flex; gap: 26px; position: relative; overflow: hidden">
+              <div style="position: absolute; inset: 0; background: repeating-radial-gradient(circle at 96% 8%, rgba(134,229,188,0) 0 40px, rgba(134,229,188,0.13) 40px 41.5px)"></div>
+              <div style="position: relative; width: 300px; height: 176px; border-radius: 16px; background: repeating-linear-gradient(45deg, #123B2E 0 10px, #16493a 10px 20px); border: 1px solid rgba(134,229,188,0.3); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; flex: none">
+                <div style="width: 48px; height: 48px; border-radius: 999px; background: #FF6A45; color: #FFF7F2; display: flex; align-items: center; justify-content: center; font-size: 17px">▶</div>
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #86E5BC">DRIVE EMBED · 58:12</div>
+              </div>
+              <div style="position: relative; flex: 1; display: flex; flex-direction: column; gap: 12px; min-width: 0">
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; color: #86E5BC">THIS WEEK · WEEK 03</div>
+                <div style="font-family: Archivo, sans-serif; font-weight: 800; font-size: 30px; line-height: 1.08; letter-spacing: -0.03em; color: #F5F2EA">Gender-Responsive Climate Policy</div>
+                <div style="font-size: 15px; color: rgba(245,242,234,0.68); line-height: 1.5">Who writes adaptation plans, who is missing from the room, and the levers you can actually pull at district level.</div>
+                <div style="margin-top: auto; display: flex; gap: 12px; align-items: center">
+                  <div style="padding: 14px 26px; border-radius: 14px; background: #FF6A45; color: #FFF7F2; font-family: Archivo, sans-serif; font-weight: 700; font-size: 16px">Resume at 12:40</div>
+                  <div style="padding: 14px 22px; border-radius: 14px; border: 1.5px solid rgba(134,229,188,0.4); color: #86E5BC; font-size: 15px; font-weight: 500">Mark attended</div>
+                  <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: rgba(245,242,234,0.45)">UNLOCKS AFTER 10 MIN</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: baseline; justify-content: space-between">
+              <div style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 19px">Week 3 modules</div>
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #4A6258">2 / 4 COMPLETE</div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px">
+              <sc-for list="{{ modules }}" as="m" hint-placeholder-count="4">
+                <div style="padding: 18px; border-radius: 18px; background: #FFFFFF; border: 1.5px solid rgba(16,36,30,0.1); display: flex; gap: 14px; align-items: flex-start">
+                  <div style="{{ m.iconStyle }}">{{ m.icon }}</div>
+                  <div style="display: flex; flex-direction: column; gap: 5px; min-width: 0; flex: 1">
+                    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.13em; color: #4A6258">{{ m.type }}</div>
+                    <div style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 16px; line-height: 1.25">{{ m.title }}</div>
+                    <div style="font-size: 13px; color: #4A6258">{{ m.meta }}</div>
+                  </div>
+                  <div style="{{ m.pillStyle }}">{{ m.state }}</div>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="padding: 20px 22px; border-radius: 18px; background: #E3D9C2; display: flex; align-items: center; gap: 18px">
+              <div style="width: 46px; height: 46px; border-radius: 14px; background: #123B2E; color: #86E5BC; display: flex; align-items: center; justify-content: center; font-size: 20px; flex: none">🗓</div>
+              <div style="flex: 1">
+                <div style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 16px">Week 4 opens Tuesday — Climate Finance for Grassroots</div>
+                <div style="font-size: 13px; color: #4A6258">Bring one funding gap from your own work.</div>
+              </div>
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #123B2E; font-weight: 500">IN 3 DAYS</div>
+            </div>
+          </div>
+
+          <div style="width: 330px; display: flex; flex-direction: column; gap: 18px; flex: none">
+            <div style="padding: 22px; border-radius: 20px; background: #123B2E; color: #F5F2EA; display: flex; align-items: center; gap: 20px">
+              <div style="width: 92px; height: 92px; border-radius: 999px; background: conic-gradient(#86E5BC 0 78%, rgba(245,242,234,0.16) 78% 100%); display: flex; align-items: center; justify-content: center; flex: none">
+                <div style="width: 68px; height: 68px; border-radius: 999px; background: #123B2E; display: flex; flex-direction: column; align-items: center; justify-content: center">
+                  <div style="font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 600; color: #86E5BC">78%</div>
+                </div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 6px">
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #86E5BC">ATTENDANCE</div>
+                <div style="font-family: Archivo, sans-serif; font-weight: 800; font-size: 22px; line-height: 1.1">7 of 9 sessions</div>
+                <div style="font-size: 13px; color: rgba(245,242,234,0.6)">2-week streak 🔥</div>
+              </div>
+            </div>
+
+            <div style="padding: 22px; border-radius: 20px; background: #FFFFFF; border: 1.5px solid rgba(16,36,30,0.1); display: flex; flex-direction: column; gap: 16px">
+              <div style="display: flex; align-items: baseline; justify-content: space-between">
+                <div style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 17px">Points</div>
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 600; color: #FF6A45">1,240</div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 9px">
+                <div style="display: flex; justify-content: space-between; font-size: 13px"><div style="color: #4A6258">Attendance</div><div style="font-family: 'IBM Plex Mono', monospace">700</div></div>
+                <div style="display: flex; justify-content: space-between; font-size: 13px"><div style="color: #4A6258">Quizzes</div><div style="font-family: 'IBM Plex Mono', monospace">380</div></div>
+                <div style="display: flex; justify-content: space-between; font-size: 13px"><div style="color: #4A6258">Assignments</div><div style="font-family: 'IBM Plex Mono', monospace">160</div></div>
+              </div>
+              <div style="height: 1px; background: rgba(16,36,30,0.1)"></div>
+              <div style="display: flex; align-items: center; justify-content: space-between">
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #4A6258">COHORT RANK</div>
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600">#6 / 42</div>
+              </div>
+            </div>
+
+            <div style="padding: 22px; border-radius: 20px; background: #FFFFFF; border: 1.5px solid rgba(16,36,30,0.1); display: flex; flex-direction: column; gap: 14px">
+              <div style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 17px">Badges</div>
+              <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px">
+                <div style="aspect-ratio: 1; border-radius: 14px; background: #86E5BC; display: flex; align-items: center; justify-content: center; font-size: 20px">🌱</div>
+                <div style="aspect-ratio: 1; border-radius: 14px; background: #FF6A45; display: flex; align-items: center; justify-content: center; font-size: 20px">🔥</div>
+                <div style="aspect-ratio: 1; border-radius: 14px; background: #123B2E; display: flex; align-items: center; justify-content: center; font-size: 20px">🗣</div>
+                <div style="aspect-ratio: 1; border-radius: 14px; border: 1.5px dashed rgba(16,36,30,0.25); display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #4A6258">V4</div>
+              </div>
+              <div style="font-size: 12px; color: #4A6258">Perfect Start · 2-Week Streak · First Submission</div>
+            </div>
+
+            <div style="padding: 22px; border-radius: 20px; background: #FFFFFF; border: 1.5px solid rgba(16,36,30,0.1); display: flex; flex-direction: column; gap: 14px; flex: 1; min-height: 0">
+              <div style="display: flex; align-items: baseline; justify-content: space-between">
+                <div style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 17px">Your cohort</div>
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #FF6A45">SEE ALL 42</div>
+              </div>
+              <sc-for list="{{ directory }}" as="p" hint-placeholder-count="4">
+                <div style="display: flex; align-items: center; gap: 12px">
+                  <div style="{{ p.avatarStyle }}"></div>
+                  <div style="flex: 1; min-width: 0">
+                    <div style="font-size: 14px; font-weight: 500">{{ p.name }}</div>
+                    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: #4A6258">{{ p.persona }}</div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile dashboard -->
+      <div style="width: 390px; height: 980px; flex: none; border-radius: 38px; overflow: hidden; background: #F5F2EA; box-shadow: 0 24px 60px rgba(11,36,28,0.18); display: flex; flex-direction: column">
+        <div style="background: #0B241C; padding: 24px 22px 24px; position: relative; overflow: hidden; flex: none">
+          <div style="position: absolute; inset: 0; background: repeating-radial-gradient(circle at 90% 110%, rgba(134,229,188,0) 0 34px, rgba(134,229,188,0.15) 34px 35.5px)"></div>
+          <div style="position: relative; display: flex; align-items: center; justify-content: space-between">
+            <div style="display: flex; flex-direction: column; gap: 4px">
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #86E5BC">WEEK 3 OF 8</div>
+              <div style="font-family: Archivo, sans-serif; font-weight: 800; font-size: 26px; letter-spacing: -0.025em; color: #F5F2EA">Salaam, Ayesha</div>
+            </div>
+            <div style="width: 44px; height: 44px; border-radius: 999px; background: #86E5BC; display: flex; align-items: center; justify-content: center"><div style="width: 18px; height: 18px; border-radius: 999px; background: #123B2E"></div></div>
+          </div>
+          <div style="position: relative; margin-top: 20px; display: flex; gap: 10px">
+            <div style="flex: 1; padding: 14px; border-radius: 16px; background: rgba(134,229,188,0.12); display: flex; flex-direction: column; gap: 3px">
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 600; color: #86E5BC">78%</div>
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.12em; color: rgba(245,242,234,0.55)">ATTENDANCE</div>
+            </div>
+            <div style="flex: 1; padding: 14px; border-radius: 16px; background: rgba(255,106,69,0.16); display: flex; flex-direction: column; gap: 3px">
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 600; color: #FF8B6D">1,240</div>
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.12em; color: rgba(245,242,234,0.55)">POINTS</div>
+            </div>
+            <div style="flex: 1; padding: 14px; border-radius: 16px; background: rgba(245,242,234,0.08); display: flex; flex-direction: column; gap: 3px">
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 600; color: #F5F2EA">2🔥</div>
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.12em; color: rgba(245,242,234,0.55)">STREAK</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="flex: 1; overflow: hidden; padding: 20px 22px; display: flex; flex-direction: column; gap: 16px">
+          <div style="border-radius: 20px; background: #FFFFFF; border: 1.5px solid rgba(16,36,30,0.1); overflow: hidden">
+            <div style="height: 132px; background: repeating-linear-gradient(45deg, #123B2E 0 10px, #16493a 10px 20px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px">
+              <div style="width: 44px; height: 44px; border-radius: 999px; background: #FF6A45; color: #FFF7F2; display: flex; align-items: center; justify-content: center; font-size: 16px">▶</div>
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.12em; color: #86E5BC">RESUME 12:40 / 58:12</div>
+            </div>
+            <div style="padding: 16px; display: flex; flex-direction: column; gap: 10px">
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.13em; color: #FF6A45">THIS WEEK · RECORDING</div>
+              <div style="font-family: Archivo, sans-serif; font-weight: 800; font-size: 21px; line-height: 1.1; letter-spacing: -0.02em">Gender-Responsive Climate Policy</div>
+              <div style="height: 52px; border-radius: 14px; background: #FF6A45; color: #FFF7F2; display: flex; align-items: center; justify-content: center; font-family: Archivo, sans-serif; font-weight: 700; font-size: 16px">Continue watching</div>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: baseline; justify-content: space-between">
+            <div style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 17px">Week 3 modules</div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #4A6258">2 / 4</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 10px">
+            <sc-for list="{{ modules }}" as="m" hint-placeholder-count="4">
+              <div style="padding: 13px 14px; border-radius: 15px; background: #FFFFFF; border: 1.5px solid rgba(16,36,30,0.1); display: flex; gap: 12px; align-items: center">
+                <div style="{{ m.iconStyleSm }}">{{ m.icon }}</div>
+                <div style="flex: 1; min-width: 0">
+                  <div style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 14px; line-height: 1.25">{{ m.title }}</div>
+                  <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.1em; color: #4A6258">{{ m.type }}</div>
+                </div>
+                <div style="{{ m.pillStyleSm }}">{{ m.state }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="height: 74px; background: #FFFFFF; border-top: 1.5px solid rgba(16,36,30,0.1); display: flex; align-items: center; justify-content: space-around; padding: 0 12px; flex: none">
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; color: #123B2E"><div style="width: 22px; height: 22px; border-radius: 7px; background: #123B2E"></div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.08em">HOME</div></div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; color: #4A6258"><div style="width: 22px; height: 22px; border-radius: 7px; border: 2px solid #4A6258"></div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.08em">WEEKS</div></div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; color: #4A6258"><div style="width: 22px; height: 22px; border-radius: 999px; border: 2px solid #4A6258"></div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.08em">COHORT</div></div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; color: #4A6258"><div style="width: 22px; height: 22px; border-radius: 999px; background: #86E5BC"></div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.08em">ME</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 3. WEEK VIEW ============ -->
+  <section data-screen-label="03 Week / session view" style="display: flex; flex-direction: column; gap: 28px">
+    <div style="display: flex; align-items: baseline; gap: 16px">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 8px; background: #FF6A45; color: #FFF7F2">03</div>
+      <div style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 30px; letter-spacing: -0.02em">Week / session view</div>
+      <div style="font-size: 14px; color: #4A6258">Soft deadlines — late is allowed and flagged, never locked.</div>
+    </div>
+
+    <div style="display: flex; gap: 28px; flex-wrap: wrap; align-items: flex-start">
+      <div style="width: 1360px; height: 840px; flex: none; border-radius: 24px; overflow: hidden; background: #F5F2EA; box-shadow: 0 24px 60px rgba(11,36,28,0.18); display: flex">
+        <div style="width: 300px; background: #0B241C; padding: 26px 20px; display: flex; flex-direction: column; gap: 18px; flex: none">
+          <div style="font-family: Archivo, sans-serif; font-weight: 800; font-size: 19px; color: #F5F2EA; padding: 0 8px">NetSifr</div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #86E5BC; padding: 0 8px">COHORT 1 · 8 WEEKS</div>
+          <div style="display: flex; flex-direction: column; gap: 5px; margin-top: 6px">
+            <sc-for list="{{ weeks }}" as="w" hint-placeholder-count="8">
+              <div style="{{ w.rowStyle }}">
+                <div style="{{ w.numStyle }}">{{ w.n }}</div>
+                <div style="{{ w.titleStyle }}">{{ w.title }}</div>
+                <div style="{{ w.dotStyle }}"></div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="margin-top: auto; padding: 16px; border-radius: 16px; background: rgba(134,229,188,0.1); display: flex; flex-direction: column; gap: 6px">
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #86E5BC">PROGRAM PROGRESS</div>
+            <div style="height: 7px; border-radius: 999px; background: rgba(245,242,234,0.15); overflow: hidden"><div style="width: 34%; height: 100%; background: #86E5BC"></div></div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: rgba(245,242,234,0.6)">11 / 32 MODULES DONE</div>
+          </div>
+        </div>
+
+        <div style="flex: 1; padding: 34px 40px; display: flex; flex-direction: column; gap: 24px; min-width: 0">
+          <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 30px">
+            <div style="display: flex; flex-direction: column; gap: 10px; max-width: 660px">
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; color: #FF6A45">WEEK 03 · OCT 20 – OCT 26</div>
+              <div style="font-family: Archivo, sans-serif; font-weight: 800; font-size: 42px; line-height: 1.04; letter-spacing: -0.035em">Gender-Responsive Climate Policy</div>
+              <div style="font-size: 16px; color: #4A6258; line-height: 1.55">How adaptation plans get written, who is absent from the table, and the district-level levers you can pull this year. Guest: Dr. S. Qureshi, TI Pakistan.</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 10px; align-items: flex-end; flex: none">
+              <div style="padding: 9px 15px; border-radius: 999px; background: #86E5BC; color: #0B241C; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; font-weight: 600">ATTENDED ✓</div>
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #4A6258">MARKED 21 OCT 20:14 PKT</div>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 14px">
+            <sc-for list="{{ weekModules }}" as="m" hint-placeholder-count="4">
+              <div style="{{ m.rowStyle }}">
+                <div style="{{ m.iconStyle }}">{{ m.icon }}</div>
+                <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px">
+                  <div style="display: flex; align-items: center; gap: 10px">
+                    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #4A6258">{{ m.type }}</div>
+                    <div style="{{ m.flagStyle }}">{{ m.flag }}</div>
+                  </div>
+                  <div style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 21px; line-height: 1.2">{{ m.title }}</div>
+                  <div style="font-size: 14px; color: #4A6258">{{ m.meta }}</div>
+                </div>
+                <div style="{{ m.ctaStyle }}">{{ m.cta }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="margin-top: auto; display: flex; gap: 14px; align-items: center; padding: 18px 22px; border-radius: 18px; background: #E3D9C2">
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: #123B2E; font-weight: 600">SOFT DEADLINES</div>
+            <div style="font-size: 14px; color: #123B2E; flex: 1">Nothing locks. Late work is accepted and flagged for your facilitator — tell us if you need more time.</div>
+            <div style="padding: 11px 18px; border-radius: 12px; background: #123B2E; color: #F5F2EA; font-size: 14px; font-weight: 600">Request extension</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile week view -->
+      <div style="width: 390px; height: 940px; flex: none; border-radius: 38px; overflow: hidden; background: #F5F2EA; box-shadow: 0 24px 60px rgba(11,36,28,0.18); display: flex; flex-direction: column">
+        <div style="background: #0B241C; padding: 24px 22px 26px; position: relative; overflow: hidden; flex: none">
+          <div style="position: absolute; inset: 0; background: repeating-radial-gradient(circle at 6% 106%, rgba(134,229,188,0) 0 32px, rgba(134,229,188,0.15) 32px 33.5px)"></div>
+          <div style="position: relative; display: flex; align-items: center; gap: 12px; color: #86E5BC; font-size: 14px">← <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em">ALL WEEKS</div></div>
+          <div style="position: relative; margin-top: 20px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #FF8B6D">WEEK 03 · OCT 20–26</div>
+          <div style="position: relative; margin-top: 8px; font-family: Archivo, sans-serif; font-weight: 800; font-size: 29px; line-height: 1.06; letter-spacing: -0.03em; color: #F5F2EA">Gender-Responsive Climate Policy</div>
+          <div style="position: relative; margin-top: 16px; display: inline-flex; padding: 8px 14px; border-radius: 999px; background: #86E5BC; color: #0B241C; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; font-weight: 600">ATTENDED ✓</div>
+        </div>
+        <div style="flex: 1; padding: 18px 22px; display: flex; flex-direction: column; gap: 12px; overflow: hidden">
+          <sc-for list="{{ weekModules }}" as="m" hint-placeholder-count="4">
+            <div style="{{ m.mobileRowStyle }}">
+              <div style="display: flex; gap: 12px; align-items: center">
+                <div style="{{ m.iconStyleSm }}">{{ m.icon }}</div>
+                <div style="flex: 1; min-width: 0">
+                  <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.12em; color: #4A6258">{{ m.type }}</div>
+                  <div style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 15px; line-height: 1.25; margin-top: 3px">{{ m.title }}</div>
+                </div>
+                <div style="{{ m.flagStyle }}">{{ m.flag }}</div>
+              </div>
+              <div style="{{ m.mobileCtaStyle }}">{{ m.cta }}</div>
+            </div>
+          </sc-for>
+          <div style="margin-top: auto; padding: 14px 16px; border-radius: 16px; background: #E3D9C2; font-size: 13px; color: #123B2E; line-height: 1.45">Nothing locks — late work is accepted and flagged. <span style="font-weight: 600; text-decoration: underline">Request an extension</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 4. ADMIN BUILDER ============ -->
+  <section data-screen-label="04 Admin program builder" style="display: flex; flex-direction: column; gap: 28px">
+    <div style="display: flex; align-items: baseline; gap: 16px">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 8px; background: #10241E; color: #86E5BC">04</div>
+      <div style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 30px; letter-spacing: -0.02em">Admin — program builder</div>
+      <div style="font-size: 14px; color: #4A6258">Desktop only. Three panes: weeks → modules → inspector.</div>
+    </div>
+
+    <div style="width: 1360px; height: 860px; border-radius: 24px; overflow: hidden; background: #FFFFFF; box-shadow: 0 24px 60px rgba(11,36,28,0.18); display: flex; flex-direction: column">
+      <div style="height: 64px; border-bottom: 1.5px solid rgba(16,36,30,0.1); display: flex; align-items: center; justify-content: space-between; padding: 0 26px; flex: none">
+        <div style="display: flex; align-items: center; gap: 16px">
+          <div style="font-family: Archivo, sans-serif; font-weight: 800; font-size: 18px">NetSifr <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #FF6A45; vertical-align: middle">ADMIN</span></div>
+          <div style="width: 1px; height: 24px; background: rgba(16,36,30,0.14)"></div>
+          <div style="font-size: 15px; font-weight: 500">Climate, Gender &amp; Community Support — Cohort 1</div>
+          <div style="padding: 5px 11px; border-radius: 999px; background: #86E5BC; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; font-weight: 600; color: #0B241C">LIVE</div>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center">
+          <div style="padding: 10px 16px; border-radius: 11px; border: 1.5px solid rgba(16,36,30,0.16); font-size: 14px; font-weight: 500">Preview as participant</div>
+          <div style="padding: 10px 18px; border-radius: 11px; background: #FF6A45; color: #FFF7F2; font-size: 14px; font-weight: 600">Invite participants</div>
+        </div>
+      </div>
+
+      <div style="flex: 1; display: flex; min-height: 0">
+        <div style="width: 320px; border-right: 1.5px solid rgba(16,36,30,0.1); padding: 22px 18px; display: flex; flex-direction: column; gap: 12px; background: #F5F2EA">
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 0 6px">
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #4A6258">WEEKS · 8</div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #FF6A45; font-weight: 600">+ ADD</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <sc-for list="{{ adminWeeks }}" as="w" hint-placeholder-count="8">
+              <div style="{{ w.rowStyle }}">
+                <div style="font-size: 13px; color: rgba(16,36,30,0.35); font-family: 'IBM Plex Mono', monospace">⠿</div>
+                <div style="{{ w.numStyle }}">{{ w.n }}</div>
+                <div style="flex: 1; min-width: 0; font-size: 14px; font-weight: 500; line-height: 1.3">{{ w.title }}</div>
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #4A6258">{{ w.count }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="flex: 1; padding: 28px 32px; display: flex; flex-direction: column; gap: 20px; min-width: 0">
+          <div style="display: flex; align-items: flex-start; justify-content: space-between">
+            <div style="display: flex; flex-direction: column; gap: 8px">
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #4A6258">EDITING WEEK 03</div>
+              <div style="font-family: Archivo, sans-serif; font-weight: 800; font-size: 30px; letter-spacing: -0.03em">Gender-Responsive Climate Policy</div>
+            </div>
+            <div style="display: flex; gap: 8px">
+              <div style="padding: 9px 14px; border-radius: 10px; border: 1.5px solid rgba(16,36,30,0.16); font-size: 13px; font-weight: 500">Duplicate week</div>
+              <div style="padding: 9px 14px; border-radius: 10px; background: #123B2E; color: #F5F2EA; font-size: 13px; font-weight: 600">Publish</div>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 12px">
+            <sc-for list="{{ builderModules }}" as="m" hint-placeholder-count="4">
+              <div style="{{ m.rowStyle }}">
+                <div style="font-size: 14px; color: rgba(16,36,30,0.3); font-family: 'IBM Plex Mono', monospace">⠿</div>
+                <div style="{{ m.iconStyle }}">{{ m.icon }}</div>
+                <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+                  <div style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 16px">{{ m.title }}</div>
+                  <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: #4A6258">{{ m.ref }}</div>
+                </div>
+                <div style="{{ m.statusStyle }}">{{ m.status }}</div>
+              </div>
+            </sc-for>
+            <div style="padding: 18px; border-radius: 16px; border: 2px dashed rgba(16,36,30,0.2); display: flex; gap: 10px; align-items: center; justify-content: center">
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: #4A6258">ADD MODULE</div>
+              <div style="display: flex; gap: 7px">
+                <div style="padding: 7px 13px; border-radius: 9px; background: #F5F2EA; border: 1.5px solid rgba(16,36,30,0.14); font-size: 13px">▶ Recording</div>
+                <div style="padding: 7px 13px; border-radius: 9px; background: #F5F2EA; border: 1.5px solid rgba(16,36,30,0.14); font-size: 13px">▤ Reading</div>
+                <div style="padding: 7px 13px; border-radius: 9px; background: #F5F2EA; border: 1.5px solid rgba(16,36,30,0.14); font-size: 13px">◉ Quiz</div>
+                <div style="padding: 7px 13px; border-radius: 9px; background: #F5F2EA; border: 1.5px solid rgba(16,36,30,0.14); font-size: 13px">✎ Assignment</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="width: 340px; border-left: 1.5px solid rgba(16,36,30,0.1); padding: 24px 22px; display: flex; flex-direction: column; gap: 18px; background: #F5F2EA; flex: none">
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #4A6258">MODULE INSPECTOR</div>
+          <div style="display: flex; align-items: center; gap: 12px">
+            <div style="width: 40px; height: 40px; border-radius: 12px; background: #FF6A45; color: #FFF7F2; display: flex; align-items: center; justify-content: center; font-size: 15px">▶</div>
+            <div style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 17px; line-height: 1.2">Session 3 recording</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #4A6258">GOOGLE DRIVE FILE ID</div>
+            <div style="padding: 12px 14px; border-radius: 11px; background: #FFFFFF; border: 1.5px solid rgba(16,36,30,0.16); font-family: 'IBM Plex Mono', monospace; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">1aQ7x9KpR2mVbN4tZ_8LcYd3</div>
+            <div style="display: flex; align-items: center; gap: 7px; font-size: 12px; color: #1E7A54"><div style="width: 7px; height: 7px; border-radius: 999px; background: #1E7A54"></div>Link sharing verified · Viewer</div>
+          </div>
+          <div style="height: 122px; border-radius: 14px; background: repeating-linear-gradient(45deg, #123B2E 0 10px, #16493a 10px 20px); display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #86E5BC">EMBED PREVIEW · 58:12</div>
+          <div style="display: flex; flex-direction: column; gap: 10px">
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #4A6258">ATTENDANCE RULE</div>
+            <div style="padding: 14px; border-radius: 12px; background: #FFFFFF; border: 1.5px solid rgba(16,36,30,0.16); display: flex; align-items: center; justify-content: space-between">
+              <div style="font-size: 14px">Self-mark after</div>
+              <div style="display: flex; align-items: center; gap: 6px"><div style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 600">10</div><div style="font-size: 13px; color: #4A6258">min</div></div>
+            </div>
+            <div style="padding: 14px; border-radius: 12px; background: #FFFFFF; border: 1.5px solid rgba(16,36,30,0.16); display: flex; align-items: center; justify-content: space-between">
+              <div style="font-size: 14px">Awards points</div>
+              <div style="width: 42px; height: 24px; border-radius: 999px; background: #86E5BC; padding: 3px; display: flex; justify-content: flex-end"><div style="width: 18px; height: 18px; border-radius: 999px; background: #123B2E"></div></div>
+            </div>
+          </div>
+          <div style="margin-top: auto; display: flex; gap: 10px">
+            <div style="flex: 1; padding: 13px; border-radius: 12px; border: 1.5px solid rgba(16,36,30,0.16); text-align: center; font-size: 14px; font-weight: 500">Delete</div>
+            <div style="flex: 2; padding: 13px; border-radius: 12px; background: #123B2E; color: #F5F2EA; text-align: center; font-size: 14px; font-weight: 600">Save module</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 5. ADMIN REPORTING ============ -->
+  <section data-screen-label="05 Admin attendance and submissions" style="display: flex; flex-direction: column; gap: 28px">
+    <div style="display: flex; align-items: baseline; gap: 16px">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 8px; background: #10241E; color: #86E5BC">05</div>
+      <div style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 30px; letter-spacing: -0.02em">Admin — attendance &amp; submissions</div>
+      <div style="font-size: 14px; color: #4A6258">The donor-reporting surface. Exportable, all mono figures.</div>
+    </div>
+
+    <div style="width: 1360px; height: 860px; border-radius: 24px; overflow: hidden; background: #FFFFFF; box-shadow: 0 24px 60px rgba(11,36,28,0.18); display: flex; flex-direction: column">
+      <div style="height: 64px; border-bottom: 1.5px solid rgba(16,36,30,0.1); display: flex; align-items: center; justify-content: space-between; padding: 0 26px; flex: none">
+        <div style="display: flex; align-items: center; gap: 16px">
+          <div style="font-family: Archivo, sans-serif; font-weight: 800; font-size: 18px">NetSifr <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #FF6A45; vertical-align: middle">ADMIN</span></div>
+          <div style="width: 1px; height: 24px; background: rgba(16,36,30,0.14)"></div>
+          <div style="display: flex; gap: 6px">
+            <div style="padding: 8px 14px; border-radius: 10px; background: #10241E; color: #F5F2EA; font-size: 14px; font-weight: 500">Attendance</div>
+            <div style="padding: 8px 14px; border-radius: 10px; color: #4A6258; font-size: 14px">Submissions</div>
+            <div style="padding: 8px 14px; border-radius: 10px; color: #4A6258; font-size: 14px">Quiz results</div>
+            <div style="padding: 8px 14px; border-radius: 10px; color: #4A6258; font-size: 14px">Invites</div>
+          </div>
+        </div>
+        <div style="padding: 10px 18px; border-radius: 11px; background: #FF6A45; color: #FFF7F2; font-size: 14px; font-weight: 600">Export CSV for partners</div>
+      </div>
+
+      <div style="padding: 26px 30px 0; display: flex; gap: 16px; flex: none">
+        <div style="flex: 1; padding: 20px 22px; border-radius: 18px; background: #F5F2EA; display: flex; flex-direction: column; gap: 6px">
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #4A6258">ENROLLED</div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 34px; font-weight: 600">42</div>
+          <div style="font-size: 13px; color: #4A6258">38 activated · 4 invites pending</div>
+        </div>
+        <div style="flex: 1; padding: 20px 22px; border-radius: 18px; background: #123B2E; color: #F5F2EA; display: flex; flex-direction: column; gap: 6px">
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #86E5BC">AVG ATTENDANCE</div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 34px; font-weight: 600; color: #86E5BC">81%</div>
+          <div style="font-size: 13px; color: rgba(245,242,234,0.6)">Weeks 1–3 · target 75%</div>
+        </div>
+        <div style="flex: 1; padding: 20px 22px; border-radius: 18px; background: #F5F2EA; display: flex; flex-direction: column; gap: 6px">
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #4A6258">SUBMISSIONS TO GRADE</div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 34px; font-weight: 600; color: #FF6A45">17</div>
+          <div style="font-size: 13px; color: #4A6258">5 flagged late</div>
+        </div>
+        <div style="flex: 1; padding: 20px 22px; border-radius: 18px; background: #F5F2EA; display: flex; flex-direction: column; gap: 6px">
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #4A6258">AT RISK</div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 34px; font-weight: 600">6</div>
+          <div style="font-size: 13px; color: #4A6258">Missed 2+ consecutive weeks</div>
+        </div>
+      </div>
+
+      <div style="padding: 24px 30px 0; display: flex; align-items: center; gap: 12px; flex: none">
+        <div style="padding: 9px 14px; border-radius: 999px; background: #10241E; color: #F5F2EA; font-size: 13px; font-weight: 500">All participants</div>
+        <div style="padding: 9px 14px; border-radius: 999px; border: 1.5px solid rgba(16,36,30,0.16); font-size: 13px">At risk</div>
+        <div style="padding: 9px 14px; border-radius: 999px; border: 1.5px solid rgba(16,36,30,0.16); font-size: 13px">Late submissions</div>
+        <div style="padding: 9px 14px; border-radius: 999px; border: 1.5px solid rgba(16,36,30,0.16); font-size: 13px">Persona</div>
+        <div style="flex: 1"></div>
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #4A6258">SORTED BY ATTENDANCE ↓</div>
+      </div>
+
+      <div style="flex: 1; padding: 18px 30px 26px; min-height: 0; display: flex; flex-direction: column">
+        <div style="display: grid; grid-template-columns: 2.2fr 1.3fr 1fr 1.4fr 1fr 1fr 0.9fr; gap: 12px; padding: 12px 16px; border-bottom: 2px solid #10241E">
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #4A6258">PARTICIPANT</div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #4A6258">PERSONA</div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #4A6258">ATTEND</div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #4A6258">WEEKS 1–8</div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #4A6258">QUIZ AVG</div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #4A6258">SUBS</div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #4A6258">POINTS</div>
+        </div>
+        <sc-for list="{{ roster }}" as="r" hint-placeholder-count="8">
+          <div style="display: grid; grid-template-columns: 2.2fr 1.3fr 1fr 1.4fr 1fr 1fr 0.9fr; gap: 12px; padding: 13px 16px; border-bottom: 1px solid rgba(16,36,30,0.09); align-items: center">
+            <div style="display: flex; align-items: center; gap: 12px; min-width: 0">
+              <div style="{{ r.avatarStyle }}"></div>
+              <div style="min-width: 0">
+                <div style="font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ r.name }}</div>
+                <div style="font-size: 12px; color: #4A6258; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ r.email }}</div>
+              </div>
+            </div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: #4A6258">{{ r.persona }}</div>
+            <div style="{{ r.attendStyle }}">{{ r.attend }}</div>
+            <div style="display: flex; gap: 4px">
+              <sc-for list="{{ r.weeks }}" as="c" hint-placeholder-count="8">
+                <div style="{{ c.style }}"></div>
+              </sc-for>
+            </div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px">{{ r.quiz }}</div>
+            <div style="{{ r.subStyle }}">{{ r.subs }}</div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 500">{{ r.points }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1520,&quot;height&quot;:1000}}">
+const PINE = '#123B2E', MINT = '#86E5BC', CORAL = '#FF6A45', INK = '#10241E', MUTE = '#4A6258';
+
+const icon = (bg, fg, size) => `width:${size}px;height:${size}px;border-radius:${size > 40 ? 14 : 11}px;background:${bg};color:${fg};display:flex;align-items:center;justify-content:center;font-size:${size > 40 ? 18 : 14}px;flex:none`;
+
+const pill = (bg, fg, sm) => `padding:${sm ? '5px 9px' : '7px 12px'};border-radius:999px;background:${bg};color:${fg};font-family:'IBM Plex Mono',monospace;font-size:${sm ? 9 : 10}px;letter-spacing:0.1em;font-weight:600;white-space:nowrap;flex:none`;
+
+class Component extends DCLogic {
+  state = { q: 1, picked: 0 };
+
+  renderVals() {
+    const questions = [
+      'What pulls you into this work?',
+      'Where do you want to be a year from now?',
+      'When a plan stalls, what do you reach for?'
+    ];
+    const opts = [
+      { title: 'Policy & systems', desc: 'Rules, budgets, and who gets to decide', tag: '→ POLICY NAVIGATOR', sw: MINT },
+      { title: 'Ground action', desc: 'Organising, mutual aid, field work', tag: '→ GROUND ORGANIZER', sw: CORAL },
+      { title: 'Storytelling', desc: 'Media, research, making it land', tag: '→ NARRATIVE BUILDER', sw: PINE }
+    ];
+
+    const mkModule = (type, icn, ibg, ifg, title, meta, state, tone) => {
+      const tones = {
+        done: [MINT, '#0B241C'],
+        due: [CORAL, '#FFF7F2'],
+        late: ['#E3D9C2', INK],
+        open: ['rgba(16,36,30,0.07)', MUTE]
+      }[tone];
+      return {
+        type, icon: icn, title, meta, state,
+        iconStyle: icon(ibg, ifg, 44),
+        iconStyleSm: icon(ibg, ifg, 36),
+        pillStyle: pill(tones[0], tones[1]),
+        pillStyleSm: pill(tones[0], tones[1], true)
+      };
+    };
+
+    const modules = [
+      mkModule('RECORDING', '▶', CORAL, '#FFF7F2', 'Session 3 recording', '58 min · Google Drive', 'ATTENDED', 'done'),
+      mkModule('READING', '▤', PINE, MINT, 'NAP 2025: chapters 4–6', '22 pages · PDF', 'READ', 'done'),
+      mkModule('QUIZ', '◉', '#E3D9C2', INK, 'Policy levers check', '6 questions · MCQ', 'DUE FRI', 'due'),
+      mkModule('ASSIGNMENT', '✎', '#E3D9C2', INK, 'One lever in your district', '300 words', 'NOT STARTED', 'open')
+    ];
+
+    const weekTitles = [
+      'Foundations: Climate & Gender Basics',
+      'Community Risk Mapping',
+      'Gender-Responsive Climate Policy',
+      'Climate Finance for Grassroots',
+      'Storytelling for Advocacy',
+      'Disaster Preparedness & Care Work',
+      'Working with Local Government',
+      'Capstone: Your Community Plan'
+    ];
+
+    const weeks = weekTitles.map((title, i) => {
+      const n = String(i + 1).padStart(2, '0');
+      const cur = i === 2, done = i < 2;
+      return {
+        n, title,
+        rowStyle: `display:flex;align-items:center;gap:11px;padding:11px 10px;border-radius:12px;background:${cur ? 'rgba(134,229,188,0.16)' : 'transparent'}`,
+        numStyle: `font-family:'IBM Plex Mono',monospace;font-size:11px;color:${cur ? MINT : 'rgba(245,242,234,0.4)'};flex:none`,
+        titleStyle: `flex:1;min-width:0;font-size:13.5px;line-height:1.3;color:${cur ? '#F5F2EA' : done ? 'rgba(245,242,234,0.6)' : 'rgba(245,242,234,0.38)'};font-weight:${cur ? 600 : 400}`,
+        dotStyle: `width:7px;height:7px;border-radius:999px;flex:none;background:${done ? MINT : cur ? CORAL : 'rgba(245,242,234,0.18)'}`
+      };
+    });
+
+    const adminWeeks = weekTitles.map((title, i) => {
+      const sel = i === 2;
+      return {
+        n: String(i + 1).padStart(2, '0'), title, count: `${i < 3 ? 4 : 3} MOD`,
+        rowStyle: `display:flex;align-items:center;gap:10px;padding:12px 11px;border-radius:12px;background:${sel ? '#FFFFFF' : 'transparent'};border:1.5px solid ${sel ? INK : 'transparent'};box-shadow:${sel ? '3px 3px 0 ' + INK : 'none'}`,
+        numStyle: `font-family:'IBM Plex Mono',monospace;font-size:11px;color:${sel ? CORAL : MUTE};flex:none`
+      };
+    });
+
+    const weekModules = [
+      ['RECORDING', '▶', CORAL, '#FFF7F2', 'Session 3 — Gender-Responsive Climate Policy', '58:12 · Google Drive embed · watched to 12:40', 'Resume', 'primary', '', ''],
+      ['READING', '▤', PINE, MINT, 'National Adaptation Plan 2025 — ch. 4–6', '22 pages · annotated PDF', 'Open', 'ghost', 'COMPLETE', 'done'],
+      ['QUIZ', '◉', '#E3D9C2', INK, 'Policy levers check', '6 questions · MCQ · auto-scored · one retake', 'Start quiz', 'primary', 'DUE FRI 23:59', 'due'],
+      ['ASSIGNMENT', '✎', '#E3D9C2', INK, 'Name one lever in your own district', '300 words or a voice note · due Oct 26', 'Submit', 'ghost', 'LATE — STILL ACCEPTED', 'late']
+    ].map(([type, icn, ibg, ifg, title, meta, cta, kind, flag, tone]) => {
+      const flagTones = { done: [MINT, '#0B241C'], due: [CORAL, '#FFF7F2'], late: ['#E3D9C2', INK] };
+      const ft = flagTones[tone];
+      return {
+        type, icon: icn, title, meta, cta, flag,
+        iconStyle: icon(ibg, ifg, 52),
+        iconStyleSm: icon(ibg, ifg, 38),
+        rowStyle: `padding:20px 22px;border-radius:20px;background:#FFFFFF;border:1.5px solid ${tone === 'due' ? CORAL : 'rgba(16,36,30,0.1)'};display:flex;gap:18px;align-items:center`,
+        mobileRowStyle: `padding:14px;border-radius:18px;background:#FFFFFF;border:1.5px solid ${tone === 'due' ? CORAL : 'rgba(16,36,30,0.1)'};display:flex;flex-direction:column;gap:12px`,
+        flagStyle: ft ? pill(ft[0], ft[1], true) : 'display:none',
+        ctaStyle: kind === 'primary'
+          ? `padding:14px 26px;border-radius:14px;background:${PINE};color:#F5F2EA;font-family:Archivo,sans-serif;font-weight:700;font-size:15px;flex:none`
+          : `padding:14px 26px;border-radius:14px;border:1.5px solid rgba(16,36,30,0.2);color:${INK};font-family:Archivo,sans-serif;font-weight:700;font-size:15px;flex:none`,
+        mobileCtaStyle: kind === 'primary'
+          ? `height:46px;border-radius:13px;background:${PINE};color:#F5F2EA;display:flex;align-items:center;justify-content:center;font-family:Archivo,sans-serif;font-weight:700;font-size:15px`
+          : `height:46px;border-radius:13px;border:1.5px solid rgba(16,36,30,0.2);display:flex;align-items:center;justify-content:center;font-family:Archivo,sans-serif;font-weight:700;font-size:15px`
+      };
+    });
+
+    const builderModules = [
+      ['▶', CORAL, '#FFF7F2', 'Session 3 recording', 'DRIVE · 1aQ7x9KpR2mVbN4tZ_8LcYd3', 'PUBLISHED', MINT, '#0B241C'],
+      ['▤', PINE, MINT, 'NAP 2025 — ch. 4–6', 'LINK · drive.google.com/…/view', 'PUBLISHED', MINT, '#0B241C'],
+      ['◉', '#E3D9C2', INK, 'Policy levers check', 'QUIZ · 6 QUESTIONS · AUTO-SCORED', 'PUBLISHED', MINT, '#0B241C'],
+      ['✎', '#E3D9C2', INK, 'Name one lever in your district', 'ASSIGNMENT · DUE 26 OCT · SOFT', 'DRAFT', '#E3D9C2', INK]
+    ].map(([icn, ibg, ifg, title, ref, status, sbg, sfg], i) => ({
+      icon: icn, title, ref, status,
+      iconStyle: icon(ibg, ifg, 42),
+      statusStyle: pill(sbg, sfg),
+      rowStyle: `padding:16px 18px;border-radius:16px;background:#FFFFFF;border:1.5px solid ${i === 0 ? INK : 'rgba(16,36,30,0.12)'};box-shadow:${i === 0 ? '3px 3px 0 ' + INK : 'none'};display:flex;gap:14px;align-items:center`
+    }));
+
+    const av = (bg, size) => `width:${size}px;height:${size}px;border-radius:999px;background:${bg};flex:none`;
+
+    const directory = [
+      ['Bilal Ahmed', 'GROUND ORGANIZER', CORAL],
+      ['Hina Shah', 'NARRATIVE BUILDER', PINE],
+      ['Zoya Malik', 'POLICY NAVIGATOR', MINT],
+      ['Faraz Iqbal', 'GROUND ORGANIZER', CORAL],
+      ['Sana Baloch', 'NARRATIVE BUILDER', '#E3D9C2']
+    ].map(([name, persona, c]) => ({ name, persona, avatarStyle: av(c, 34) }));
+
+    const rosterRaw = [
+      ['Zoya Malik', 'zoya.m@crgc.org', 'POLICY NAV', '100%', 88, '4 / 4', '1,480', MINT, [1, 1, 1, 1, 0, 0, 0, 0]],
+      ['Ayesha Tariq', 'ayesha.t@netsifr.org', 'POLICY NAV', '78%', 92, '3 / 4', '1,240', MINT, [1, 1, 1, 0, 0, 0, 0, 0]],
+      ['Bilal Ahmed', 'bilal@karachiclimate.pk', 'GROUND ORG', '78%', 74, '4 / 4', '1,180', CORAL, [1, 0, 1, 1, 0, 0, 0, 0]],
+      ['Hina Shah', 'hina.shah@ssuet.edu.pk', 'NARRATIVE', '67%', 81, '2 / 4', '960', PINE, [1, 1, 0, 0, 0, 0, 0, 0]],
+      ['Faraz Iqbal', 'f.iqbal@tipakistan.org', 'GROUND ORG', '67%', 69, '3 / 4', '910', CORAL, [0, 1, 1, 0, 0, 0, 0, 0]],
+      ['Sana Baloch', 'sana.b@gmail.com', 'NARRATIVE', '44%', 58, '1 / 4', '540', '#E3D9C2', [1, 0, 0, 0, 0, 0, 0, 0]],
+      ['Usman Raza', 'usman.raza@netsifr.org', 'POLICY NAV', '33%', 46, '1 / 4', '410', MINT, [0, 1, 0, 0, 0, 0, 0, 0]],
+      ['Mahnoor Khan', 'mahnoor@ncsw.gov.pk', 'GROUND ORG', '0%', 0, '0 / 4', '0', CORAL, [0, 0, 0, 0, 0, 0, 0, 0]]
+    ];
+
+    const roster = rosterRaw.map(([name, email, persona, attend, quizN, subs, points, c, wk], i) => {
+      const pct = parseInt(attend, 10);
+      const low = pct < 50;
+      const subsLow = subs.startsWith('0') || subs.startsWith('1');
+      return {
+        name, email, persona, attend, points, subs,
+        quiz: quizN ? quizN + '%' : '—',
+        avatarStyle: av(c, 32),
+        attendStyle: `font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:${low ? CORAL : INK}`,
+        subStyle: `font-family:'IBM Plex Mono',monospace;font-size:13px;color:${subsLow ? CORAL : INK}`,
+        weeks: wk.map((v, j) => ({
+          style: `width:12px;height:18px;border-radius:3px;background:${v ? (j < 3 ? PINE : 'rgba(16,36,30,0.12)') : j < 3 ? 'rgba(255,106,69,0.28)' : 'rgba(16,36,30,0.08)'}`
+        }))
+      };
+    });
+
+    return {
+      q: this.state.q,
+      personaQuestion: questions[this.state.q - 1],
+      nextQ: () => this.setState(s => ({ q: s.q < 3 ? s.q + 1 : 1, picked: 0 })),
+      personaOptions: opts.map((o, i) => ({
+        title: o.title, desc: o.desc, tag: o.tag,
+        pick: () => this.setState({ picked: i }),
+        swatchStyle: `width:52px;height:52px;border-radius:15px;background:${o.sw}`,
+        cardStyle: `padding:24px;border-radius:22px;background:#FFFFFF;border:2px solid ${this.state.picked === i ? INK : 'rgba(16,36,30,0.14)'};box-shadow:${this.state.picked === i ? '5px 5px 0 ' + INK : 'none'};display:flex;flex-direction:column;gap:12px;min-height:210px;cursor:pointer;transition:box-shadow .12s,border-color .12s`
+      })),
+      modules, weeks, adminWeeks, weekModules, builderModules, directory, roster
+    };
+  }
+}
+</script>
+</body>
+</html>

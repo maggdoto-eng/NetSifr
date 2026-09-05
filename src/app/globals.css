@@ -1,0 +1,136 @@
+@import 'tailwindcss';
+
+/*
+ * NetSifr brand theme — palette and type lifted from the Claude Design
+ * prototype (project/NetSifr LMS Prototype v2.dc.html): a warm cream canvas,
+ * deep forest greens, a mint accent, and coral. Rather than restyle ~40
+ * screens by hand, the recurring Tailwind color tokens the app already uses
+ * (zinc neutrals, emerald positives, orange accent) are redefined here to the
+ * brand values, so every utility class picks up the brand at once. amber /
+ * sky / red stay as semantic status colors.
+ */
+
+@theme {
+  /* Fonts */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+  --font-display: var(--font-archivo), var(--font-inter), sans-serif;
+
+  /* Brand primitives (also usable directly, e.g. bg-cream / text-forest / bg-coral / bg-mint) */
+  --color-cream: #f5f2ea;
+  --color-cream-deep: #ede8db;
+  --color-forest: #0b241c;
+  --color-forest-700: #123b2e;
+  --color-forest-600: #16493a;
+  --color-moss: #4a6258;
+  --color-mint: #86e5bc;
+  --color-mint-soft: #cdeede;
+  --color-coral: #ff6a45;
+  --color-coral-soft: #ff8b6d;
+  --color-sand: #e3d9c2;
+
+  /* Neutrals (zinc) remapped to warm cream/tan/forest */
+  --color-zinc-50: #faf7f0;
+  --color-zinc-100: #efeadd;
+  --color-zinc-200: #e6ddc9;
+  --color-zinc-300: #d8ccb2;
+  --color-zinc-400: #a99f89;
+  --color-zinc-500: #6b6a5b;
+  --color-zinc-600: #4a6258;
+  --color-zinc-700: #2f4239;
+  --color-zinc-800: #16493a;
+  --color-zinc-900: #0b241c;
+
+  /* Accent (orange) remapped to coral */
+  --color-orange-300: #ff8b6d;
+  --color-orange-500: #ff6a45;
+  --color-orange-600: #d1512e;
+
+  /* Positives (emerald) remapped to mint / forest greens */
+  --color-emerald-50: #edf9f2;
+  --color-emerald-100: #d3f0e1;
+  --color-emerald-200: #a8e6c8;
+  --color-emerald-300: #86e5bc;
+  --color-emerald-500: #34b988;
+  --color-emerald-600: #1f9d6b;
+  --color-emerald-700: #16493a;
+  --color-emerald-800: #123b2e;
+  --color-emerald-900: #0b241c;
+}
+
+body {
+  background: var(--color-cream);
+  color: #10241e; /* --ns-ink */
+  font-family: var(--font-sans);
+}
+
+/* Display face + tighter tracking on real headings (Archivo 700/800). */
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+
+/* Signature HARD offset shadows from the prototype (never soft on selectables). */
+.shadow-coral {
+  box-shadow: 4px 4px 0 var(--color-coral);
+}
+.shadow-ink {
+  box-shadow: 3px 3px 0 #10241e;
+}
+.shadow-float {
+  box-shadow: 0 26px 60px rgba(11, 36, 28, 0.22);
+}
+
+/*
+ * Brand primitives, straight from the prototype:
+ * - .ns-hero      the deep-pine app header with a mint radial-dot pattern
+ * - .ns-label     the uppercase, letter-spaced IBM Plex Mono micro-label
+ * - .ns-card      a 20px white card with the hairline ink border
+ * - .ns-mark      the 30px per-activity colour mark
+ */
+.ns-hero {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-forest); /* #0B241C pine-deep */
+  color: var(--color-cream);
+}
+.ns-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-radial-gradient(
+    circle at 90% 112%,
+    rgba(134, 229, 188, 0) 0 32px,
+    rgba(134, 229, 188, 0.14) 32px 33.5px
+  );
+  pointer-events: none;
+}
+.ns-hero > * {
+  position: relative;
+}
+.ns-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.ns-card {
+  border-radius: 20px;
+  background: #fff;
+  border: 1.5px solid rgba(16, 36, 30, 0.1);
+}
+.ns-mark {
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  flex: none;
+}
+
+::selection {
+  background: var(--color-mint);
+  color: var(--color-forest);
+}

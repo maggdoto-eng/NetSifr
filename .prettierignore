@@ -1,0 +1,6 @@
+# Reference/historical material, not part of the app's own source —
+# formatting these would just be repo-wide noise on every prettier run.
+.claude/skills/
+chats/
+project/
+docs/plan.md

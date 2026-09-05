@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  body { margin: 0; background: #E9E5DA; }
+  a { color: #FF6A45; text-decoration: none; }
+  a:hover { color: #123B2E; }
+  * { box-sizing: border-box; }
+  input, textarea, button { font-family: inherit; }
+  input:focus, textarea:focus { outline: 2px solid #FF6A45; outline-offset: 1px; }
+  .scroll > * { flex-shrink: 0; }
+  .scroll::-webkit-scrollbar { width: 6px; }
+  .scroll::-webkit-scrollbar-thumb { background: rgba(16,36,30,0.2); border-radius: 999px; }
+</style>
+</helmet>
+
+<div style="font-family: Inter, sans-serif; color: #10241E; background: #E9E5DA; padding: 44px 56px 90px; display: flex; flex-direction: column; gap: 30px">
+
+  <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 40px; flex-wrap: wrap; border-bottom: 2px solid #10241E; padding-bottom: 20px">
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #4A6258">NetSifr / CRGC — interactive prototype</div>
+      <div style="font-family: Archivo, sans-serif; font-weight: 800; font-size: 40px; line-height: 1; letter-spacing: -0.03em">Climate, Gender &amp; Community Support</div>
+      <div style="font-size: 15px; color: #4A6258; max-width: 760px">Both panes are live and share one state. Watch the recording on the phone and the admin table updates; unpublish a module in the builder and it disappears for the participant.</div>
+    </div>
+    <div style="display: flex; gap: 10px; align-items: center">
+      <div onClick="{{ reset }}" style="padding: 11px 18px; border-radius: 12px; border: 1.5px solid rgba(16,36,30,0.25); font-size: 14px; font-weight: 600; cursor: pointer" style-hover="background: #FFFFFF">Reset prototype</div>
+      <div onClick="{{ skipOnboarding }}" style="padding: 11px 18px; border-radius: 12px; background: #10241E; color: #F5F2EA; font-size: 14px; font-weight: 600; cursor: pointer">Skip to dashboard</div>
+    </div>
+  </div>
+
+  <div style="display: flex; gap: 34px; align-items: flex-start; flex-wrap: wrap">
+
+    <!-- ================= PARTICIPANT (MOBILE) ================= -->
+    <div style="display: flex; flex-direction: column; gap: 14px; flex: none">
+      <div style="display: flex; align-items: baseline; gap: 12px">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; padding: 6px 11px; border-radius: 7px; background: #FF6A45; color: #FFF7F2">PARTICIPANT</div>
+        <div style="font-size: 14px; color: #4A6258">{{ mobileCaption }}</div>
+      </div>
+
+      <div style="width: 402px; height: 872px; flex: none; border-radius: 40px; padding: 6px; background: #10241E; box-shadow: 0 26px 60px rgba(11,36,28,0.3)">
+        <div style="{{ phoneStyle }}">
+
+          <!-- ---------- ONBOARDING ---------- -->
+          <sc-if value="{{ isOnboard }}" hint-placeholder-val="{{ true }}">
+            <div style="{{ onboardShellStyle }}">
+              <div style="position: absolute; inset: 0; background: repeating-radial-gradient(circle at 10% 98%, rgba(134,229,188,0) 0 36px, rgba(134,229,188,0.14) 36px 37.5px); pointer-events: none"></div>
+
+              <div style="position: relative; padding: 26px 26px 0; display: flex; align-items: center; justify-content: space-between; flex: none">
+                <div style="{{ brandStyle }}">NetSifr</div>
+                <div style="{{ stepLabelStyle }}">STEP {{ step }} / 4</div>
+              </div>
+              <div style="position: relative; padding: 16px 26px 0; display: flex; gap: 7px; flex: none">
+                <sc-for list="{{ stepBars }}" as="b" hint-placeholder-count="4">
+                  <div style="{{ b.style }}"></div>
+                </sc-for>
+              </div>
+
+              <!-- step 1 -->
+              <sc-if value="{{ isStep1 }}" hint-placeholder-val="{{ true }}">
+                <div style="position: relative; flex: 1; display: flex; flex-direction: column; padding: 22px 26px 0; min-height: 0">
+                  <div style="height: 168px; border-radius: 20px; background: repeating-linear-gradient(45deg, #123B2E 0 10px, #16493a 10px 20px); border: 1px solid rgba(134,229,188,0.35); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 11px; flex: none">
+                    <div style="width: 50px; height: 50px; border-radius: 999px; background: #FF6A45; color: #FFF7F2; display: flex; align-items: center; justify-content: center; font-size: 17px">▶</div>
+                    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #86E5BC">WELCOME FROM THE TEAM · 0:48</div>
+                  </div>
+                  <div style="margin-top: 26px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; color: #86E5BC">COHORT 1 · OCT–DEC 2026</div>
+                  <div style="margin-top: 12px; font-family: Archivo, sans-serif; font-weight: 800; font-size: 40px; line-height: 0.98; letter-spacing: -0.035em; color: #F5F2EA">You're in.</div>
+                  <div style="margin-top: 14px; font-size: 15px; line-height: 1.55; color: rgba(245,242,234,0.72)">Eight weeks on climate, gender and community power — with 41 other people doing this work across Pakistan. Two minutes to set up.</div>
+                </div>
+              </sc-if>
+
+              <!-- step 2 -->
+              <sc-if value="{{ isStep2 }}" hint-placeholder-val="{{ true }}">
+                <div style="position: relative; flex: 1; display: flex; flex-direction: column; padding: 26px 26px 0; min-height: 0">
+                  <div style="font-family: Archivo, sans-serif; font-weight: 800; font-size: 32px; line-height: 1.02; letter-spacing: -0.03em">Who's joining us?</div>
+                  <div style="margin-top: 8px; font-size: 15px; color: #4A6258">This is what your cohort will see.</div>
+                  <div style="margin-top: 22px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #4A6258">FULL NAME</div>
+                  <input value="{{ name }}" onChange="{{ setName }}" placeholder="Your name" style="margin-top: 9px; height: 56px; border-radius: 16px; background: #FFFFFF; border: 2px solid #123B2E; padding: 0 17px; font-size: 17px; font-weight: 500; color: #10241E; width: 100%" />
+                  <div style="margin-top: 22px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #4A6258">PICK AN AVATAR — OR UPLOAD</div>
+                  <div style="margin-top: 12px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px">
+                    <sc-for list="{{ avatars }}" as="a" hint-placeholder-count="8">
+                      <div onClick="{{ a.pick }}" style="{{ a.style }}"><div style="{{ a.inner }}">{{ a.glyph }}</div></div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-if>
+
+              <!-- step 3 -->
+              <sc-if value="{{ isStep3 }}" hint-placeholder-val="{{ true }}">
+                <div style="position: relative; flex: 1; display: flex; flex-direction: column; padding: 26px 26px 0; min-height: 0">
+                  <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #FF6A45">YOUR CLIMATE PERSONA · Q{{ qNum }} OF 3</div>
+                  <div style="margin-top: 10px; font-family: Archivo, sans-serif; font-weight: 800; font-size: 29px; line-height: 1.06; letter-spacing: -0.03em; text-wrap: pretty">{{ personaQuestion }}</div>
+                  <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 12px">
+                    <sc-for list="{{ personaOptions }}" as="o" hint-placeholder-count="3">
+                      <div onClick="{{ o.pick }}" style="{{ o.style }}">
+                        <div style="{{ o.swatch }}"></div>
+                        <div style="display: flex; flex-direction: column; gap: 3px; min-width: 0">
+                          <div style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 17px">{{ o.title }}</div>
+                          <div style="font-size: 13px; color: #4A6258; line-height: 1.35">{{ o.desc }}</div>
+                        </div>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <div style="margin-top: auto; padding-bottom: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: #4A6258; text-align: center">NOT GRADED — IT JUST BECOMES YOUR TAG</div>
+                </div>
+              </sc-if>
+
+              <!-- step 4 -->
+              <sc-if value="{{ isStep4 }}" hint-placeholder-val="{{ true }}">
+                <div style="position: relative; flex: 1; display: flex; flex-direction: column; padding: 22px 26px 0; min-height: 0">
+                  <div style="padding: 18px; border-radius: 20px; background: #0B241C; display: flex; align-items: center; gap: 15px; flex: none">
+                    <div style="{{ personaAvatarStyle }}">{{ personaGlyph }}</div>
+                    <div style="display: flex; flex-direction: column; gap: 5px">
+                      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #86E5BC">YOU ARE A</div>
+                      <div style="font-family: Archivo, sans-serif; font-weight: 800; font-size: 24px; letter-spacing: -0.025em; color: #F5F2EA; line-height: 1">{{ persona }}</div>
+                    </div>
+                  </div>
+                  <div style="margin-top: 22px; font-family: Archivo, sans-serif; font-weight: 800; font-size: 26px; line-height: 1.05; letter-spacing: -0.028em">What are you here for?</div>
+                  <div style="margin-top: 7px; font-size: 14px; color: #4A6258">Pick any — we surface these first. ({{ interestCount }} chosen)</div>
+                  <div style="margin-top: 18px; display: flex; flex-wrap: wrap; gap: 9px">
+                    <sc-for list="{{ interestChips }}" as="c" hint-placeholder-count="8">
+                      <div onClick="{{ c.toggle }}" style="{{ c.style }}">{{ c.label }}</div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-if>
+
+              <div style="position: relative; padding: 20px 26px 28px; display: flex; gap: 11px; flex: none">
+                <sc-if value="{{ canGoBack }}" hint-placeholder-val="{{ true }}">
+                  <div onClick="{{ back }}" style="{{ backBtnStyle }}">←</div>
+                </sc-if>
+                <div onClick="{{ next }}" style="{{ nextBtnStyle }}">{{ nextLabel }}</div>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- ---------- APP ---------- -->
+          <sc-if value="{{ isApp }}" hint-placeholder-val="{{ true }}">
+            <div style="flex: 1; display: flex; flex-direction: column; min-height: 0; background: #F5F2EA">
+
+              <!-- HOME -->
+              <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+                <div style="background: #0B241C; padding: 24px 22px 22px; position: relative; overflow: hidden; flex: none">
+                  <div style="position: absolute; inset: 0; background: repeating-radial-gradient(circle at 92% 112%, rgba(134,229,188,0) 0 32px, rgba(134,229,188,0.14) 32px 33.5px)"></div>
+                  <div style="position: relative; display: flex; align-items: center; justify-content: space-between">
+                    <div style="display: flex; flex-direction: column; gap: 4px">
+                      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #86E5BC">WEEK 3 OF 8</div>
+                      <div style="font-family: Archivo, sans-serif; font-weight: 800; font-size: 25px; letter-spacing: -0.025em; color: #F5F2EA">Salaam, {{ firstName }}</div>
+                    </div>
+                    <div style="{{ headerAvatarStyle }}">{{ personaGlyph }}</div>
+                  </div>
+                  <div style="position: relative; margin-top: 18px; display: flex; gap: 9px">
+                    <div style="flex: 1; padding: 13px; border-radius: 15px; background: rgba(134,229,188,0.12)">
+                      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 21px; font-weight: 600; color: #86E5BC">{{ attendPct }}%</div>
+                      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.12em; color: rgba(245,242,234,0.55); margin-top: 3px">ATTENDANCE</div>
+                    </div>
+                    <div style="flex: 1; padding: 13px; border-radius: 15px; background: rgba(255,106,69,0.16)">
+                      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 21px; font-weight: 600; color: #FF8B6D">{{ points }}</div>
+                      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.12em; color: rgba(245,242,234,0.55); margin-top: 3px">POINTS</div>
+                    </div>
+                    <div style="flex: 1; padding: 13px; border-radius: 15px; background: rgba(245,242,234,0.08)">
+                      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 21px; font-weight: 600; color: #F5F2EA">{{ streak }}🔥</div>
+                      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.12em; color: rgba(245,242,234,0.55); margin-top: 3px">STREAK</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="scroll" style="flex: 1; overflow-y: auto; padding: 18px 22px 22px; display: flex; flex-direction: column; gap: 15px; min-height: 0">
+                  <div onClick="{{ openRecording }}" style="border-radius: 20px; background: #FFFFFF; border: 1.5px solid rgba(16,36,30,0.1); overflow: hidden; cursor: pointer">
+                    <div style="height: 128px; background: repeating-linear-gradient(45deg, #123B2E 0 10px, #16493a 10px 20px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px">
+                      <div style="width: 42px; height: 42px; border-radius: 999px; background: #FF6A45; color: #FFF7F2; display: flex; align-items: center; justify-content: center; font-size: 15px">▶</div>
+                      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.12em; color: #86E5BC">{{ watchLabel }}</div>
+                    </div>
+                    <div style="padding: 15px; display: flex; flex-direction: column; gap: 9px">
+                      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.13em; color: #FF6A45">THIS WEEK · RECORDING</div>
+                      <div style="font-family: Archivo, sans-serif; font-weight: 800; font-size: 20px; line-height: 1.1; letter-spacing: -0.02em">Gender-Responsive Climate Policy</div>
+                      <div style="height: 48px; border-radius: 13px; background: #FF6A45; color: #FFF7F2; display: flex; align-items: center; justify-content: center; font-family: Archivo, sans-serif; font-weight: 700; font-size: 16px">{{ recordingCta }}</div>
+                    </div>
+                  </div>
+                  <div style="display: flex; align-items: baseline; justify-content: space-between">
+                    <div style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 17px">Week 3 modules</div>
+                    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #4A6258">{{ weekProgressLabel }}</div>
+                  </div>
+                  <sc-for list="{{ liveModules }}" as="m" hint-placeholder-count="4">
+                    <div onClick="{{ m.open }}" style="{{ m.cardStyle }}">
+                      <div style="{{ m.iconStyle }}">{{ m.icon }}</div>
+                      <div style="flex: 1; min-width: 0">
+                        <div style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 14.5px; line-height: 1.25">{{ m.title }}</div>
+                        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.1em; color: #4A6258; margin-top: 3px">{{ m.type }}</div>
+                      </div>
+                      <div style="{{ m.pillStyle }}">{{ m.state }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+
+              <!-- WEEKS LIST -->
+              <sc-if value="{{ isWeeks }}" hint-placeholder-val="{{ true }}">
+                <div style="{{ subHeaderStyle }}">
+                  <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #86E5BC">COHORT 1 · 8 WEEKS</div>
+                  <div style="margin-top: 8px; font-family: Archivo, sans-serif; font-weight: 800; font-size: 27px; letter-spacing: -0.03em; color: #F5F2EA">All sessions</div>
+                </div>
+                <div class="scroll" style="flex: 1; overflow-y: auto; padding: 18px 22px 22px; display: flex; flex-direction: column; gap: 10px; min-height: 0">
+                  <sc-for list="{{ weekCards }}" as="w" hint-placeholder-count="8">
+                    <div onClick="{{ w.open }}" style="{{ w.style }}">
+                      <div style="{{ w.numStyle }}">{{ w.n }}</div>
+                      <div style="flex: 1; min-width: 0">
+                        <div style="{{ w.titleStyle }}">{{ w.title }}</div>
+                        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.1em; color: #4A6258; margin-top: 4px">{{ w.meta }}</div>
+                      </div>
+                      <div style="{{ w.dotStyle }}"></div>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+
+              <!-- WEEK DETAIL -->
+              <sc-if value="{{ isWeekDetail }}" hint-placeholder-val="{{ true }}">
+                <div style="{{ subHeaderStyle }}">
+                  <div onClick="{{ goWeeks }}" style="display: flex; align-items: center; gap: 10px; color: #86E5BC; font-size: 13px; cursor: pointer">← <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em">ALL WEEKS</div></div>
+                  <div style="margin-top: 16px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #FF8B6D">WEEK {{ weekNum }} · {{ weekDates }}</div>
+                  <div style="margin-top: 8px; font-family: Archivo, sans-serif; font-weight: 800; font-size: 26px; line-height: 1.07; letter-spacing: -0.03em; color: #F5F2EA">{{ weekTitle }}</div>
+                  <div style="margin-top: 14px; display: flex; gap: 8px">
+                    <div style="{{ weekAttendPillStyle }}">{{ weekAttendPill }}</div>
+                  </div>
+                </div>
+                <div class="scroll" style="flex: 1; overflow-y: auto; padding: 18px 22px 22px; display: flex; flex-direction: column; gap: 11px; min-height: 0">
+                  <sc-for list="{{ liveModules }}" as="m" hint-placeholder-count="4">
+                    <div onClick="{{ m.open }}" style="{{ m.rowStyle }}">
+                      <div style="display: flex; gap: 12px; align-items: center">
+                        <div style="{{ m.iconStyle }}">{{ m.icon }}</div>
+                        <div style="flex: 1; min-width: 0">
+                          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.12em; color: #4A6258">{{ m.type }}</div>
+                          <div style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 15px; line-height: 1.25; margin-top: 3px">{{ m.title }}</div>
+                          <div style="font-size: 12px; color: #4A6258; margin-top: 3px">{{ m.meta }}</div>
+                        </div>
+                        <div style="{{ m.pillStyle }}">{{ m.state }}</div>
+                      </div>
+                    </div>
+                  </sc-for>
+                  <sc-if value="{{ weekEmpty }}" hint-placeholder-val="{{ false }}">
+                    <div style="padding: 26px; border-radius: 18px; border: 2px dashed rgba(16,36,30,0.2); text-align: center; font-size: 14px; color: #4A6258; line-height: 1.5">Nothing published for this week yet.<br />Your facilitator is still building it.</div>
+                  </sc-if>
+                  <div style="margin-top: auto; padding: 14px 16px; border-radius: 16px; background: #E3D9C2; font-size: 13px; color: #123B2E; line-height: 1.45">Nothing locks — late work is accepted and flagged for your facilitator.</div>
+                </div>
+              </sc-if>
+
+              <!-- RECORDING -->
+              <sc-if value="{{ isRecording }}" hint-placeholder-val="{{ true }}">
+                <div style="background: #0B241C; flex: none">
+                  <div style="padding: 22px 22px 0" onClick="{{ goBackModule }}"><div style="display: flex; align-items: center; gap: 10px; color: #86E5BC; font-size: 13px; cursor: pointer">← <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em">WEEK {{ weekNum }}</div></div></div>
+                  <div style="margin-top: 16px; height: 214px; background: repeating-linear-gradient(45deg, #123B2E 0 10px, #16493a 10px 20px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; position: relative">
+                    <div onClick="{{ togglePlay }}" style="{{ playBtnStyle }}">{{ playGlyph }}</div>
+                    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #86E5BC">DRIVE EMBED · {{ watchClock }} / 58:12</div>
+                    <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: rgba(245,242,234,0.15)"><div style="{{ scrubStyle }}"></div></div>
+                  </div>
+                </div>
+                <div class="scroll" style="flex: 1; overflow-y: auto; padding: 20px 22px 22px; display: flex; flex-direction: column; gap: 14px; min-height: 0">
+                  <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #FF6A45">WEEK {{ weekNum }} · RECORDING</div>
+                  <div style="font-family: Archivo, sans-serif; font-weight: 800; font-size: 24px; line-height: 1.1; letter-spacing: -0.028em">{{ weekTitle }}</div>
+                  <div style="font-size: 14px; color: #4A6258; line-height: 1.55">{{ weekSummary }}</div>
+                  <div style="{{ attendBoxStyle }}">
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+                      <div style="min-width: 0">
+                        <div style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 16px">{{ attendBoxTitle }}</div>
+                        <div style="font-size: 13px; color: #4A6258; margin-top: 3px">{{ attendBoxNote }}</div>
+                      </div>
+                      <div onClick="{{ markAttended }}" style="{{ attendBtnStyle }}">{{ attendBtnLabel }}</div>
+                    </div>
+                    <div style="margin-top: 12px; height: 6px; border-radius: 999px; background: rgba(16,36,30,0.1); overflow: hidden"><div style="{{ unlockBarStyle }}"></div></div>
+                  </div>
+                </div>
+              </sc-if>
+
+              <!-- READING -->
+              <sc-if value="{{ isReading }}" hint-placeholder-val="{{ true }}">
+                <div style="{{ subHeaderStyle }}">
+                  <div onClick="{{ goBackModule }}" style="display: flex; align-items: center; gap: 10px; color: #86E5BC; font-size: 13px; cursor: pointer">← <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em">WEEK {{ weekNum }}</div></div>
+                  <div style="margin-top: 16px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #FF8B6D">READING · 22 PAGES</div>
+                  <div style="margin-top: 8px; font-family: Archivo, sans-serif; font-weight: 800; font-size: 25px; line-height: 1.08; letter-spacing: -0.03em; color: #F5F2EA">National Adaptation Plan 2025 — ch. 4–6</div>
+                </div>
+                <div class="scroll" style="flex: 1; overflow-y: auto; padding: 18px 22px 22px; display: flex; flex-direction: column; gap: 14px; min-height: 0">
+                  <div style="height: 210px; border-radius: 18px; background: repeating-linear-gradient(135deg, #E3D9C2 0 12px, #ded3b8 12px 24px); display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #4A6258">PDF PREVIEW</div>
+                  <div style="font-size: 14px; color: #4A6258; line-height: 1.6">Chapters 4–6 cover the costing stage — where gender-responsive budgeting either happens or doesn't. Read before the quiz.</div>
+                  <div onClick="{{ markRead }}" style="{{ readBtnStyle }}">{{ readBtnLabel }}</div>
+                </div>
+              </sc-if>
+
+              <!-- QUIZ -->
+              <sc-if value="{{ isQuiz }}" hint-placeholder-val="{{ true }}">
+                <div style="{{ subHeaderStyle }}">
+                  <div onClick="{{ goBackModule }}" style="display: flex; align-items: center; gap: 10px; color: #86E5BC; font-size: 13px; cursor: pointer">← <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em">WEEK {{ weekNum }}</div></div>
+                  <div style="margin-top: 16px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #FF8B6D">QUIZ · {{ quizProgressLabel }}</div>
+                  <div style="margin-top: 8px; font-family: Archivo, sans-serif; font-weight: 800; font-size: 25px; line-height: 1.08; letter-spacing: -0.03em; color: #F5F2EA">Policy levers check</div>
+                </div>
+                <div class="scroll" style="flex: 1; overflow-y: auto; padding: 18px 22px 22px; display: flex; flex-direction: column; gap: 14px; min-height: 0">
+                  <sc-if value="{{ quizOpen }}" hint-placeholder-val="{{ true }}">
+                    <sc-for list="{{ quizQuestions }}" as="q" hint-placeholder-count="3">
+                      <div style="padding: 16px; border-radius: 18px; background: #FFFFFF; border: 1.5px solid rgba(16,36,30,0.1); display: flex; flex-direction: column; gap: 11px">
+                        <div style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 15px; line-height: 1.3">{{ q.prompt }}</div>
+                        <sc-for list="{{ q.options }}" as="o" hint-placeholder-count="3">
+                          <div onClick="{{ o.pick }}" style="{{ o.style }}">
+                            <div style="{{ o.dot }}"></div>
+                            <div style="font-size: 13.5px; line-height: 1.35">{{ o.label }}</div>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </sc-for>
+                    <div onClick="{{ submitQuiz }}" style="{{ quizSubmitStyle }}">{{ quizSubmitLabel }}</div>
+                  </sc-if>
+                  <sc-if value="{{ quizDone }}" hint-placeholder-val="{{ false }}">
+                    <div style="padding: 24px; border-radius: 20px; background: #0B241C; display: flex; flex-direction: column; gap: 10px; align-items: center; text-align: center">
+                      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 44px; font-weight: 600; color: #86E5BC">{{ quizScore }}%</div>
+                      <div style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 19px; color: #F5F2EA">{{ quizVerdict }}</div>
+                      <div style="font-size: 13px; color: rgba(245,242,234,0.65); line-height: 1.5">{{ quizPointsNote }}</div>
+                    </div>
+                    <sc-for list="{{ quizReview }}" as="r" hint-placeholder-count="3">
+                      <div style="{{ r.style }}">
+                        <div style="font-size: 13.5px; font-weight: 500; line-height: 1.35">{{ r.prompt }}</div>
+                        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: #4A6258; margin-top: 6px">{{ r.verdict }}</div>
+                      </div>
+                    </sc-for>
+                    <div onClick="{{ retakeQuiz }}" style="height: 50px; border-radius: 14px; border: 1.5px solid rgba(16,36,30,0.2); display: flex; align-items: center; justify-content: center; font-family: Archivo, sans-serif; font-weight: 700; font-size: 15px; cursor: pointer">Retake (1 left)</div>
+                  </sc-if>
+                </div>
+              </sc-if>
+
+              <!-- ASSIGNMENT -->
+              <sc-if value="{{ isAssignment }}" hint-placeholder-val="{{ true }}">
+                <div style="{{ subHeaderStyle }}">
+                  <div onClick="{{ goBackModule }}" style="display: flex; align-items: center; gap: 10px; color: #86E5BC; font-size: 13px; cursor: pointer">← <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em">WEEK {{ weekNum }}</div></div>
+                  <div style="margin-top: 16px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #FF8B6D">ASSIGNMENT · DUE 26 OCT · SOFT</div>
+                  <div style="margin-top: 8px; font-family: Archivo, sans-serif; font-weight: 800; font-size: 25px; line-height: 1.08; letter-spacing: -0.03em; color: #F5F2EA">Name one lever in your own district</div>
+                </div>
+                <div class="scroll" style="flex: 1; overflow-y: auto; padding: 18px 22px 22px; display: flex; flex-direction: column; gap: 13px; min-height: 0">
+                  <div style="font-size: 14px; color: #4A6258; line-height: 1.55">300 words or a voice note. Which budget line, plan or office could you realistically move in the next year — and who signs it off?</div>
+                  <sc-if value="{{ assignmentOpen }}" hint-placeholder-val="{{ true }}">
+                    <textarea value="{{ assignmentText }}" onChange="{{ setAssignment }}" placeholder="Type your answer…" style="min-height: 190px; border-radius: 16px; border: 1.5px solid rgba(16,36,30,0.2); background: #FFFFFF; padding: 15px; font-size: 14px; line-height: 1.5; color: #10241E; resize: none; width: 100%"></textarea>
+                    <div style="display: flex; align-items: center; justify-content: space-between">
+                      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: #4A6258">{{ wordCount }} WORDS</div>
+                      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: #FF6A45">2 DAYS LATE — STILL ACCEPTED</div>
+                    </div>
+                    <div onClick="{{ submitAssignment }}" style="{{ assignmentBtnStyle }}">{{ assignmentBtnLabel }}</div>
+                  </sc-if>
+                  <sc-if value="{{ assignmentDone }}" hint-placeholder-val="{{ false }}">
+                    <div style="padding: 18px; border-radius: 18px; background: #FFFFFF; border: 1.5px solid rgba(16,36,30,0.12); display: flex; flex-direction: column; gap: 9px">
+                      <div style="display: flex; align-items: center; justify-content: space-between">
+                        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #4A6258">YOUR SUBMISSION</div>
+                        <div style="{{ latePillStyle }}">LATE — ACCEPTED</div>
+                      </div>
+                      <div style="font-size: 13.5px; line-height: 1.55; color: #10241E">{{ assignmentText }}</div>
+                    </div>
+                    <div style="{{ gradeBoxStyle }}">
+                      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #86E5BC">FACILITATOR</div>
+                      <div style="margin-top: 8px; font-family: Archivo, sans-serif; font-weight: 700; font-size: 19px; color: #F5F2EA">{{ gradeLabel }}</div>
+                      <div style="margin-top: 7px; font-size: 13.5px; line-height: 1.5; color: rgba(245,242,234,0.7)">{{ feedbackLabel }}</div>
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-if>
+
+              <!-- COHORT -->
+              <sc-if value="{{ isCohort }}" hint-placeholder-val="{{ true }}">
+                <div style="{{ subHeaderStyle }}">
+                  <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #86E5BC">42 PEOPLE · COHORT 1</div>
+                  <div style="margin-top: 8px; font-family: Archivo, sans-serif; font-weight: 800; font-size: 27px; letter-spacing: -0.03em; color: #F5F2EA">Your cohort</div>
+                  <div style="margin-top: 16px; display: flex; gap: 7px; flex-wrap: wrap">
+                    <sc-for list="{{ cohortFilters }}" as="f" hint-placeholder-count="4">
+                      <div onClick="{{ f.pick }}" style="{{ f.style }}">{{ f.label }}</div>
+                    </sc-for>
+                  </div>
+                </div>
+                <div class="scroll" style="flex: 1; overflow-y: auto; padding: 16px 22px 22px; display: flex; flex-direction: column; gap: 9px; min-height: 0">
+                  <sc-for list="{{ cohortList }}" as="p" hint-placeholder-count="6">
+                    <div style="padding: 13px 14px; border-radius: 15px; background: #FFFFFF; border: 1.5px solid rgba(16,36,30,0.1); display: flex; align-items: center; gap: 12px">
+                      <div style="{{ p.avatarStyle }}">{{ p.glyph }}</div>
+                      <div style="flex: 1; min-width: 0">
+                        <div style="font-size: 14.5px; font-weight: 500">{{ p.name }}</div>
+                        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.1em; color: #4A6258; margin-top: 2px">{{ p.persona }}</div>
+                      </div>
+                      <div style="font-size: 12px; color: #4A6258">{{ p.city }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+
+              <!-- ME -->
+              <sc-if value="{{ isMe }}" hint-placeholder-val="{{ true }}">
+                <div style="{{ subHeaderStyle }}">
+                  <div style="display: flex; align-items: center; gap: 15px">
+                    <div style="{{ bigAvatarStyle }}">{{ personaGlyph }}</div>
+                    <div style="min-width: 0">
+                      <div style="font-family: Archivo, sans-serif; font-weight: 800; font-size: 25px; letter-spacing: -0.028em; color: #F5F2EA">{{ name }}</div>
+                      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #86E5BC; margin-top: 5px">{{ personaUpper }}</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="scroll" style="flex: 1; overflow-y: auto; padding: 18px 22px 22px; display: flex; flex-direction: column; gap: 14px; min-height: 0">
+                  <div style="display: flex; gap: 11px">
+                    <div style="flex: 1; padding: 16px; border-radius: 18px; background: #FFFFFF; border: 1.5px solid rgba(16,36,30,0.1)">
+                      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 26px; font-weight: 600; color: #FF6A45">{{ points }}</div>
+                      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.12em; color: #4A6258; margin-top: 4px">POINTS · RANK {{ rank }}</div>
+                    </div>
+                    <div style="flex: 1; padding: 16px; border-radius: 18px; background: #FFFFFF; border: 1.5px solid rgba(16,36,30,0.1)">
+                      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 26px; font-weight: 600; color: #123B2E">{{ attendPct }}%</div>
+                      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.12em; color: #4A6258; margin-top: 4px">ATTENDANCE</div>
+                    </div>
+                  </div>
+                  <div style="padding: 18px; border-radius: 18px; background: #FFFFFF; border: 1.5px solid rgba(16,36,30,0.1); display: flex; flex-direction: column; gap: 13px">
+                    <div style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 16px">Badges</div>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px">
+                      <sc-for list="{{ badges }}" as="b" hint-placeholder-count="4">
+                        <div style="{{ b.style }}">{{ b.glyph }}</div>
+                      </sc-for>
+                    </div>
+                    <div style="font-size: 12px; color: #4A6258; line-height: 1.5">{{ badgeNames }}</div>
+                  </div>
+                  <div style="padding: 18px; border-radius: 18px; background: #FFFFFF; border: 1.5px solid rgba(16,36,30,0.1); display: flex; flex-direction: column; gap: 11px">
+                    <div style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 16px">Your interests</div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px">
+                      <sc-for list="{{ myInterests }}" as="i" hint-placeholder-count="3">
+                        <div style="padding: 8px 13px; border-radius: 999px; background: #E3D9C2; font-size: 13px">{{ i.label }}</div>
+                      </sc-for>
+                    </div>
+                  </div>
+                  <div onClick="{{ reset }}" style="height: 48px; border-radius: 14px; border: 1.5px solid rgba(16,36,30,0.2); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; cursor: pointer; color: #4A6258">Restart onboarding</div>
+                </div>
+              </sc-if>
+
+              <!-- BOTTOM NAV -->
+              <div style="height: 72px; background: #FFFFFF; border-top: 1.5px solid rgba(16,36,30,0.1); display: flex; align-items: center; justify-content: space-around; padding: 0 10px; flex: none">
+                <sc-for list="{{ navItems }}" as="n" hint-placeholder-count="4">
+                  <div onClick="{{ n.pick }}" style="{{ n.style }}">
+                    <div style="{{ n.iconStyle }}"></div>
+                    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.08em">{{ n.label }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+        </div>
+      </div>
+      <div style="width: 402px; font-size: 13px; color: #4A6258; line-height: 1.5">{{ mobileHint }}</div>
+    </div>
+
+    <!-- ================= ADMIN (DESKTOP) ================= -->
+    <div style="display: flex; flex-direction: column; gap: 14px; flex: none">
+      <div style="display: flex; align-items: baseline; gap: 12px">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; padding: 6px 11px; border-radius: 7px; background: #10241E; color: #86E5BC">ADMIN</div>
+        <div style="font-size: 14px; color: #4A6258">{{ adminCaption }}</div>
+      </div>
+
+      <div style="width: 1300px; height: 872px; flex: none; border-radius: 22px; overflow: hidden; background: #FFFFFF; box-shadow: 0 26px 60px rgba(11,36,28,0.22); display: flex; flex-direction: column">
+        <div style="height: 62px; border-bottom: 1.5px solid rgba(16,36,30,0.1); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; flex: none">
+          <div style="display: flex; align-items: center; gap: 16px">
+            <div style="font-family: Archivo, sans-serif; font-weight: 800; font-size: 18px">NetSifr <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #FF6A45">ADMIN</span></div>
+            <div style="width: 1px; height: 22px; background: rgba(16,36,30,0.14)"></div>
+            <div style="display: flex; gap: 5px">
+              <sc-for list="{{ adminTabs }}" as="t" hint-placeholder-count="4">
+                <div onClick="{{ t.pick }}" style="{{ t.style }}">{{ t.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px">
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #4A6258">COHORT 1 · 42 ENROLLED</div>
+            <div style="padding: 9px 16px; border-radius: 11px; background: #FF6A45; color: #FFF7F2; font-size: 13.5px; font-weight: 600">Export CSV</div>
+          </div>
+        </div>
+
+        <!-- BUILDER -->
+        <sc-if value="{{ isBuilder }}" hint-placeholder-val="{{ true }}">
+          <div style="flex: 1; display: flex; min-height: 0">
+            <div class="scroll" style="width: 310px; border-right: 1.5px solid rgba(16,36,30,0.1); padding: 20px 16px; display: flex; flex-direction: column; gap: 10px; background: #F5F2EA; overflow-y: auto; flex: none">
+              <div style="display: flex; align-items: center; justify-content: space-between; padding: 0 6px">
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #4A6258">WEEKS · 8</div>
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #FF6A45; font-weight: 600; cursor: pointer">+ ADD</div>
+              </div>
+              <sc-for list="{{ adminWeekList }}" as="w" hint-placeholder-count="8">
+                <div onClick="{{ w.pick }}" style="{{ w.style }}">
+                  <div style="font-size: 12px; color: rgba(16,36,30,0.3); font-family: 'IBM Plex Mono', monospace">⠿</div>
+                  <div style="{{ w.numStyle }}">{{ w.n }}</div>
+                  <div style="flex: 1; min-width: 0; font-size: 13.5px; font-weight: 500; line-height: 1.3">{{ w.title }}</div>
+                  <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #4A6258">{{ w.count }}</div>
+                </div>
+              </sc-for>
+            </div>
+
+            <div class="scroll" style="flex: 1; padding: 24px 28px; display: flex; flex-direction: column; gap: 18px; min-width: 0; overflow-y: auto">
+              <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 20px">
+                <div style="min-width: 0">
+                  <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #4A6258">EDITING WEEK {{ adminWeekNum }}</div>
+                  <div style="margin-top: 7px; font-family: Archivo, sans-serif; font-weight: 800; font-size: 27px; letter-spacing: -0.03em; line-height: 1.1">{{ adminWeekTitle }}</div>
+                </div>
+                <div style="display: flex; gap: 8px; flex: none">
+                  <div style="padding: 9px 14px; border-radius: 10px; border: 1.5px solid rgba(16,36,30,0.16); font-size: 13px; font-weight: 500">Duplicate</div>
+                  <div style="padding: 9px 14px; border-radius: 10px; background: #123B2E; color: #F5F2EA; font-size: 13px; font-weight: 600">Publish week</div>
+                </div>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 11px">
+                <sc-for list="{{ adminModuleList }}" as="m" hint-placeholder-count="4">
+                  <div onClick="{{ m.pick }}" style="{{ m.style }}">
+                    <div style="font-size: 13px; color: rgba(16,36,30,0.3); font-family: 'IBM Plex Mono', monospace">⠿</div>
+                    <div style="{{ m.iconStyle }}">{{ m.icon }}</div>
+                    <div style="flex: 1; min-width: 0">
+                      <div style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 15.5px">{{ m.title }}</div>
+                      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: #4A6258; margin-top: 4px">{{ m.ref }}</div>
+                    </div>
+                    <div onClick="{{ m.togglePublish }}" style="{{ m.statusStyle }}">{{ m.status }}</div>
+                  </div>
+                </sc-for>
+                <div style="padding: 16px; border-radius: 16px; border: 2px dashed rgba(16,36,30,0.2); display: flex; gap: 10px; align-items: center; justify-content: center">
+                  <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: #4A6258">ADD MODULE</div>
+                  <div style="display: flex; gap: 7px">
+                    <sc-for list="{{ addTypes }}" as="t" hint-placeholder-count="4">
+                      <div onClick="{{ t.add }}" style="padding: 7px 13px; border-radius: 9px; background: #F5F2EA; border: 1.5px solid rgba(16,36,30,0.14); font-size: 13px; cursor: pointer" style-hover="border-color: #10241E">{{ t.label }}</div>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+
+              <div style="padding: 16px 18px; border-radius: 16px; background: #E3D9C2; display: flex; align-items: center; gap: 14px">
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #123B2E; font-weight: 600; flex: none">TRY IT</div>
+                <div style="font-size: 13.5px; color: #123B2E; line-height: 1.45">Click a module's status pill to unpublish it — it disappears from the participant's week on the left. Change the attendance rule and the phone's unlock timer changes with it.</div>
+              </div>
+            </div>
+
+            <div class="scroll" style="width: 330px; border-left: 1.5px solid rgba(16,36,30,0.1); padding: 22px 20px; display: flex; flex-direction: column; gap: 16px; background: #F5F2EA; flex: none; overflow-y: auto">
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #4A6258">MODULE INSPECTOR</div>
+              <div style="display: flex; align-items: center; gap: 12px">
+                <div style="{{ inspectorIconStyle }}">{{ inspectorIcon }}</div>
+                <div style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 16.5px; line-height: 1.2">{{ inspectorTitle }}</div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 8px">
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #4A6258">{{ inspectorFieldLabel }}</div>
+                <input value="{{ inspectorField }}" onChange="{{ setInspectorField }}" style="height: 44px; border-radius: 11px; background: #FFFFFF; border: 1.5px solid rgba(16,36,30,0.16); padding: 0 13px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #10241E; width: 100%" />
+                <div style="display: flex; align-items: center; gap: 7px; font-size: 12px; color: #1E7A54"><div style="width: 7px; height: 7px; border-radius: 999px; background: #1E7A54"></div>Link sharing verified · Viewer</div>
+              </div>
+              <sc-if value="{{ inspectorIsRecording }}" hint-placeholder-val="{{ true }}">
+                <div style="display: flex; flex-direction: column; gap: 10px">
+                  <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #4A6258">ATTENDANCE RULE</div>
+                  <div style="padding: 13px 14px; border-radius: 12px; background: #FFFFFF; border: 1.5px solid rgba(16,36,30,0.16); display: flex; align-items: center; justify-content: space-between">
+                    <div style="font-size: 13.5px">Self-mark after</div>
+                    <div style="display: flex; align-items: center; gap: 9px">
+                      <div onClick="{{ decMinutes }}" style="{{ stepperStyle }}">−</div>
+                      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 600; min-width: 22px; text-align: center">{{ attendMinutes }}</div>
+                      <div onClick="{{ incMinutes }}" style="{{ stepperStyle }}">+</div>
+                      <div style="font-size: 12.5px; color: #4A6258">min</div>
+                    </div>
+                  </div>
+                </div>
+              </sc-if>
+              <div style="padding: 13px 14px; border-radius: 12px; background: #FFFFFF; border: 1.5px solid rgba(16,36,30,0.16); display: flex; align-items: center; justify-content: space-between">
+                <div style="font-size: 13.5px">Published</div>
+                <div onClick="{{ toggleInspectorPublish }}" style="{{ toggleTrackStyle }}"><div style="{{ toggleKnobStyle }}"></div></div>
+              </div>
+              <div style="height: 112px; border-radius: 14px; background: repeating-linear-gradient(45deg, #123B2E 0 10px, #16493a 10px 20px); display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #86E5BC; flex: none">EMBED PREVIEW · 58:12</div>
+              <div style="margin-top: auto; display: flex; gap: 9px">
+                <div style="flex: 1; padding: 12px; border-radius: 12px; border: 1.5px solid rgba(16,36,30,0.16); text-align: center; font-size: 13.5px; font-weight: 500">Delete</div>
+                <div style="flex: 2; padding: 12px; border-radius: 12px; background: #123B2E; color: #F5F2EA; text-align: center; font-size: 13.5px; font-weight: 600">Save module</div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ATTENDANCE -->
+        <sc-if value="{{ isAttendance }}" hint-placeholder-val="{{ false }}">
+          <div style="flex: 1; display: flex; flex-direction: column; min-height: 0; padding: 22px 26px 20px">
+            <div style="display: flex; gap: 14px; flex: none">
+              <sc-for list="{{ statCards }}" as="s" hint-placeholder-count="4">
+                <div style="{{ s.style }}">
+                  <div style="{{ s.labelStyle }}">{{ s.label }}</div>
+                  <div style="{{ s.valueStyle }}">{{ s.value }}</div>
+                  <div style="{{ s.noteStyle }}">{{ s.note }}</div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="margin-top: 20px; display: flex; align-items: center; gap: 10px; flex: none">
+              <sc-for list="{{ rosterFilters }}" as="f" hint-placeholder-count="3">
+                <div onClick="{{ f.pick }}" style="{{ f.style }}">{{ f.label }}</div>
+              </sc-for>
+              <div style="flex: 1"></div>
+              <div onClick="{{ toggleSort }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #4A6258; cursor: pointer; padding: 8px 12px; border-radius: 9px; border: 1.5px solid rgba(16,36,30,0.14)">SORT: {{ sortLabel }}</div>
+            </div>
+            <div style="margin-top: 16px; display: grid; grid-template-columns: 2.2fr 1.3fr 1fr 1.3fr 1fr 1fr 0.9fr; gap: 12px; padding: 11px 14px; border-bottom: 2px solid #10241E; flex: none">
+              <div style="{{ thStyle }}">PARTICIPANT</div>
+              <div style="{{ thStyle }}">PERSONA</div>
+              <div style="{{ thStyle }}">ATTEND</div>
+              <div style="{{ thStyle }}">WEEKS 1–8</div>
+              <div style="{{ thStyle }}">QUIZ AVG</div>
+              <div style="{{ thStyle }}">SUBS</div>
+              <div style="{{ thStyle }}">POINTS</div>
+            </div>
+            <div class="scroll" style="flex: 1; overflow-y: auto; min-height: 0">
+              <sc-for list="{{ roster }}" as="r" hint-placeholder-count="8">
+                <div style="{{ r.rowStyle }}">
+                  <div style="display: flex; align-items: center; gap: 11px; min-width: 0">
+                    <div style="{{ r.avatarStyle }}">{{ r.glyph }}</div>
+                    <div style="min-width: 0">
+                      <div style="font-size: 13.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ r.name }}</div>
+                      <div style="font-size: 11.5px; color: #4A6258; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ r.email }}</div>
+                    </div>
+                  </div>
+                  <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: #4A6258">{{ r.persona }}</div>
+                  <div style="{{ r.attendStyle }}">{{ r.attend }}</div>
+                  <div style="display: flex; gap: 4px">
+                    <sc-for list="{{ r.weeks }}" as="c" hint-placeholder-count="8">
+                      <div style="{{ c.style }}"></div>
+                    </sc-for>
+                  </div>
+                  <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px">{{ r.quiz }}</div>
+                  <div style="{{ r.subStyle }}">{{ r.subs }}</div>
+                  <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 500">{{ r.points }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- SUBMISSIONS -->
+        <sc-if value="{{ isSubmissions }}" hint-placeholder-val="{{ false }}">
+          <div style="flex: 1; display: flex; min-height: 0">
+            <div class="scroll" style="width: 420px; border-right: 1.5px solid rgba(16,36,30,0.1); background: #F5F2EA; padding: 20px 16px; display: flex; flex-direction: column; gap: 9px; overflow-y: auto; flex: none">
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #4A6258; padding: 0 6px">QUEUE · {{ queueCount }} TO GRADE</div>
+              <sc-for list="{{ submissions }}" as="s" hint-placeholder-count="5">
+                <div onClick="{{ s.pick }}" style="{{ s.style }}">
+                  <div style="{{ s.avatarStyle }}">{{ s.glyph }}</div>
+                  <div style="flex: 1; min-width: 0">
+                    <div style="font-size: 14px; font-weight: 500">{{ s.name }}</div>
+                    <div style="font-size: 12px; color: #4A6258; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ s.excerpt }}</div>
+                  </div>
+                  <div style="{{ s.flagStyle }}">{{ s.flag }}</div>
+                </div>
+              </sc-for>
+            </div>
+            <div class="scroll" style="flex: 1; padding: 26px 30px; display: flex; flex-direction: column; gap: 18px; min-width: 0; overflow-y: auto">
+              <div>
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #4A6258">WEEK 3 ASSIGNMENT · {{ activeSubName }}</div>
+                <div style="margin-top: 7px; font-family: Archivo, sans-serif; font-weight: 800; font-size: 26px; letter-spacing: -0.03em">Name one lever in your own district</div>
+              </div>
+              <div style="padding: 22px; border-radius: 18px; background: #F5F2EA; font-size: 14.5px; line-height: 1.65; min-height: 190px">{{ activeSubText }}</div>
+              <div style="display: flex; flex-direction: column; gap: 11px">
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #4A6258">GRADE</div>
+                <div style="display: flex; gap: 9px">
+                  <sc-for list="{{ gradeOptions }}" as="g" hint-placeholder-count="3">
+                    <div onClick="{{ g.pick }}" style="{{ g.style }}">{{ g.label }}</div>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 9px; flex: 1; min-height: 0">
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #4A6258">FEEDBACK TO PARTICIPANT</div>
+                <textarea value="{{ feedbackDraft }}" onChange="{{ setFeedback }}" placeholder="One concrete next step…" style="min-height: 120px; border-radius: 14px; border: 1.5px solid rgba(16,36,30,0.18); padding: 14px; font-size: 14px; line-height: 1.5; resize: none; width: 100%; color: #10241E"></textarea>
+              </div>
+              <div onClick="{{ sendGrade }}" style="{{ sendGradeStyle }}">{{ sendGradeLabel }}</div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- INVITES -->
+        <sc-if value="{{ isInvites }}" hint-placeholder-val="{{ false }}">
+          <div style="flex: 1; display: flex; min-height: 0; padding: 26px 30px; gap: 30px">
+            <div style="width: 420px; flex: none; display: flex; flex-direction: column; gap: 16px">
+              <div>
+                <div style="font-family: Archivo, sans-serif; font-weight: 800; font-size: 26px; letter-spacing: -0.03em">Invite a participant</div>
+                <div style="margin-top: 8px; font-size: 14px; color: #4A6258; line-height: 1.55">Generates a single-use link. Share it on WhatsApp or email — no password, no public sign-up.</div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 8px">
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #4A6258">EMAIL OR PHONE</div>
+                <input value="{{ inviteInput }}" onChange="{{ setInviteInput }}" placeholder="name@example.org" style="height: 48px; border-radius: 12px; border: 1.5px solid rgba(16,36,30,0.18); padding: 0 14px; font-size: 14.5px; width: 100%; color: #10241E" />
+              </div>
+              <div onClick="{{ generateInvite }}" style="{{ inviteBtnStyle }}">Generate invite link</div>
+              <sc-if value="{{ hasNewInvite }}" hint-placeholder-val="{{ false }}">
+                <div style="padding: 18px; border-radius: 16px; background: #0B241C; display: flex; flex-direction: column; gap: 10px">
+                  <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: #86E5BC">LINK READY · EXPIRES IN 14 DAYS</div>
+                  <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #F5F2EA; word-break: break-all; line-height: 1.5">{{ latestInviteUrl }}</div>
+                  <div onClick="{{ copyInvite }}" style="{{ copyBtnStyle }}">{{ copyLabel }}</div>
+                </div>
+              </sc-if>
+            </div>
+            <div class="scroll" style="flex: 1; display: flex; flex-direction: column; gap: 10px; min-width: 0; overflow-y: auto">
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #4A6258">SENT · {{ inviteCount }}</div>
+              <sc-for list="{{ invites }}" as="i" hint-placeholder-count="4">
+                <div style="padding: 14px 16px; border-radius: 14px; background: #F5F2EA; display: flex; align-items: center; gap: 14px">
+                  <div style="flex: 1; min-width: 0">
+                    <div style="font-size: 14px; font-weight: 500">{{ i.who }}</div>
+                    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: #4A6258; margin-top: 3px">{{ i.sent }}</div>
+                  </div>
+                  <div style="{{ i.statusStyle }}">{{ i.status }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+      <div style="width: 1300px; font-size: 13px; color: #4A6258">{{ adminHint }}</div>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1820,&quot;height&quot;:1060}}">
+const PINE = '#123B2E', MINT = '#86E5BC', CORAL = '#FF6A45', INK = '#10241E', MUTE = '#4A6258', SAND = '#E3D9C2';
+const VIDEO_LEN = 3492;
+
+const mono = (size, color, ls) => `font-family:'IBM Plex Mono',monospace;font-size:${size}px;color:${color};letter-spacing:${ls || 0.12}em`;
+const pill = (bg, fg, sm) => `padding:${sm ? '5px 9px' : '6px 11px'};border-radius:999px;background:${bg};color:${fg};font-family:'IBM Plex Mono',monospace;font-size:${sm ? 9 : 9.5}px;letter-spacing:0.1em;font-weight:600;white-space:nowrap;flex:none`;
+const iconBox = (bg, fg, size) => `width:${size}px;height:${size}px;border-radius:${size > 44 ? 14 : 11}px;background:${bg};color:${fg};display:flex;align-items:center;justify-content:center;font-size:${size > 44 ? 17 : 14}px;flex:none`;
+const clock = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+
+const WEEK_TITLES = [
+  ['Foundations: Climate & Gender Basics', 'OCT 6 – OCT 12'],
+  ['Community Risk Mapping', 'OCT 13 – OCT 19'],
+  ['Gender-Responsive Climate Policy', 'OCT 20 – OCT 26'],
+  ['Climate Finance for Grassroots', 'OCT 27 – NOV 2'],
+  ['Storytelling for Advocacy', 'NOV 3 – NOV 9'],
+  ['Disaster Preparedness & Care Work', 'NOV 10 – NOV 16'],
+  ['Working with Local Government', 'NOV 17 – NOV 23'],
+  ['Capstone: Your Community Plan', 'NOV 24 – DEC 1']
+];
+
+const WEEK_SUMMARY = 'How adaptation plans get written, who is absent from the table, and the district-level levers you can pull this year. Guest: Dr. S. Qureshi, TI Pakistan.';
+
+const MODULE_DEFS = [
+  { id: 'rec', type: 'RECORDING', icon: '▶', ibg: CORAL, ifg: '#FFF7F2', title: 'Session 3 recording', meta: '58:12 · Google Drive', ref: 'DRIVE · ' },
+  { id: 'read', type: 'READING', icon: '▤', ibg: PINE, ifg: MINT, title: 'NAP 2025 — ch. 4–6', meta: '22 pages · PDF', ref: 'LINK · drive.google.com/…/view' },
+  { id: 'quiz', type: 'QUIZ', icon: '◉', ibg: SAND, ifg: INK, title: 'Policy levers check', meta: '3 questions · auto-scored', ref: 'QUIZ · 3 QUESTIONS · AUTO-SCORED' },
+  { id: 'asg', type: 'ASSIGNMENT', icon: '✎', ibg: SAND, ifg: INK, title: 'Name one lever in your district', meta: '300 words · due 26 Oct', ref: 'ASSIGNMENT · DUE 26 OCT · SOFT' }
+];
+
+const PERSONA_QS = [
+  { prompt: 'What pulls you into this work?', opts: [['Policy & systems', 'Rules, budgets, who decides', MINT], ['Ground action', 'Organising, mutual aid, field work', CORAL], ['Storytelling', 'Media, research, making it land', PINE]] },
+  { prompt: 'Where do you want to be a year from now?', opts: [['In the room where plans are costed', 'Committees, consultations, budgets', MINT], ['With the people the plan is for', 'Wards, villages, response teams', CORAL], ['Where the story reaches people', 'Newsrooms, film, research briefs', PINE]] },
+  { prompt: 'When something stalls, what do you reach for?', opts: [['The written rule', 'Find the clause, use it', MINT], ['The phone tree', 'Get thirty people in a room', CORAL], ['The evidence', 'Show what it actually costs', PINE]] }
+];
+
+const PERSONAS = [
+  { name: 'Policy Navigator', glyph: '◈', color: MINT },
+  { name: 'Ground Organizer', glyph: '◉', color: CORAL },
+  { name: 'Narrative Builder', glyph: '❋', color: PINE }
+];
+
+const QUIZ_QS = [
+  { prompt: 'A district adaptation plan allocates nothing to unpaid care work. Fastest realistic lever?', options: ['Public interest litigation', 'A budget-line amendment at the district assembly', 'A social media campaign'], correct: 1 },
+  { prompt: 'Gender-responsive budgeting has the most effect when introduced…', options: ['After the plan is approved', 'During the costing stage', 'At the final evaluation'], correct: 1 },
+  { prompt: 'Who most often signs off a district-level adaptation plan?', options: ['The Deputy Commissioner', 'The federal Climate Ministry', 'The donor'], correct: 0 },
+];
+
+const INTERESTS = ['Gender equity', 'Climate finance', 'Youth advocacy', 'Disaster response', 'Water & heat', 'Local government', 'Care work', 'Storytelling'];
+
+const AVATARS = [
+  [MINT, PINE, '●'], [CORAL, '#FFF7F2', '■'], [PINE, MINT, '▲'], [SAND, PINE, '◆'],
+  [PINE, CORAL, '✦'], [MINT, CORAL, '◈'], [CORAL, '#FFF7F2', '❋'], [SAND, INK, '◉']
+];
+
+const COHORT = [
+  ['Zoya Malik', 0, 'Lahore'], ['Bilal Ahmed', 1, 'Karachi'], ['Hina Shah', 2, 'Karachi'],
+  ['Faraz Iqbal', 1, 'Quetta'], ['Sana Baloch', 2, 'Gwadar'], ['Usman Raza', 0, 'Islamabad'],
+  ['Mahnoor Khan', 1, 'Multan'], ['Rida Aslam', 2, 'Peshawar'], ['Kamran Sethi', 0, 'Hyderabad']
+];
+
+const OTHERS = [
+  { name: 'Zoya Malik', email: 'zoya.m@crgc.org', p: 0, att: [1, 1, 1], quiz: 88, subs: 4, pts: 1480 },
+  { name: 'Bilal Ahmed', email: 'bilal@karachiclimate.pk', p: 1, att: [1, 0, 1], quiz: 74, subs: 4, pts: 1180 },
+  { name: 'Hina Shah', email: 'hina.shah@ssuet.edu.pk', p: 2, att: [1, 1, 0], quiz: 81, subs: 2, pts: 960 },
+  { name: 'Faraz Iqbal', email: 'f.iqbal@tipakistan.org', p: 1, att: [0, 1, 1], quiz: 69, subs: 3, pts: 910 },
+  { name: 'Sana Baloch', email: 'sana.b@gmail.com', p: 2, att: [1, 0, 0], quiz: 58, subs: 1, pts: 540 },
+  { name: 'Usman Raza', email: 'usman.raza@netsifr.org', p: 0, att: [0, 1, 0], quiz: 46, subs: 1, pts: 410 },
+  { name: 'Mahnoor Khan', email: 'mahnoor@ncsw.gov.pk', p: 1, att: [0, 0, 0], quiz: 0, subs: 0, pts: 0 }
+];
+
+const OTHER_SUBS = [
+  { name: 'Zoya Malik', p: 0, text: 'The district assembly re-tables the ADP schedule in February. Our lever is the costing annexe — last year no line item named care work, so the WASH allocation absorbed it invisibly. I would take the draft annexe to the Deputy Commissioner in January with two costed lines and the NCSW guidance attached.', flag: 'ON TIME' },
+  { name: 'Bilal Ahmed', p: 1, text: 'In Lyari the union council already runs a heat-relief roster informally. The lever is getting it into the UC budget as a recurring line rather than an emergency response, which means going through the UC secretary before the March budget call.', flag: 'ON TIME' },
+  { name: 'Hina Shah', p: 2, text: 'Our lever is the provincial EPA public hearing record. Nobody reads it. If we publish a two-page brief for each hearing, the record becomes usable by journalists, and the hearings start to cost something politically.', flag: 'LATE' },
+  { name: 'Faraz Iqbal', p: 1, text: 'The BDA drainage plan is the lever. It was approved in 2021 and never funded.', flag: 'LATE' }
+];
+
+class Component extends DCLogic {
+  state = this.fresh();
+
+  fresh() {
+    return {
+      onboarded: false, step: 1, qIndex: 0, answers: [null, null, null],
+      name: 'Ayesha Tariq', avatar: 0, interests: { 0: true, 2: true, 5: true },
+      tab: 'home', view: 'home', weekIdx: 2, moduleId: null,
+      watched: 0, playing: false, attendedW3: false, readDone: false,
+      quizPicks: {}, quizScore: null,
+      assignmentText: '', assignmentSubmitted: false, grade: null, feedback: '',
+      cohortFilter: -1,
+      adminTab: 'builder', adminWeek: 2, adminModule: 0,
+      unpublished: {}, driveId: '1aQ7x9KpR2mVbN4tZ_8LcYd3', attendMinutes: 10,
+      rosterFilter: 'all', sortBy: 'attend',
+      subIndex: 0, gradeDraft: null, feedbackDraft: '', graded: {},
+      inviteInput: '', invites: [
+        { who: 'rida.aslam@ssuet.edu.pk', sent: 'SENT 2 OCT', status: 'USED' },
+        { who: '+92 300 2214477', sent: 'SENT 2 OCT', status: 'USED' },
+        { who: 'k.sethi@netsifr.org', sent: 'SENT 5 OCT', status: 'PENDING' }
+      ], latestInvite: null, copied: false
+    };
+  }
+
+  componentDidMount() {
+    this.timer = setInterval(() => {
+      if (this.state.playing) {
+        this.setState(s => {
+          const w = Math.min(VIDEO_LEN, s.watched + 45);
+          return { watched: w, playing: w < VIDEO_LEN };
+        });
+      }
+    }, 200);
+  }
+  componentWillUnmount() { clearInterval(this.timer); }
+
+  personaIdx() {
+    const a = this.state.answers.filter(x => x !== null);
+    if (!a.length) return 0;
+    const counts = [0, 0, 0];
+    a.forEach(i => counts[i]++);
+    return counts.indexOf(Math.max(...counts));
+  }
+
+  attendedWeeks() { return [true, true, this.state.attendedW3]; }
+  attendPct() { return Math.round(this.attendedWeeks().filter(Boolean).length / 3 * 100); }
+
+  points() {
+    const s = this.state;
+    let p = 800;
+    if (s.attendedW3) p += 100;
+    if (s.readDone) p += 40;
+    if (s.quizScore !== null) p += Math.round(s.quizScore * 1.5);
+    if (s.assignmentSubmitted) p += 80;
+    if (s.grade) p += 60;
+    return p;
+  }
+
+  visibleModules() {
+    return MODULE_DEFS.filter(m => !this.state.unpublished[m.id]);
+  }
+
+  moduleState(id) {
+    const s = this.state;
+    if (id === 'rec') return s.attendedW3 ? ['ATTENDED', 'done'] : s.watched > 0 ? ['IN PROGRESS', 'due'] : ['NOT STARTED', 'open'];
+    if (id === 'read') return s.readDone ? ['READ', 'done'] : ['NOT STARTED', 'open'];
+    if (id === 'quiz') return s.quizScore !== null ? [s.quizScore + '%', 'done'] : ['DUE FRI', 'due'];
+    return s.assignmentSubmitted ? (s.grade ? ['GRADED', 'done'] : ['SUBMITTED', 'done']) : ['LATE', 'late'];
+  }
+
+  tone(t) {
+    return { done: [MINT, '#0B241C'], due: [CORAL, '#FFF7F2'], late: [SAND, INK], open: ['rgba(16,36,30,0.07)', MUTE] }[t];
+  }
+
+  go(view) { this.setState({ view, tab: view === 'home' ? 'home' : this.state.tab }); }
+
+  renderVals() {
+    const s = this.state;
+    const set = o => this.setState(o);
+    const pIdx = this.personaIdx();
+    const persona = PERSONAS[pIdx];
+    const av = AVATARS[s.avatar];
+    const unlockSec = s.attendMinutes * 60;
+    const canAttend = s.watched >= unlockSec;
+
+    // ---- onboarding ----
+    const stepBars = [1, 2, 3, 4].map(i => ({
+      style: `height:5px;flex:1;border-radius:999px;background:${i <= s.step ? (s.step === 1 ? MINT : PINE) : s.step === 1 ? 'rgba(245,242,234,0.18)' : 'rgba(18,59,46,0.14)'}`
+    }));
+
+    const nextLabels = { 1: "Let's go →", 2: 'Continue', 3: s.qIndex < 2 ? 'Next question' : 'See my persona', 4: 'Enter the cohort →' };
+    const next = () => {
+      if (s.step === 3) {
+        if (s.answers[s.qIndex] === null) return;
+        if (s.qIndex < 2) return set({ qIndex: s.qIndex + 1 });
+        return set({ step: 4 });
+      }
+      if (s.step === 4) return set({ onboarded: true, view: 'home', tab: 'home' });
+      set({ step: s.step + 1 });
+    };
+    const back = () => {
+      if (s.step === 3 && s.qIndex > 0) return set({ qIndex: s.qIndex - 1 });
+      set({ step: Math.max(1, s.step - 1) });
+    };
+
+    const dark = s.step === 1;
+    const q3ok = s.step !== 3 || s.answers[s.qIndex] !== null;
+
+    // ---- live modules ----
+    const liveModules = this.visibleModules().map(m => {
+      const [label, t] = this.moduleState(m.id);
+      const tn = this.tone(t);
+      return {
+        type: m.type, icon: m.icon, title: m.title, meta: m.meta, state: label,
+        iconStyle: iconBox(m.ibg, m.ifg, 38),
+        pillStyle: pill(tn[0], tn[1], true),
+        cardStyle: `padding:13px 14px;border-radius:15px;background:#FFFFFF;border:1.5px solid ${t === 'due' ? CORAL : 'rgba(16,36,30,0.1)'};display:flex;gap:12px;align-items:center;cursor:pointer`,
+        rowStyle: `padding:14px;border-radius:18px;background:#FFFFFF;border:1.5px solid ${t === 'due' ? CORAL : 'rgba(16,36,30,0.1)'};cursor:pointer`,
+        open: () => set({ view: { rec: 'recording', read: 'reading', quiz: 'quiz', asg: 'assignment' }[m.id] })
+      };
+    });
+
+    const doneCount = this.visibleModules().filter(m => ['done'].includes(this.moduleState(m.id)[1])).length;
+
+    // ---- quiz ----
+    const quizQuestions = QUIZ_QS.map((q, qi) => ({
+      prompt: q.prompt,
+      options: q.options.map((o, oi) => ({
+        label: o,
+        pick: () => set({ quizPicks: Object.assign({}, s.quizPicks, { [qi]: oi }) }),
+        style: `padding:11px 13px;border-radius:13px;border:1.5px solid ${s.quizPicks[qi] === oi ? INK : 'rgba(16,36,30,0.14)'};background:${s.quizPicks[qi] === oi ? '#F5F2EA' : '#FFFFFF'};display:flex;gap:11px;align-items:center;cursor:pointer`,
+        dot: `width:16px;height:16px;border-radius:999px;border:2px solid ${s.quizPicks[qi] === oi ? CORAL : 'rgba(16,36,30,0.25)'};background:${s.quizPicks[qi] === oi ? CORAL : 'transparent'};flex:none`
+      }))
+    }));
+    const allAnswered = Object.keys(s.quizPicks).length === QUIZ_QS.length;
+    const submitQuiz = () => {
+      if (!allAnswered) return;
+      const correct = QUIZ_QS.filter((q, i) => s.quizPicks[i] === q.correct).length;
+      set({ quizScore: Math.round(correct / QUIZ_QS.length * 100) });
+    };
+
+    // ---- roster ----
+    const me = {
+      name: s.name || 'Ayesha Tariq', email: 'ayesha.t@netsifr.org', p: pIdx,
+      att: this.attendedWeeks().map(x => x ? 1 : 0),
+      quiz: s.quizScore === null ? null : s.quizScore,
+      subs: (s.readDone ? 1 : 0) + (s.assignmentSubmitted ? 1 : 0) + (s.quizScore !== null ? 1 : 0),
+      pts: this.points(), me: true
+    };
+    let rows = [me].concat(OTHERS.map(o => Object.assign({}, o, { att: o.att })));
+    if (s.rosterFilter === 'risk') rows = rows.filter(r => r.att.filter(Boolean).length < 2);
+    if (s.rosterFilter === 'late') rows = rows.filter(r => r.subs < 3);
+    rows.sort((a, b) => s.sortBy === 'attend'
+      ? b.att.filter(Boolean).length - a.att.filter(Boolean).length || b.pts - a.pts
+      : b.pts - a.pts);
+
+    const roster = rows.map(r => {
+      const pct = Math.round(r.att.filter(Boolean).length / 3 * 100);
+      const low = pct < 50;
+      return {
+        name: r.me ? r.name + '  (you)' : r.name, email: r.email,
+        persona: PERSONAS[r.p].name.split(' ')[0].toUpperCase() + ' ' + PERSONAS[r.p].name.split(' ')[1].slice(0, 3).toUpperCase(),
+        glyph: PERSONAS[r.p].glyph,
+        attend: pct + '%',
+        quiz: r.quiz === null || r.quiz === 0 ? '—' : r.quiz + '%',
+        subs: r.subs + ' / 4',
+        points: r.pts.toLocaleString(),
+        avatarStyle: `width:30px;height:30px;border-radius:999px;background:${PERSONAS[r.p].color};color:${r.p === 2 ? MINT : PINE};display:flex;align-items:center;justify-content:center;font-size:13px;flex:none`,
+        attendStyle: `font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:600;color:${low ? CORAL : INK}`,
+        subStyle: `font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:${r.subs < 2 ? CORAL : INK}`,
+        rowStyle: `display:grid;grid-template-columns:2.2fr 1.3fr 1fr 1.3fr 1fr 1fr 0.9fr;gap:12px;padding:12px 14px;border-bottom:1px solid rgba(16,36,30,0.09);align-items:center;background:${r.me ? 'rgba(134,229,188,0.14)' : 'transparent'}`,
+        weeks: [0, 1, 2, 3, 4, 5, 6, 7].map(j => ({
+          style: `width:11px;height:17px;border-radius:3px;background:${j < 3 ? (r.att[j] ? PINE : 'rgba(255,106,69,0.3)') : 'rgba(16,36,30,0.08)'}`
+        }))
+      };
+    });
+
+    // ---- submissions ----
+    const subs = OTHER_SUBS.slice();
+    if (s.assignmentSubmitted) subs.unshift({ name: s.name || 'Ayesha Tariq', p: pIdx, text: s.assignmentText, flag: 'LATE', me: true });
+    const active = subs[Math.min(s.subIndex, subs.length - 1)] || subs[0];
+    const gradedKey = active ? active.name : '';
+    const gradeOptions = ['Needs work', 'Good', 'Excellent'].map(g => ({
+      label: g,
+      pick: () => set({ gradeDraft: g }),
+      style: `padding:12px 20px;border-radius:12px;border:1.5px solid ${s.gradeDraft === g ? INK : 'rgba(16,36,30,0.18)'};background:${s.gradeDraft === g ? INK : '#FFFFFF'};color:${s.gradeDraft === g ? '#F5F2EA' : INK};font-size:14px;font-weight:600;cursor:pointer`
+    }));
+
+    const sendGrade = () => {
+      if (!s.gradeDraft) return;
+      const upd = Object.assign({}, s.graded, { [gradedKey]: true });
+      if (active && active.me) set({ graded: upd, grade: s.gradeDraft, feedback: s.feedbackDraft || 'Clear lever, named the right office. Bring the costing annexe to week 4.', gradeDraft: null, feedbackDraft: '' });
+      else set({ graded: upd, gradeDraft: null, feedbackDraft: '' });
+    };
+
+    // ---- admin builder ----
+    const adminModules = MODULE_DEFS.map((m, i) => {
+      const published = !s.unpublished[m.id];
+      return {
+        icon: m.icon, title: m.title,
+        ref: m.id === 'rec' ? 'DRIVE · ' + s.driveId : m.ref,
+        status: published ? 'PUBLISHED' : 'DRAFT',
+        iconStyle: iconBox(m.ibg, m.ifg, 40),
+        statusStyle: pill(published ? MINT : SAND, published ? '#0B241C' : INK) + ';cursor:pointer',
+        style: `padding:15px 17px;border-radius:16px;background:#FFFFFF;border:1.5px solid ${s.adminModule === i ? INK : 'rgba(16,36,30,0.12)'};box-shadow:${s.adminModule === i ? '3px 3px 0 ' + INK : 'none'};display:flex;gap:13px;align-items:center;cursor:pointer`,
+        pick: () => set({ adminModule: i }),
+        togglePublish: e => { if (e && e.stopPropagation) e.stopPropagation(); set({ unpublished: Object.assign({}, s.unpublished, { [m.id]: published }) }); }
+      };
+    });
+    const insp = MODULE_DEFS[s.adminModule];
+    const inspPublished = !s.unpublished[insp.id];
+
+    const badges = [
+      ['🌱', true], ['🔥', s.attendedW3], ['🗣', s.assignmentSubmitted], ['★', s.quizScore !== null && s.quizScore >= 66]
+    ].map(([g, on]) => ({
+      glyph: on ? g : '',
+      style: `aspect-ratio:1;border-radius:14px;background:${on ? [MINT, CORAL, PINE, SAND][0] : 'transparent'};border:${on ? 'none' : '1.5px dashed rgba(16,36,30,0.25)'};display:flex;align-items:center;justify-content:center;font-size:19px;${on ? '' : "font-family:'IBM Plex Mono',monospace;font-size:10px;color:" + MUTE}`
+    }));
+    badges[1].style = badges[1].style.replace(MINT, CORAL);
+    badges[2].style = badges[2].style.replace(MINT, PINE);
+    badges[3].style = badges[3].style.replace(MINT, SAND);
+
+    const navItems = [['home', 'HOME'], ['weeks', 'WEEKS'], ['cohort', 'COHORT'], ['me', 'ME']].map(([id, label]) => {
+      const on = s.view === id || (id === 'weeks' && ['weekDetail', 'recording', 'reading', 'quiz', 'assignment'].includes(s.view));
+      return {
+        label,
+        pick: () => set({ view: id }),
+        style: `display:flex;flex-direction:column;align-items:center;gap:5px;color:${on ? PINE : MUTE};cursor:pointer;padding:6px 14px`,
+        iconStyle: `width:20px;height:20px;border-radius:${id === 'cohort' || id === 'me' ? '999px' : '6px'};background:${on ? PINE : 'transparent'};border:${on ? 'none' : '2px solid ' + MUTE}`
+      };
+    });
+
+    const cohortFilters = [[-1, 'ALL'], [0, 'POLICY'], [1, 'GROUND'], [2, 'NARRATIVE']].map(([v, label]) => ({
+      label, pick: () => set({ cohortFilter: v }),
+      style: `padding:7px 12px;border-radius:999px;background:${s.cohortFilter === v ? MINT : 'rgba(245,242,234,0.1)'};color:${s.cohortFilter === v ? '#0B241C' : 'rgba(245,242,234,0.7)'};font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:0.1em;font-weight:600;cursor:pointer`
+    }));
+
+    const cohortList = COHORT.filter(c => s.cohortFilter === -1 || c[1] === s.cohortFilter).map(([name, p, city]) => ({
+      name, city, persona: PERSONAS[p].name.toUpperCase(), glyph: PERSONAS[p].glyph,
+      avatarStyle: `width:38px;height:38px;border-radius:999px;background:${PERSONAS[p].color};color:${p === 2 ? MINT : PINE};display:flex;align-items:center;justify-content:center;font-size:15px;flex:none`
+    }));
+
+    const statCards = [
+      ['ENROLLED', '42', '38 activated · 4 pending', false],
+      ['AVG ATTENDANCE', this.attendPct() >= 80 ? '84%' : '81%', 'Weeks 1–3 · target 75%', true],
+      ['TO GRADE', String(subs.filter(x => !s.graded[x.name]).length), subs.filter(x => x.flag === 'LATE').length + ' flagged late', false],
+      ['AT RISK', String(rows.filter(r => r.att.filter(Boolean).length < 2).length), 'Missed 2+ weeks', false]
+    ].map(([label, value, note, dark]) => ({
+      label, value, note,
+      style: `flex:1;padding:18px 20px;border-radius:16px;background:${dark ? PINE : '#F5F2EA'};display:flex;flex-direction:column;gap:5px`,
+      labelStyle: mono(10, dark ? MINT : MUTE, 0.14),
+      valueStyle: `font-family:'IBM Plex Mono',monospace;font-size:30px;font-weight:600;color:${dark ? MINT : label === 'TO GRADE' ? CORAL : INK}`,
+      noteStyle: `font-size:12.5px;color:${dark ? 'rgba(245,242,234,0.6)' : MUTE}`
+    }));
+
+    return {
+      // shell
+      reset: () => this.setState(this.fresh()),
+      skipOnboarding: () => set({ onboarded: true, view: 'home' }),
+      phoneStyle: `width:100%;height:100%;border-radius:34px;overflow:hidden;background:${s.onboarded ? '#F5F2EA' : '#0B241C'};display:flex;flex-direction:column;position:relative`,
+      mobileCaption: s.onboarded ? 'Live app — tap through every module' : 'Invite link opened · onboarding wizard',
+      mobileHint: s.onboarded ? 'Open the recording and press play — the timer runs fast so you can reach the attendance unlock.' : 'Answer the persona questions honestly-ish; the badge you get follows you into the dashboard and the admin table.',
+      adminCaption: { builder: 'Program builder', attendance: 'Attendance', submissions: 'Submissions', invites: 'Invites' }[s.adminTab],
+      adminHint: 'Everything here is wired to the same state as the phone — grade the participant’s assignment and the feedback appears on their screen.',
+
+      // onboarding
+      isOnboard: !s.onboarded, isApp: s.onboarded,
+      onboardShellStyle: `flex:1;display:flex;flex-direction:column;min-height:0;background:${dark ? '#0B241C' : '#F5F2EA'};position:relative`,
+      brandStyle: `font-family:Archivo,sans-serif;font-weight:800;font-size:17px;color:${dark ? '#F5F2EA' : INK}`,
+      stepLabelStyle: mono(10, dark ? MINT : MUTE, 0.14),
+      step: s.step, stepBars,
+      isStep1: s.step === 1, isStep2: s.step === 2, isStep3: s.step === 3, isStep4: s.step === 4,
+      name: s.name, firstName: (s.name || 'friend').split(' ')[0],
+      setName: e => set({ name: e.target.value }),
+      avatars: AVATARS.map(([bg, fg, glyph], i) => ({
+        glyph: i === 7 ? '+' : glyph,
+        pick: () => set({ avatar: i }),
+        style: `aspect-ratio:1;border-radius:999px;background:${i === 7 ? 'transparent' : bg};border:${s.avatar === i ? '3px solid ' + INK : i === 7 ? '2px dashed ' + MUTE : '3px solid transparent'};display:flex;align-items:center;justify-content:center;cursor:pointer`,
+        inner: `color:${i === 7 ? MUTE : fg};font-size:${i === 7 ? 20 : 22}px;line-height:1`
+      })),
+      qNum: s.qIndex + 1,
+      personaQuestion: PERSONA_QS[s.qIndex].prompt,
+      personaOptions: PERSONA_QS[s.qIndex].opts.map(([title, desc, sw], i) => ({
+        title, desc,
+        pick: () => set({ answers: s.answers.map((a, j) => j === s.qIndex ? i : a) }),
+        swatch: `width:42px;height:42px;border-radius:13px;background:${sw};flex:none`,
+        style: `padding:15px;border-radius:18px;background:#FFFFFF;border:2px solid ${s.answers[s.qIndex] === i ? INK : 'rgba(16,36,30,0.14)'};box-shadow:${s.answers[s.qIndex] === i ? '4px 4px 0 ' + INK : 'none'};display:flex;gap:13px;align-items:center;cursor:pointer`
+      })),
+      persona: persona.name, personaUpper: persona.name.toUpperCase(), personaGlyph: persona.glyph,
+      personaAvatarStyle: `width:62px;height:62px;border-radius:999px;background:${persona.color};color:${pIdx === 2 ? MINT : PINE};display:flex;align-items:center;justify-content:center;font-size:26px;flex:none;border:3px solid #F5F2EA`,
+      interestChips: INTERESTS.map((label, i) => ({
+        label: s.interests[i] ? label + ' ✓' : label,
+        toggle: () => set({ interests: Object.assign({}, s.interests, { [i]: !s.interests[i] }) }),
+        style: `padding:10px 15px;border-radius:999px;background:${s.interests[i] ? PINE : 'transparent'};color:${s.interests[i] ? '#F5F2EA' : INK};border:1.5px solid ${s.interests[i] ? PINE : 'rgba(16,36,30,0.22)'};font-size:13.5px;font-weight:${s.interests[i] ? 500 : 400};cursor:pointer`
+      })),
+      interestCount: Object.values(s.interests).filter(Boolean).length,
+      canGoBack: s.step > 1,
+      back, next, nextLabel: nextLabels[s.step],
+      backBtnStyle: `width:58px;height:58px;border-radius:18px;border:2px solid ${dark ? 'rgba(245,242,234,0.35)' : PINE};color:${dark ? '#F5F2EA' : PINE};display:flex;align-items:center;justify-content:center;font-size:19px;cursor:pointer;flex:none`,
+      nextBtnStyle: `flex:1;height:58px;border-radius:18px;background:${!q3ok ? 'rgba(16,36,30,0.14)' : s.step === 1 || s.step === 4 ? CORAL : PINE};color:${!q3ok ? MUTE : s.step === 1 || s.step === 4 ? '#FFF7F2' : '#F5F2EA'};display:flex;align-items:center;justify-content:center;font-family:Archivo,sans-serif;font-weight:700;font-size:17px;cursor:${q3ok ? 'pointer' : 'not-allowed'}`,
+
+      // app nav
+      isHome: s.view === 'home', isWeeks: s.view === 'weeks', isWeekDetail: s.view === 'weekDetail',
+      isRecording: s.view === 'recording', isReading: s.view === 'reading', isQuiz: s.view === 'quiz',
+      isAssignment: s.view === 'assignment', isCohort: s.view === 'cohort', isMe: s.view === 'me',
+      navItems,
+      subHeaderStyle: 'background:#0B241C;padding:24px 22px 24px;flex:none',
+      goWeeks: () => set({ view: 'weeks' }),
+      goBackModule: () => set({ view: 'weekDetail' }),
+      openRecording: () => set({ view: 'recording' }),
+
+      // home
+      headerAvatarStyle: `width:44px;height:44px;border-radius:999px;background:${persona.color};color:${pIdx === 2 ? MINT : PINE};display:flex;align-items:center;justify-content:center;font-size:19px;flex:none`,
+      bigAvatarStyle: `width:64px;height:64px;border-radius:999px;background:${persona.color};color:${pIdx === 2 ? MINT : PINE};display:flex;align-items:center;justify-content:center;font-size:27px;flex:none`,
+      attendPct: this.attendPct(), points: this.points().toLocaleString(),
+      streak: s.attendedW3 ? 3 : 2,
+      rank: s.attendedW3 ? '#2 / 42' : '#4 / 42',
+      watchLabel: s.watched > 0 ? 'RESUME ' + clock(s.watched) + ' / 58:12' : 'NOT STARTED · 58:12',
+      recordingCta: s.attendedW3 ? 'Rewatch' : s.watched > 0 ? 'Continue watching' : 'Start watching',
+      weekProgressLabel: doneCount + ' / ' + this.visibleModules().length,
+      liveModules,
+
+      // weeks
+      weekCards: WEEK_TITLES.map(([title, dates], i) => {
+        const done = i < 2, cur = i === 2, locked = i > 2;
+        return {
+          n: String(i + 1).padStart(2, '0'), title, meta: locked ? 'OPENS ' + dates.split(' – ')[0] : dates,
+          open: () => { if (!locked) set({ view: 'weekDetail', weekIdx: i }); },
+          style: `padding:14px;border-radius:16px;background:${cur ? '#FFFFFF' : locked ? 'transparent' : '#FFFFFF'};border:1.5px solid ${cur ? INK : 'rgba(16,36,30,0.12)'};box-shadow:${cur ? '3px 3px 0 ' + INK : 'none'};display:flex;gap:12px;align-items:center;cursor:${locked ? 'not-allowed' : 'pointer'};opacity:${locked ? 0.55 : 1}`,
+          numStyle: `font-family:'IBM Plex Mono',monospace;font-size:12px;color:${cur ? CORAL : MUTE};flex:none`,
+          titleStyle: `font-size:14.5px;font-weight:${cur ? 600 : 500};line-height:1.3`,
+          dotStyle: `width:9px;height:9px;border-radius:999px;flex:none;background:${done ? MINT : cur ? CORAL : 'rgba(16,36,30,0.15)'}`
+        };
+      }),
+
+      // week detail
+      weekNum: String(s.weekIdx + 1).padStart(2, '0'),
+      weekTitle: WEEK_TITLES[s.weekIdx][0],
+      weekDates: WEEK_TITLES[s.weekIdx][1],
+      weekSummary: WEEK_SUMMARY,
+      weekEmpty: this.visibleModules().length === 0,
+      weekAttendPill: s.attendedW3 ? 'ATTENDED ✓' : 'NOT MARKED YET',
+      weekAttendPillStyle: pill(s.attendedW3 ? MINT : 'rgba(245,242,234,0.12)', s.attendedW3 ? '#0B241C' : 'rgba(245,242,234,0.75)'),
+
+      // recording
+      togglePlay: () => set({ playing: !s.playing }),
+      playGlyph: s.playing ? '❚❚' : '▶',
+      playBtnStyle: `width:58px;height:58px;border-radius:999px;background:${CORAL};color:#FFF7F2;display:flex;align-items:center;justify-content:center;font-size:19px;cursor:pointer`,
+      watchClock: clock(s.watched),
+      scrubStyle: `height:100%;width:${(s.watched / VIDEO_LEN * 100).toFixed(1)}%;background:${CORAL}`,
+      attendBoxStyle: `padding:16px;border-radius:18px;background:${s.attendedW3 ? 'rgba(134,229,188,0.35)' : '#FFFFFF'};border:1.5px solid ${s.attendedW3 ? MINT : canAttend ? CORAL : 'rgba(16,36,30,0.12)'}`,
+      attendBoxTitle: s.attendedW3 ? 'Attendance recorded' : canAttend ? 'You can mark attendance' : 'Keep watching to unlock',
+      attendBoxNote: s.attendedW3 ? 'Marked just now · +100 points' : `Unlocks after ${s.attendMinutes} min of playback (set by your facilitator)`,
+      attendBtnStyle: `padding:12px 18px;border-radius:13px;background:${s.attendedW3 ? 'transparent' : canAttend ? PINE : 'rgba(16,36,30,0.1)'};color:${s.attendedW3 ? PINE : canAttend ? '#F5F2EA' : MUTE};border:${s.attendedW3 ? '1.5px solid ' + PINE : 'none'};font-family:Archivo,sans-serif;font-weight:700;font-size:14px;cursor:${canAttend && !s.attendedW3 ? 'pointer' : 'default'};flex:none;white-space:nowrap`,
+      attendBtnLabel: s.attendedW3 ? 'Done ✓' : 'Mark attended',
+      markAttended: () => { if (canAttend && !s.attendedW3) set({ attendedW3: true, playing: false }); },
+      unlockBarStyle: `height:100%;width:${Math.min(100, s.watched / unlockSec * 100).toFixed(0)}%;background:${canAttend ? MINT : CORAL}`,
+
+      // reading
+      markRead: () => set({ readDone: !s.readDone }),
+      readBtnStyle: `height:52px;border-radius:14px;background:${s.readDone ? 'rgba(134,229,188,0.4)' : PINE};color:${s.readDone ? PINE : '#F5F2EA'};display:flex;align-items:center;justify-content:center;font-family:Archivo,sans-serif;font-weight:700;font-size:15.5px;cursor:pointer`,
+      readBtnLabel: s.readDone ? 'Marked as read ✓  ·  +40 pts' : 'Mark as read',
+
+      // quiz
+      quizOpen: s.quizScore === null, quizDone: s.quizScore !== null,
+      quizProgressLabel: s.quizScore === null ? Object.keys(s.quizPicks).length + ' OF 3 ANSWERED' : 'SUBMITTED',
+      quizQuestions, submitQuiz,
+      quizSubmitStyle: `height:52px;border-radius:14px;background:${allAnswered ? CORAL : 'rgba(16,36,30,0.12)'};color:${allAnswered ? '#FFF7F2' : MUTE};display:flex;align-items:center;justify-content:center;font-family:Archivo,sans-serif;font-weight:700;font-size:15.5px;cursor:${allAnswered ? 'pointer' : 'not-allowed'}`,
+      quizSubmitLabel: allAnswered ? 'Submit answers' : 'Answer all 3 to submit',
+      quizScore: s.quizScore,
+      quizVerdict: s.quizScore === 100 ? 'All three. Nice.' : s.quizScore >= 66 ? 'Solid — one to revisit' : 'Worth a rewatch',
+      quizPointsNote: '+' + Math.round((s.quizScore || 0) * 1.5) + ' points added to your cohort total.',
+      quizReview: QUIZ_QS.map((q, i) => {
+        const ok = s.quizPicks[i] === q.correct;
+        return {
+          prompt: q.prompt,
+          verdict: ok ? 'CORRECT' : 'CORRECT ANSWER: ' + q.options[q.correct].toUpperCase(),
+          style: `padding:14px;border-radius:15px;background:#FFFFFF;border-left:4px solid ${ok ? MINT : CORAL};border-top:1.5px solid rgba(16,36,30,0.08);border-right:1.5px solid rgba(16,36,30,0.08);border-bottom:1.5px solid rgba(16,36,30,0.08)`
+        };
+      }),
+      retakeQuiz: () => set({ quizScore: null, quizPicks: {} }),
+
+      // assignment
+      assignmentOpen: !s.assignmentSubmitted, assignmentDone: s.assignmentSubmitted,
+      assignmentText: s.assignmentText,
+      setAssignment: e => set({ assignmentText: e.target.value }),
+      wordCount: s.assignmentText.trim() ? s.assignmentText.trim().split(/\s+/).length : 0,
+      submitAssignment: () => { if (s.assignmentText.trim().length > 3) set({ assignmentSubmitted: true, subIndex: 0 }); },
+      assignmentBtnStyle: `height:52px;border-radius:14px;background:${s.assignmentText.trim().length > 3 ? PINE : 'rgba(16,36,30,0.12)'};color:${s.assignmentText.trim().length > 3 ? '#F5F2EA' : MUTE};display:flex;align-items:center;justify-content:center;font-family:Archivo,sans-serif;font-weight:700;font-size:15.5px;cursor:pointer`,
+      assignmentBtnLabel: s.assignmentText.trim().length > 3 ? 'Submit assignment' : 'Write something first',
+      latePillStyle: pill(SAND, INK, true),
+      gradeBoxStyle: `padding:18px;border-radius:18px;background:${s.grade ? '#0B241C' : 'rgba(16,36,30,0.06)'}`,
+      gradeLabel: s.grade || 'Awaiting your facilitator',
+      feedbackLabel: s.grade ? s.feedback : 'Grade it yourself from the Submissions tab on the right →',
+
+      // cohort / me
+      cohortFilters, cohortList, badges,
+      badgeNames: 'Perfect Start' + (s.attendedW3 ? ' · 3-Week Streak' : '') + (s.assignmentSubmitted ? ' · First Submission' : '') + (s.quizScore >= 66 ? ' · Quiz Ace' : ''),
+      myInterests: INTERESTS.filter((_, i) => s.interests[i]).map(label => ({ label })),
+
+      // ---- admin ----
+      adminTabs: [['builder', 'Builder'], ['attendance', 'Attendance'], ['submissions', 'Submissions'], ['invites', 'Invites']].map(([id, label]) => ({
+        label, pick: () => set({ adminTab: id }),
+        style: `padding:8px 14px;border-radius:10px;background:${s.adminTab === id ? INK : 'transparent'};color:${s.adminTab === id ? '#F5F2EA' : MUTE};font-size:13.5px;font-weight:500;cursor:pointer`
+      })),
+      isBuilder: s.adminTab === 'builder', isAttendance: s.adminTab === 'attendance',
+      isSubmissions: s.adminTab === 'submissions', isInvites: s.adminTab === 'invites',
+
+      adminWeekList: WEEK_TITLES.map(([title], i) => ({
+        n: String(i + 1).padStart(2, '0'), title, count: (i < 3 ? 4 : 3) + ' MOD',
+        pick: () => set({ adminWeek: i }),
+        style: `display:flex;align-items:center;gap:10px;padding:11px 10px;border-radius:12px;background:${s.adminWeek === i ? '#FFFFFF' : 'transparent'};border:1.5px solid ${s.adminWeek === i ? INK : 'transparent'};box-shadow:${s.adminWeek === i ? '3px 3px 0 ' + INK : 'none'};cursor:pointer`,
+        numStyle: `font-family:'IBM Plex Mono',monospace;font-size:11px;color:${s.adminWeek === i ? CORAL : MUTE};flex:none`
+      })),
+      adminWeekNum: String(s.adminWeek + 1).padStart(2, '0'),
+      adminWeekTitle: WEEK_TITLES[s.adminWeek][0],
+      adminModuleList: adminModules,
+      addTypes: [['▶ Recording'], ['▤ Reading'], ['◉ Quiz'], ['✎ Assignment']].map(([label]) => ({ label, add: () => {} })),
+      inspectorIcon: insp.icon,
+      inspectorIconStyle: iconBox(insp.ibg, insp.ifg, 40),
+      inspectorTitle: insp.title,
+      inspectorIsRecording: insp.id === 'rec',
+      inspectorFieldLabel: insp.id === 'rec' ? 'GOOGLE DRIVE FILE ID' : 'CONTENT REFERENCE',
+      inspectorField: insp.id === 'rec' ? s.driveId : insp.ref,
+      setInspectorField: e => { if (insp.id === 'rec') set({ driveId: e.target.value }); },
+      attendMinutes: s.attendMinutes,
+      incMinutes: () => set({ attendMinutes: Math.min(45, s.attendMinutes + 5) }),
+      decMinutes: () => set({ attendMinutes: Math.max(1, s.attendMinutes - 5) }),
+      stepperStyle: `width:26px;height:26px;border-radius:8px;border:1.5px solid rgba(16,36,30,0.2);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;user-select:none`,
+      toggleInspectorPublish: () => set({ unpublished: Object.assign({}, s.unpublished, { [insp.id]: inspPublished }) }),
+      toggleTrackStyle: `width:44px;height:25px;border-radius:999px;background:${inspPublished ? MINT : 'rgba(16,36,30,0.18)'};padding:3px;display:flex;justify-content:${inspPublished ? 'flex-end' : 'flex-start'};cursor:pointer`,
+      toggleKnobStyle: `width:19px;height:19px;border-radius:999px;background:${inspPublished ? PINE : '#FFFFFF'}`,
+
+      // attendance
+      statCards, roster, thStyle: mono(10, MUTE, 0.14),
+      rosterFilters: [['all', 'All participants'], ['risk', 'At risk'], ['late', 'Behind on work']].map(([id, label]) => ({
+        label, pick: () => set({ rosterFilter: id }),
+        style: `padding:8px 14px;border-radius:999px;background:${s.rosterFilter === id ? INK : 'transparent'};color:${s.rosterFilter === id ? '#F5F2EA' : INK};border:1.5px solid ${s.rosterFilter === id ? INK : 'rgba(16,36,30,0.16)'};font-size:13px;cursor:pointer`
+      })),
+      toggleSort: () => set({ sortBy: s.sortBy === 'attend' ? 'points' : 'attend' }),
+      sortLabel: s.sortBy === 'attend' ? 'ATTENDANCE ↓' : 'POINTS ↓',
+
+      // submissions
+      queueCount: subs.filter(x => !s.graded[x.name]).length,
+      submissions: subs.map((x, i) => ({
+        name: x.me ? x.name + '  (you)' : x.name,
+        excerpt: x.text.slice(0, 54) + '…',
+        glyph: PERSONAS[x.p].glyph,
+        flag: s.graded[x.name] ? 'GRADED' : x.flag,
+        pick: () => set({ subIndex: i, gradeDraft: null, feedbackDraft: '' }),
+        avatarStyle: `width:34px;height:34px;border-radius:999px;background:${PERSONAS[x.p].color};color:${x.p === 2 ? MINT : PINE};display:flex;align-items:center;justify-content:center;font-size:14px;flex:none`,
+        flagStyle: pill(s.graded[x.name] ? MINT : x.flag === 'LATE' ? SAND : 'rgba(16,36,30,0.07)', s.graded[x.name] ? '#0B241C' : x.flag === 'LATE' ? INK : MUTE, true),
+        style: `padding:13px 14px;border-radius:14px;background:${s.subIndex === i ? '#FFFFFF' : 'transparent'};border:1.5px solid ${s.subIndex === i ? INK : 'transparent'};box-shadow:${s.subIndex === i ? '3px 3px 0 ' + INK : 'none'};display:flex;gap:12px;align-items:center;cursor:pointer`
+      })),
+      activeSubName: active ? active.name : '—',
+      activeSubText: active ? active.text : '',
+      gradeOptions, sendGrade,
+      feedbackDraft: s.feedbackDraft,
+      setFeedback: e => set({ feedbackDraft: e.target.value }),
+      sendGradeStyle: `height:52px;border-radius:14px;background:${s.gradeDraft ? CORAL : 'rgba(16,36,30,0.12)'};color:${s.gradeDraft ? '#FFF7F2' : MUTE};display:flex;align-items:center;justify-content:center;font-family:Archivo,sans-serif;font-weight:700;font-size:15.5px;cursor:${s.gradeDraft ? 'pointer' : 'not-allowed'};flex:none`,
+      sendGradeLabel: s.graded[gradedKey] ? 'Update grade & feedback' : 'Send grade & feedback',
+
+      // invites
+      inviteInput: s.inviteInput,
+      setInviteInput: e => set({ inviteInput: e.target.value, copied: false }),
+      generateInvite: () => {
+        const who = s.inviteInput.trim();
+        if (!who) return;
+        const token = Math.random().toString(36).slice(2, 12);
+        set({
+          invites: [{ who, sent: 'SENT JUST NOW', status: 'PENDING' }].concat(s.invites),
+          latestInvite: { who, token }, inviteInput: '', copied: false
+        });
+      },
+      inviteBtnStyle: `height:50px;border-radius:13px;background:${s.inviteInput.trim() ? PINE : 'rgba(16,36,30,0.12)'};color:${s.inviteInput.trim() ? '#F5F2EA' : MUTE};display:flex;align-items:center;justify-content:center;font-family:Archivo,sans-serif;font-weight:700;font-size:15.5px;cursor:pointer;flex:none`,
+      hasNewInvite: !!s.latestInvite,
+      latestInviteUrl: s.latestInvite ? 'lms.netsifr.org/join/' + s.latestInvite.token : '',
+      copyInvite: () => set({ copied: true }),
+      copyLabel: s.copied ? 'Copied ✓' : 'Copy link',
+      copyBtnStyle: `height:42px;border-radius:11px;background:${s.copied ? MINT : CORAL};color:${s.copied ? '#0B241C' : '#FFF7F2'};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;cursor:pointer`,
+      inviteCount: s.invites.length,
+      invites: s.invites.map(i => ({
+        who: i.who, sent: i.sent, status: i.status,
+        statusStyle: pill(i.status === 'USED' ? MINT : SAND, i.status === 'USED' ? '#0B241C' : INK)
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>
