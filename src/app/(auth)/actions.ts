@@ -42,6 +42,35 @@ export async function loginAction(
   }
 }
 
+export async function adminLoginAction(
+  _prevState: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const parsed = LoginSchema.safeParse({
+    email: formData.get('email'),
+    password: formData.get('password'),
+  });
+  if (!parsed.success) {
+    return { error: 'Enter a valid email and password.' };
+  }
+
+  try {
+    // Same credentials as the participant login — the account's org role is
+    // what gates /admin (enforced in the console layout + every admin action).
+    // A non-admin who signs in here is bounced to /programs by that guard.
+    await signIn('credentials', {
+      email: parsed.data.email,
+      password: parsed.data.password,
+      redirectTo: '/admin',
+    });
+  } catch (error) {
+    if (error instanceof AuthError) {
+      return { error: 'Invalid email or password.' };
+    }
+    throw error; // signIn's own redirect() throws internally — must propagate.
+  }
+}
+
 export async function logoutAction(): Promise<void> {
   await signOut({ redirectTo: '/login' });
 }

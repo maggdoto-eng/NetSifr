@@ -1,9 +1,16 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { auth } from '@/lib/auth';
 import { getDefaultOrganization } from '@/lib/org';
 import { requireOrgAdmin } from '@/lib/dal';
 import { logoutAction } from '@/app/(auth)/actions';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  // Unauthenticated visitors to the admin console land on the *admin* login
+  // (a separate door from the participant /login), not the participant one.
+  const session = await auth();
+  if (!session?.user?.id) redirect('/admin/login');
+
   const org = await getDefaultOrganization();
   await requireOrgAdmin(org.id);
 

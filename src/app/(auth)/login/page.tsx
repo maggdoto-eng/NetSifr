@@ -8,25 +8,23 @@ export default function LoginPage() {
   const [state, action, pending] = useActionState(loginAction, undefined);
 
   return (
-    <form action={action} className="flex flex-col gap-4">
-      <h1 className="text-xl font-semibold">Log in</h1>
-
-      <div className="flex flex-col gap-1">
-        <label htmlFor="email" className="text-sm font-medium">
-          Email
-        </label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          required
-          autoComplete="email"
-          className="rounded border border-zinc-300 px-3 py-2"
-        />
+    <form action={action} className="stack">
+      <div className="col" style={{ gap: 'var(--s1)' }}>
+        <h1 className="display-sm">Log in</h1>
+        <p className="muted" style={{ fontSize: 14 }}>
+          Welcome back. Continue to your programs.
+        </p>
       </div>
 
-      <div className="flex flex-col gap-1">
-        <label htmlFor="password" className="text-sm font-medium">
+      <div className="field">
+        <label htmlFor="email" className="mono">
+          Email
+        </label>
+        <input id="email" name="email" type="email" required autoComplete="email" />
+      </div>
+
+      <div className="field">
+        <label htmlFor="password" className="mono">
           Password
         </label>
         <input
@@ -35,22 +33,37 @@ export default function LoginPage() {
           type="password"
           required
           autoComplete="current-password"
-          className="rounded border border-zinc-300 px-3 py-2"
         />
       </div>
 
-      {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
+      {state?.error && (
+        <p style={{ color: 'var(--coral)', fontSize: 14 }} role="alert">
+          {state.error}
+        </p>
+      )}
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
-      >
+      <button type="submit" disabled={pending} className="btn btn--primary btn--block">
         {pending ? 'Logging in…' : 'Log in'}
       </button>
 
-      <Link href="/forgot-password" className="text-sm text-zinc-500 underline">
-        Forgot your password?
+      <div className="col" style={{ gap: 'var(--s2)', alignItems: 'center', textAlign: 'center' }}>
+        <Link href="/forgot-password" style={{ fontSize: 14 }}>
+          Forgot your password?
+        </Link>
+        <div className="muted" style={{ fontSize: 14 }}>
+          New to NetSifr?{' '}
+          <Link href="/register">Join with an invite</Link>
+        </div>
+      </div>
+
+      <div className="divider" />
+
+      <Link
+        href="/admin/login"
+        className="mono"
+        style={{ textAlign: 'center', color: 'var(--mute)' }}
+      >
+        Staff &amp; admin login →
       </Link>
     </form>
   );

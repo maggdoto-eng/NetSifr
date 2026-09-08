@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { createEvent } from '@/modules/events';
-import { requireAdminContext } from '../action-context';
+import { requireAdminContext } from '@/app/admin/action-context';
 import { CreateEventSchema } from './schemas';
 
 export type CreateEventState = { error?: string } | undefined;

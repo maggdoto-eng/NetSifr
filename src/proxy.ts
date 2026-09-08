@@ -10,6 +10,8 @@ import { auth } from '@/lib/auth';
 
 const PUBLIC_PREFIXES = [
   '/login',
+  '/register',
+  '/admin/login',
   '/forgot-password',
   '/reset-password/',
   '/join/',
@@ -25,13 +27,21 @@ export default auth((req) => {
   const isAuthed = !!req.auth?.user;
 
   if (!isAuthed && !isPublicPath(pathname)) {
-    const loginUrl = new URL('/login', req.nextUrl);
-    loginUrl.searchParams.set('from', pathname);
+    // The admin console is a separate door: send unauthenticated visitors to
+    // the admin login, everyone else to the participant login.
+    const isAdminArea = pathname === '/admin' || pathname.startsWith('/admin/');
+    const target = isAdminArea ? '/admin/login' : '/login';
+    const loginUrl = new URL(target, req.nextUrl);
+    if (!isAdminArea) loginUrl.searchParams.set('from', pathname);
     return NextResponse.redirect(loginUrl);
   }
 
   if (isAuthed && pathname === '/login') {
     return NextResponse.redirect(new URL('/programs', req.nextUrl));
+  }
+
+  if (isAuthed && pathname === '/admin/login') {
+    return NextResponse.redirect(new URL('/admin', req.nextUrl));
   }
 
   return NextResponse.next();

@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { createProgram, duplicateProgram, updateCohortStatus } from '@/modules/learning';
-import { requireAdminContext } from '../action-context';
+import { requireAdminContext } from '@/app/admin/action-context';
 import { CreateProgramSchema } from './schemas';
 
 export type CreateProgramState = { error?: string } | undefined;
