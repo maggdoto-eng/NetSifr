@@ -1,5 +1,8 @@
 import type { Metadata } from 'next';
 import { Archivo, Inter, IBM_Plex_Mono } from 'next/font/google';
+// tokens.css must load before globals.css: it defines the design-system CSS
+// variables (--pine, --bg-app, …) in a plain stylesheet Tailwind won't prune.
+import './tokens.css';
 import './globals.css';
 
 // Display headings — Archivo, per the NetSifr design prototype.

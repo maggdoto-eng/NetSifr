@@ -143,75 +143,13 @@ h4 {
  * until every screen is ported, then it is removed.
  * ======================================================================== */
 
-:root {
-  /* Palette */
-  --pine-deep: #0b241c;
-  --pine: #123b2e;
-  --pine-alt: #16493a;
-  --mint: #86e5bc;
-  --coral: #ff6a45;
-  --coral-light: #ff8b6d;
-  --sand: #e3d9c2;
-  --ink: #10241e;
-  --mute: #4a6258;
-
-  /* Surfaces */
-  --bg-app: #f5f2ea;
-  --bg-card: #ffffff;
-  --bg-sunk: #efebe0;
-  --fg-on-dark: #f5f2ea;
-  --fg-on-coral: #fff7f2;
-
-  /* Alpha tints */
-  --border: rgba(16, 36, 30, 0.11);
-  --border-strong: rgba(16, 36, 30, 0.2);
-  --fill-inactive: rgba(16, 36, 30, 0.07);
-  --fill-disabled: rgba(16, 36, 30, 0.12);
-  --on-dark-body: rgba(245, 242, 234, 0.72);
-  --on-dark-faint: rgba(245, 242, 234, 0.5);
-  --on-dark-subtle: rgba(245, 242, 234, 0.72);
-  --on-dark-fill: rgba(245, 242, 234, 0.09);
-  --mint-tint: rgba(134, 229, 188, 0.14);
-  --coral-tint: rgba(255, 106, 69, 0.14);
-  --attend-miss: rgba(255, 106, 69, 0.3);
-
-  /* Type — mapped to the app's next/font CSS variables */
-  --font-body: var(--font-inter), system-ui, sans-serif;
-  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
-
-  /* Radii */
-  --r-pill: 999px;
-  --r-card: 20px;
-  --r-panel: 16px;
-  --r-item: 13px;
-  --r-input: 11px;
-
-  /* Elevation — selection is a hard offset shadow, never a soft glow */
-  --shadow-sel: 3px 3px 0 var(--ink);
-  --shadow-sel-lg: 4px 4px 0 var(--ink);
-  --shadow-sel-coral: 4px 4px 0 var(--coral);
-  --shadow-float: 0 18px 44px rgba(11, 36, 28, 0.14);
-
-  /* Spacing scale */
-  --s1: 4px;
-  --s2: 8px;
-  --s3: 12px;
-  --s4: 16px;
-  --s5: 20px;
-  --s6: 26px;
-  --s7: 32px;
-  --s8: 44px;
-
-  /* Layout */
-  --shell-max: 1180px;
-  --admin-rail: 248px;
-  --topbar-h: 62px;
-
-  --ease: 0.12s ease;
-}
-
-/* --font-display is defined by the @theme block above (var(--font-archivo)).
-   base.css primitives reference it directly. */
+/* The design tokens (--pine, --bg-app, --r-card, --s4, …) live in a SEPARATE
+   plain stylesheet, ./tokens.css, imported before this file in layout.tsx.
+   They cannot live here: Tailwind v4's processing of this @import-tailwindcss
+   file prunes bare :root custom properties, and tree-shakes @theme vars our
+   hand-written CSS "uses" (even @theme static didn't emit them). A plain CSS
+   file Tailwind doesn't process keeps every token. --font-display comes from
+   the @theme block above (var(--font-archivo)); tokens.css re-exports it too. */
 
 body {
   margin: 0;
