@@ -45,6 +45,7 @@ model Organization {
   volunteerOpportunities VolunteerOpportunity[]
   skills                 Skill[]
   announcements          Announcement[]
+  posts                  Post[]
 }
 
 enum OrgRole {
@@ -129,6 +130,8 @@ model User {
   serviceVerificationsGiven    ServiceVerification[]    @relation("ServiceVerifiedBy")
   announcementsAuthored        Announcement[]           @relation("AnnouncementAuthor")
   notifications                Notification[]
+  posts                        Post[]                   @relation("PostAuthor")
+  comments                     Comment[]                @relation("CommentAuthor")
   skills                       UserSkill[]
 }
 
@@ -539,6 +542,7 @@ model Cohort {
   invitations        Invitation[]
   contributionEvents ContributionEvent[]
   announcements      Announcement[]
+  posts              Post[]
 
   @@index([organizationId, status])
 }
@@ -1293,4 +1297,49 @@ model Notification {
 
   @@index([userId, createdAt])
   @@index([userId, readAt])
+}
+
+// ============================================================================
+// Community — cohort discussion (Phase 4 slice, audience-scoped from day one)
+// ============================================================================
+
+/// Every Post carries an explicit audience so cohort/community content can
+/// never default to public. Phase 4 uses COHORT; the rest are reserved.
+enum PostAudience {
+  PUBLIC
+  ORGANIZATION
+  COMMUNITY
+  COHORT
+  PROJECT_TEAM
+  PRIVATE
+}
+
+model Post {
+  id             String       @id @default(uuid())
+  cohortId       String
+  organizationId String
+  authorUserId   String
+  audience       PostAudience @default(COHORT)
+  body           String
+  createdAt      DateTime     @default(now())
+
+  cohort       Cohort       @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id])
+  author       User         @relation("PostAuthor", fields: [authorUserId], references: [id])
+  comments     Comment[]
+
+  @@index([cohortId, createdAt])
+}
+
+model Comment {
+  id           String   @id @default(uuid())
+  postId       String
+  authorUserId String
+  body         String
+  createdAt    DateTime @default(now())
+
+  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author User @relation("CommentAuthor", fields: [authorUserId], references: [id])
+
+  @@index([postId, createdAt])
 }
