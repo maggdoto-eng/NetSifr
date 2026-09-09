@@ -12,20 +12,19 @@ export default async function AssignmentPage({
   const assignment = await getAssignmentForTaking(userId, moduleId);
 
   return (
-    <div className="flex flex-col gap-4 p-5">
+    <div className="stack">
       <div>
-        <Link
-          href={`/programs/${programId}/weeks/${weekId}`}
-          className="text-xs text-zinc-500 underline"
-        >
+        <Link href={`/programs/${programId}/weeks/${weekId}`} className="mono" style={{ color: 'var(--mute)' }}>
           ← Week
         </Link>
-        <div className="mt-2 font-mono text-[10px] tracking-wide text-orange-600">ASSIGNMENT</div>
+        <div className="mono mono--coral" style={{ marginTop: 6 }}>
+          Assignment
+        </div>
       </div>
 
-      <div className="rounded-2xl border border-zinc-200 bg-white p-4">
-        <p className="text-sm">{assignment.prompt}</p>
-        <p className="mt-2 text-xs text-zinc-500">
+      <div className="card">
+        <p style={{ margin: 0 }}>{assignment.prompt}</p>
+        <p className="muted" style={{ fontSize: 13, marginTop: 8 }}>
           Due {assignment.softDeadline.toLocaleDateString()} — late work is still accepted and
           flagged for your facilitator.
         </p>

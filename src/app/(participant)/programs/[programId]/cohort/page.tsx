@@ -15,29 +15,28 @@ export default async function CohortPage({ params }: PageProps<'/programs/[progr
   });
 
   return (
-    <div className="flex flex-col gap-4 p-5">
+    <div className="stack">
       <div>
-        <div className="font-mono text-[10px] tracking-wide text-zinc-500">
-          {enrolments.length} PARTICIPANTS
-        </div>
-        <h1 className="mt-1 text-xl font-bold">This cohort</h1>
+        <div className="mono">{enrolments.length} participants</div>
+        <h1 className="display-md" style={{ marginTop: 4 }}>
+          This cohort
+        </h1>
       </div>
 
-      <div className="flex flex-col gap-2">
+      <div className="grid-3">
         {enrolments.map((enrolment) => {
           const avatar = avatarFor(enrolment.user.avatarKey);
           return (
-            <div key={enrolment.id} className="flex items-center gap-3 rounded-xl bg-white p-3">
-              <div
-                className="flex h-9 w-9 flex-none items-center justify-center rounded-full text-sm"
-                style={{ background: avatar.bg, color: avatar.fg }}
-              >
+            <div key={enrolment.id} className="person">
+              <span className="avatar" style={{ background: avatar.bg, color: avatar.fg }}>
                 {avatar.glyph}
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="truncate text-sm font-medium">{enrolment.user.name}</div>
-                <div className="font-mono text-[9px] tracking-wide text-zinc-500">
-                  {enrolment.user.persona?.name.toUpperCase() ?? '—'}
+              </span>
+              <div className="grow">
+                <div className="truncate" style={{ fontWeight: 600 }}>
+                  {enrolment.user.name}
+                </div>
+                <div className="mono" style={{ marginTop: 2 }}>
+                  {enrolment.user.persona?.name ?? '—'}
                 </div>
               </div>
             </div>

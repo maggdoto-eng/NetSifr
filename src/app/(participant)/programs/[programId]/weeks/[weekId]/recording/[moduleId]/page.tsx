@@ -25,16 +25,17 @@ export default async function RecordingPage({
   ]);
 
   return (
-    <div className="flex flex-col gap-4 p-5">
+    <div className="stack">
       <div>
-        <Link
-          href={`/programs/${programId}/weeks/${weekId}`}
-          className="text-xs text-zinc-500 underline"
-        >
+        <Link href={`/programs/${programId}/weeks/${weekId}`} className="mono" style={{ color: 'var(--mute)' }}>
           ← Week
         </Link>
-        <div className="mt-2 font-mono text-[10px] tracking-wide text-orange-600">RECORDING</div>
-        <h1 className="mt-1 text-xl font-bold">{module_.title}</h1>
+        <div className="mono mono--coral" style={{ marginTop: 6 }}>
+          Recording
+        </div>
+        <h1 className="display-md" style={{ marginTop: 4 }}>
+          {module_.title}
+        </h1>
       </div>
 
       <RecordingPlayer

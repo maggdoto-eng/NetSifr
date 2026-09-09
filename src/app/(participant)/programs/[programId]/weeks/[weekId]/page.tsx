@@ -35,42 +35,47 @@ export default async function WeekDetailPage({
     })),
   );
 
+  const MOD_ICON_CLS: Record<string, string> = {
+    RECORDING: 'mod-icon--recording',
+    READING: 'mod-icon--reading',
+    QUIZ: 'mod-icon--quiz',
+    ASSIGNMENT: 'mod-icon--assignment',
+  };
+
   return (
-    <div className="flex flex-col gap-4 p-5">
+    <div className="stack">
       <div>
-        <Link href={`/programs/${programId}/weeks`} className="text-xs text-zinc-500 underline">
+        <Link href={`/programs/${programId}/weeks`} className="mono" style={{ color: 'var(--mute)' }}>
           ← All weeks
         </Link>
-        <h1 className="mt-2 text-xl font-bold">{week.title}</h1>
+        <h1 className="display-md" style={{ marginTop: 6 }}>
+          {week.title}
+        </h1>
       </div>
 
-      <div className="flex flex-col gap-2">
+      <div className="stack">
         {moduleRows.map((module_) => (
           <Link
             key={module_.id}
             href={`/programs/${programId}/weeks/${weekId}/${MODULE_ROUTE[module_.type]}/${module_.id}`}
-            className="flex items-center gap-3 rounded-xl border border-zinc-200 bg-white p-3"
+            className="mod-row"
           >
-            <span className="flex h-9 w-9 flex-none items-center justify-center rounded-lg bg-zinc-100">
+            <span className={`mod-icon ${MOD_ICON_CLS[module_.type] ?? ''}`}>
               {MODULE_ICON[module_.type]}
             </span>
-            <div className="min-w-0 flex-1">
-              <div className="font-mono text-[9px] tracking-wide text-zinc-500">{module_.type}</div>
-              <div className="truncate text-sm font-semibold">{module_.title}</div>
+            <div className="grow">
+              <div className="mono">{module_.type}</div>
+              <div className="truncate" style={{ fontWeight: 600, marginTop: 2 }}>
+                {module_.title}
+              </div>
             </div>
-            <span className="rounded px-2 py-0.5 font-mono text-[10px] text-zinc-600">
-              {module_.state.label}
-            </span>
+            <span className="pill">{module_.state.label}</span>
           </Link>
         ))}
-        {moduleRows.length === 0 && (
-          <p className="rounded-xl border-2 border-dashed border-zinc-300 p-5 text-center text-sm text-zinc-500">
-            Nothing published for this week yet.
-          </p>
-        )}
+        {moduleRows.length === 0 && <div className="empty">Nothing published for this week yet.</div>}
       </div>
 
-      <div className="rounded-xl bg-amber-50 p-3 text-xs text-amber-900">
+      <div className="card card--notice">
         Nothing locks — late work is accepted and flagged for your facilitator.
       </div>
     </div>

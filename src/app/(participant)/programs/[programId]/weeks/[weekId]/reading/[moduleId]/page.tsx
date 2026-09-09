@@ -21,43 +21,36 @@ export default async function ReadingPage({
   });
 
   return (
-    <div className="flex flex-col gap-4 p-5">
+    <div className="stack">
       <div>
-        <Link
-          href={`/programs/${programId}/weeks/${weekId}`}
-          className="text-xs text-zinc-500 underline"
-        >
+        <Link href={`/programs/${programId}/weeks/${weekId}`} className="mono" style={{ color: 'var(--mute)' }}>
           ← Week
         </Link>
-        <div className="mt-2 font-mono text-[10px] tracking-wide text-orange-600">READING</div>
-        <h1 className="mt-1 text-xl font-bold">{module_.title}</h1>
+        <div className="mono mono--coral" style={{ marginTop: 6 }}>
+          Reading
+        </div>
+        <h1 className="display-md" style={{ marginTop: 4 }}>
+          {module_.title}
+        </h1>
       </div>
 
-      <div className="flex h-48 items-center justify-center rounded-2xl bg-zinc-100 font-mono text-xs text-zinc-500">
+      <div className="placeholder placeholder--doc" style={{ height: 200 }}>
         {module_.reading.contentUrl ? (
-          <a
-            href={module_.reading.contentUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="underline"
-          >
+          <a href={module_.reading.contentUrl} target="_blank" rel="noreferrer" className="btn btn--ghost btn--sm">
             Open reading
           </a>
         ) : (
-          'PDF PREVIEW'
+          <span className="mono">PDF preview</span>
         )}
       </div>
 
-      <p className="text-sm text-zinc-600">Read before the quiz — the questions come from this.</p>
+      <p className="muted" style={{ fontSize: 14 }}>
+        Read before the quiz — the questions come from this.
+      </p>
 
       <form action={markReadingDoneAction.bind(null, { moduleId, programId, weekId })}>
-        <button
-          type="submit"
-          className={`w-full rounded-xl py-3 font-semibold ${
-            progress ? 'bg-zinc-200 text-zinc-600' : 'bg-zinc-900 text-white'
-          }`}
-        >
-          {progress ? 'Marked as read' : 'Mark as read'}
+        <button type="submit" className={`btn btn--block ${progress ? 'btn--done' : 'btn--primary'}`}>
+          {progress ? 'Marked as read ✓' : 'Mark as read'}
         </button>
       </form>
     </div>

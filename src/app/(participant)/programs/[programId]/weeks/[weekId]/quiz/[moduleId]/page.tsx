@@ -12,16 +12,17 @@ export default async function QuizPage({
   const quiz = await getQuizForTaking(userId, moduleId);
 
   return (
-    <div className="flex flex-col gap-4 p-5">
+    <div className="stack">
       <div>
-        <Link
-          href={`/programs/${programId}/weeks/${weekId}`}
-          className="text-xs text-zinc-500 underline"
-        >
+        <Link href={`/programs/${programId}/weeks/${weekId}`} className="mono" style={{ color: 'var(--mute)' }}>
           ← Week
         </Link>
-        <div className="mt-2 font-mono text-[10px] tracking-wide text-orange-600">QUIZ</div>
-        <h1 className="mt-1 text-xl font-bold">{quiz.title}</h1>
+        <div className="mono mono--coral" style={{ marginTop: 6 }}>
+          Quiz
+        </div>
+        <h1 className="display-md" style={{ marginTop: 4 }}>
+          {quiz.title}
+        </h1>
       </div>
 
       {/* Forces a full remount when navigating between different quiz modules — same class of bug as ModuleInspector's stale defaultValue fields. */}

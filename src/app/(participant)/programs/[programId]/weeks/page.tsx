@@ -32,34 +32,41 @@ export default async function WeeksPage({ params }: PageProps<'/programs/[progra
   );
 
   return (
-    <div className="flex flex-col gap-4 p-5">
-      <div>
-        <div className="font-mono text-[10px] tracking-wide text-zinc-500">
-          {cohort.opportunity.title.toUpperCase()}
-        </div>
-        <h1 className="mt-1 text-xl font-bold">All weeks</h1>
-      </div>
+    <div className="stack">
+      <h1 className="display-md">All weeks</h1>
 
-      <div className="flex flex-col gap-2">
+      <div className="stack">
         {rows.map(({ session, total, done }, index) => (
           <Link
             key={session.id}
             href={`/programs/${programId}/weeks/${session.weekId}`}
-            className="flex items-center gap-3 rounded-xl border border-zinc-200 bg-white p-3"
+            className="card card--pick row"
           >
-            <div className="flex h-8 w-8 flex-none items-center justify-center rounded-lg bg-zinc-100 font-mono text-sm font-semibold">
+            <span
+              className="figure"
+              style={{
+                width: 32,
+                height: 32,
+                flex: 'none',
+                display: 'grid',
+                placeItems: 'center',
+                borderRadius: 10,
+                background: 'var(--bg-sunk)',
+                fontSize: 13,
+              }}
+            >
               {index + 1}
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="truncate font-semibold">{session.week.title}</div>
-              <div className="font-mono text-[10px] text-zinc-500">
-                {total > 0 ? `${done}/${total} DONE` : 'NOT PUBLISHED YET'}
+            </span>
+            <div className="grow">
+              <div className="truncate" style={{ fontWeight: 600 }}>
+                {session.week.title}
+              </div>
+              <div className="mono" style={{ marginTop: 2 }}>
+                {total > 0 ? `${done}/${total} done` : 'Not published yet'}
               </div>
             </div>
-            <div
-              className={`h-2.5 w-2.5 flex-none rounded-full ${
-                total > 0 && done === total ? 'bg-emerald-500' : 'bg-zinc-200'
-              }`}
+            <span
+              className={`rail__dot ${total > 0 && done === total ? 'rail__dot--done' : ''}`}
             />
           </Link>
         ))}

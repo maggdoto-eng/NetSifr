@@ -3,12 +3,7 @@ import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { verifySession } from '@/lib/dal';
 import { getActiveEnrolment } from '@/modules/learning';
-
-const NAV_ITEMS = [
-  { href: '', label: 'Home' },
-  { href: '/weeks', label: 'Weeks' },
-  { href: '/cohort', label: 'Cohort' },
-];
+import { ProgramTabs } from './program-tabs';
 
 export default async function ProgramLayout({
   children,
@@ -27,22 +22,32 @@ export default async function ProgramLayout({
   if (!cohort) notFound();
 
   return (
-    <div className="flex h-[calc(100dvh-3.5rem)] flex-col">
-      <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
-      <nav className="flex h-16 flex-none items-center justify-around border-t border-zinc-200 bg-white">
-        {NAV_ITEMS.map((item) => (
-          <Link
-            key={item.href}
-            href={`/programs/${programId}${item.href}`}
-            className="flex flex-col items-center gap-1 px-4 text-xs text-zinc-600"
-          >
-            {item.label}
-          </Link>
-        ))}
-        <Link href="/me" className="flex flex-col items-center gap-1 px-4 text-xs text-zinc-600">
-          Me
-        </Link>
-      </nav>
+    <div>
+      <div
+        style={{
+          borderBottom: '1.5px solid var(--border)',
+          background: 'var(--bg-card)',
+          position: 'sticky',
+          top: 'var(--topbar-h)',
+          zIndex: 10,
+        }}
+      >
+        <div
+          className="shell row row--between wrap"
+          style={{ paddingTop: 'var(--s4)', paddingBottom: 'var(--s4)', gap: 'var(--s4)' }}
+        >
+          <div className="row" style={{ gap: 'var(--s3)', minWidth: 0 }}>
+            <Link href="/programs" className="mono" style={{ color: 'var(--mute)' }}>
+              ← All programs
+            </Link>
+            <span className="title truncate">{cohort.opportunity.title}</span>
+          </div>
+          <ProgramTabs programId={programId} />
+        </div>
+      </div>
+      <div className="shell" style={{ maxWidth: 860 }}>
+        {children}
+      </div>
     </div>
   );
 }
