@@ -3,7 +3,6 @@ import { verifySession } from '@/lib/dal';
 import { getDefaultOrganization } from '@/lib/org';
 import { getDiscoverFeed } from '@/modules/events';
 import { getVolunteerDiscoverCards } from '@/modules/volunteering';
-import { BottomNav } from '../bottom-nav';
 
 const LOCATION_LABEL: Record<string, string> = {
   ONLINE: 'Online',
@@ -20,121 +19,94 @@ export default async function DiscoverPage() {
   ]);
 
   return (
-    <>
-      <header className="ns-hero px-[22px] pb-6 pt-7">
-        <div className="ns-label text-mint">Explore</div>
-        <h1 className="mt-1.5 text-[28px] leading-none text-cream">Discover</h1>
-        <p className="mt-2 text-[13px] leading-relaxed text-[rgba(245,242,234,0.72)]">
+    <div className="shell stack">
+      <div>
+        <div className="mono">Explore</div>
+        <h1 className="display-lg" style={{ marginTop: 6 }}>
+          Discover
+        </h1>
+        <p className="lede" style={{ marginTop: 8 }}>
           Events and volunteer calls are open to everyone. Programs are invite-only — your
           facilitator adds you.
         </p>
-      </header>
-      <div className="flex flex-col gap-6 p-[22px]">
-        <div className="flex flex-col gap-3">
-          <div className="font-mono text-[10px] tracking-wide text-orange-600">EVENTS</div>
-          {events.map((e) => (
-            <Link
-              key={e.occurrenceId}
-              href={`/discover/events/${e.occurrenceId}`}
-              className="flex flex-col gap-2 rounded-2xl border border-zinc-200 bg-white p-4"
-            >
-              <div className="font-bold leading-tight">{e.eventTitle}</div>
-              <div className="font-mono text-[10px] tracking-wide text-zinc-500">
-                {e.startsAt.toLocaleString()} · {LOCATION_LABEL[e.locationMode]}
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-zinc-500">
-                  {e.registeredCount}
-                  {e.capacity != null && ` / ${e.capacity}`} registered
-                </span>
-                {e.myRegistrationStatus === 'REGISTERED' && (
-                  <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800">
-                    Registered
-                  </span>
-                )}
-                {e.myRegistrationStatus === 'WAITLISTED' && (
-                  <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-800">
-                    Waitlisted
-                  </span>
-                )}
-                {e.myRegistrationStatus == null && (
-                  <span className="rounded-full bg-zinc-900 px-2.5 py-1 text-xs font-semibold text-white">
-                    Register
-                  </span>
-                )}
-              </div>
-            </Link>
-          ))}
-          {events.length === 0 && (
-            <p className="rounded-xl border-2 border-dashed border-zinc-300 p-5 text-center text-sm text-zinc-500">
-              No events open right now — check back soon.
-            </p>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-3">
-          <div className="font-mono text-[10px] tracking-wide text-orange-600">VOLUNTEER</div>
-          {volunteering.map((v) => (
-            <Link
-              key={v.volunteerOpportunityId}
-              href={`/discover/volunteering/${v.volunteerOpportunityId}`}
-              className="flex flex-col gap-2 rounded-2xl border border-zinc-200 bg-white p-4"
-            >
-              <div className="font-bold leading-tight">{v.title}</div>
-              <div className="font-mono text-[10px] tracking-wide text-zinc-500">
-                {LOCATION_LABEL[v.locationMode]}
-                {v.applyByDate && ` · APPLY BY ${v.applyByDate.toLocaleDateString()}`}
-              </div>
-              <div className="flex items-center justify-end">
-                {v.myApplicationStatus === 'ACCEPTED' && (
-                  <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800">
-                    Accepted
-                  </span>
-                )}
-                {(v.myApplicationStatus === 'APPLIED' ||
-                  v.myApplicationStatus === 'SHORTLISTED') && (
-                  <span className="rounded-full bg-sky-100 px-2.5 py-1 text-xs font-semibold text-sky-800">
-                    Applied
-                  </span>
-                )}
-                {(v.myApplicationStatus == null ||
-                  v.myApplicationStatus === 'WITHDRAWN' ||
-                  v.myApplicationStatus === 'REJECTED') && (
-                  <span className="rounded-full bg-zinc-900 px-2.5 py-1 text-xs font-semibold text-white">
-                    Apply
-                  </span>
-                )}
-              </div>
-            </Link>
-          ))}
-          {volunteering.length === 0 && (
-            <p className="rounded-xl border-2 border-dashed border-zinc-300 p-5 text-center text-sm text-zinc-500">
-              No volunteer calls open right now — check back soon.
-            </p>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-3">
-          <div className="font-mono text-[10px] tracking-wide text-zinc-500">
-            PROGRAMS · INVITE-ONLY
-          </div>
-          {courses.map((c) => (
-            <div
-              key={c.cohortId}
-              className="flex flex-col gap-1 rounded-2xl border border-zinc-200 bg-zinc-50 p-4"
-            >
-              <div className="font-bold leading-tight">{c.title}</div>
-              <div className="font-mono text-[10px] tracking-wide text-zinc-500">
-                {c.cohortLabel.toUpperCase()} · ASK YOUR FACILITATOR FOR AN INVITE
-              </div>
-            </div>
-          ))}
-          {courses.length === 0 && (
-            <p className="text-center text-xs text-zinc-500">No live programs right now.</p>
-          )}
-        </div>
       </div>
-      <BottomNav active="/discover" />
-    </>
+
+      <div className="stack">
+        <div className="mono mono--coral">Events</div>
+        {events.length === 0 ? (
+          <div className="empty">No events open right now — check back soon.</div>
+        ) : (
+          <div className="grid-3">
+            {events.map((e) => (
+              <Link key={e.occurrenceId} href={`/discover/events/${e.occurrenceId}`} className="card card--pick col" style={{ gap: 'var(--s3)' }}>
+                <div className="title">{e.eventTitle}</div>
+                <div className="mono">
+                  {e.startsAt.toLocaleString()} · {LOCATION_LABEL[e.locationMode]}
+                </div>
+                <div className="row row--between">
+                  <span className="muted" style={{ fontSize: 13 }}>
+                    {e.registeredCount}
+                    {e.capacity != null && ` / ${e.capacity}`} registered
+                  </span>
+                  {e.myRegistrationStatus === 'REGISTERED' ? (
+                    <span className="pill pill--done">Registered</span>
+                  ) : e.myRegistrationStatus === 'WAITLISTED' ? (
+                    <span className="pill pill--late">Waitlisted</span>
+                  ) : (
+                    <span className="pill pill--due">Register</span>
+                  )}
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="stack">
+        <div className="mono mono--coral">Volunteer</div>
+        {volunteering.length === 0 ? (
+          <div className="empty">No volunteer calls open right now — check back soon.</div>
+        ) : (
+          <div className="grid-3">
+            {volunteering.map((v) => (
+              <Link key={v.volunteerOpportunityId} href={`/discover/volunteering/${v.volunteerOpportunityId}`} className="card card--pick col" style={{ gap: 'var(--s3)' }}>
+                <div className="title">{v.title}</div>
+                <div className="mono">
+                  {LOCATION_LABEL[v.locationMode]}
+                  {v.applyByDate && ` · apply by ${v.applyByDate.toLocaleDateString()}`}
+                </div>
+                <div className="row" style={{ justifyContent: 'flex-end' }}>
+                  {v.myApplicationStatus === 'ACCEPTED' ? (
+                    <span className="pill pill--done">Accepted</span>
+                  ) : v.myApplicationStatus === 'APPLIED' || v.myApplicationStatus === 'SHORTLISTED' ? (
+                    <span className="pill pill--live">Applied</span>
+                  ) : (
+                    <span className="pill pill--due">Apply</span>
+                  )}
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="stack">
+        <div className="mono">Programs · invite-only</div>
+        {courses.length === 0 ? (
+          <p className="muted" style={{ fontSize: 13 }}>
+            No live programs right now.
+          </p>
+        ) : (
+          <div className="grid-3">
+            {courses.map((c) => (
+              <div key={c.cohortId} className="card card--sunk col" style={{ gap: 4 }}>
+                <div className="title">{c.title}</div>
+                <div className="mono">{c.cohortLabel} · ask your facilitator for an invite</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
