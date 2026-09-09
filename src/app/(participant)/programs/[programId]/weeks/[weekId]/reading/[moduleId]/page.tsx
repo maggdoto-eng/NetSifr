@@ -2,7 +2,9 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { verifySession } from '@/lib/dal';
+import { getModuleNeighbors } from '@/modules/learning';
 import { markReadingDoneAction } from './actions';
+import { ModuleNav } from '../../module-nav';
 
 export default async function ReadingPage({
   params,
@@ -16,9 +18,12 @@ export default async function ReadingPage({
   });
   if (!module_ || !module_.reading) notFound();
 
-  const progress = await prisma.readingProgress.findUnique({
-    where: { userId_readingModuleId: { userId, readingModuleId: moduleId } },
-  });
+  const [progress, neighbors] = await Promise.all([
+    prisma.readingProgress.findUnique({
+      where: { userId_readingModuleId: { userId, readingModuleId: moduleId } },
+    }),
+    getModuleNeighbors(programId, moduleId),
+  ]);
 
   return (
     <div className="stack">
@@ -53,6 +58,7 @@ export default async function ReadingPage({
           {progress ? 'Marked as read ✓' : 'Mark as read'}
         </button>
       </form>
+      <ModuleNav programId={programId} prev={neighbors.prev} next={neighbors.next} />
     </div>
   );
 }

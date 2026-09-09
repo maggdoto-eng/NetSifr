@@ -73,27 +73,37 @@ export function RecordingPlayer(props: {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex h-52 items-center justify-center overflow-hidden rounded-2xl bg-zinc-900">
+    <div className="stack">
+      <div
+        style={{
+          height: 320,
+          overflow: 'hidden',
+          borderRadius: 'var(--r-panel)',
+          background: 'var(--pine-deep)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
         {props.driveFileId ? (
           <iframe
             src={`https://drive.google.com/file/d/${props.driveFileId}/preview`}
             title="Week recording"
-            className="h-full w-full"
+            style={{ height: '100%', width: '100%', border: 0 }}
             allow="autoplay"
           />
         ) : (
-          <div className="font-mono text-xs text-emerald-300">DRIVE EMBED NOT CONFIGURED</div>
+          <span className="mono mono--onDark">Drive embed not configured</span>
         )}
       </div>
 
-      <div className="rounded-2xl border border-zinc-200 bg-white p-4">
-        <div className="flex items-center justify-between gap-3">
-          <div className="min-w-0">
-            <div className="font-semibold">
-              {confirmed ? 'Attendance confirmed' : 'Mark yourself attended'}
+      <div className={`attend ${confirmed ? 'attend--done' : thresholdReached ? 'attend--ready' : ''}`}>
+        <div className="row row--between" style={{ alignItems: 'flex-start' }}>
+          <div className="grow">
+            <div style={{ fontWeight: 700 }}>
+              {confirmed ? 'Attendance confirmed ✓' : 'Mark yourself attended'}
             </div>
-            <p className="mt-1 text-xs text-zinc-500">
+            <p className="muted" style={{ fontSize: 13, marginTop: 4 }}>
               Keep this page open and focused — recording page open ≥{' '}
               {Math.round(props.unlockSeconds / 60)} min unlocks the button. This tracks page
               engagement, not that the video actually played.
@@ -104,19 +114,18 @@ export function RecordingPlayer(props: {
               type="button"
               onClick={handleMarkAttended}
               disabled={!thresholdReached || marking}
-              className="flex-none rounded-xl bg-orange-500 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-40"
+              className="btn btn--accent btn--sm"
             >
               {marking ? 'Marking…' : 'Mark attended'}
             </button>
           )}
         </div>
-        <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-zinc-100">
-          <div
-            className="h-full rounded-full bg-emerald-500 transition-all"
-            style={{ width: `${percent}%` }}
-          />
-        </div>
-        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+        {!confirmed && (
+          <div className="bar" style={{ marginTop: 'var(--s3)' }}>
+            <i style={{ width: `${percent}%` }} />
+          </div>
+        )}
+        {error && <p style={{ color: 'var(--coral)', fontSize: 14, marginTop: 8 }}>{error}</p>}
       </div>
     </div>
   );

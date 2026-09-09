@@ -21,43 +21,57 @@ export function QuizExperience(props: { programId: string; weekId: string; quiz:
     );
 
     return (
-      <div className="flex flex-col gap-4">
-        <div className="rounded-2xl border border-zinc-200 bg-white p-4">
-          <div className="text-sm text-zinc-500">
+      <div className="stack">
+        <div className="card">
+          <div className="mono">
             Attempt {attempt.attemptNumber} of {attempt.attemptNumber + quiz.attemptsRemaining}
           </div>
-          <div className="mt-1 text-3xl font-bold">
+          <div className="figure" style={{ fontSize: 40, marginTop: 4 }}>
             {justScored ?? attempt.scorePercent}
-            <span className="text-lg text-zinc-400">%</span>
+            <span className="muted" style={{ fontSize: 20 }}>%</span>
           </div>
           {quiz.bestScorePercent != null && quiz.attemptsUsed > 1 && (
-            <div className="mt-1 text-xs text-zinc-500">Best score: {quiz.bestScorePercent}%</div>
+            <div className="mono" style={{ marginTop: 4 }}>
+              Best score: {quiz.bestScorePercent}%
+            </div>
           )}
         </div>
 
-        <div className="flex flex-col gap-3">
+        <div className="stack" style={{ gap: 'var(--s3)' }}>
           {quiz.questions.map((q, i) => {
             const selectedOptionId = selectedByQuestionId.get(q.id);
             const correctOptionId = quiz.correctOptionIdByQuestionId![q.id];
+            const gotItRight = selectedOptionId === correctOptionId;
             return (
-              <div key={q.id} className="rounded-xl border border-zinc-200 bg-white p-3">
-                <div className="text-sm font-semibold">
+              <div key={q.id} className={`review ${gotItRight ? 'review--ok' : ''}`}>
+                <div style={{ fontWeight: 600 }}>
                   {i + 1}. {q.prompt}
                 </div>
-                <div className="mt-2 flex flex-col gap-1.5">
+                <div className="col" style={{ gap: 6, marginTop: 'var(--s2)' }}>
                   {q.options.map((o) => {
                     const isCorrect = o.id === correctOptionId;
                     const isSelected = o.id === selectedOptionId;
+                    const bg = isCorrect
+                      ? 'var(--mint-tint)'
+                      : isSelected
+                        ? 'var(--coral-tint)'
+                        : 'transparent';
+                    const border = isCorrect
+                      ? 'var(--mint)'
+                      : isSelected
+                        ? 'var(--coral)'
+                        : 'var(--border)';
                     return (
                       <div
                         key={o.id}
-                        className={`rounded-lg border px-3 py-2 text-sm ${
-                          isCorrect
-                            ? 'border-emerald-300 bg-emerald-50 text-emerald-800'
-                            : isSelected
-                              ? 'border-red-300 bg-red-50 text-red-700'
-                              : 'border-zinc-200 text-zinc-500'
-                        }`}
+                        style={{
+                          padding: '8px 12px',
+                          borderRadius: 'var(--r-item)',
+                          border: `1.5px solid ${border}`,
+                          background: bg,
+                          fontSize: 14,
+                          color: isCorrect || isSelected ? 'var(--ink)' : 'var(--mute)',
+                        }}
                       >
                         {o.label}
                         {isCorrect && ' ✓'}
@@ -71,7 +85,7 @@ export function QuizExperience(props: { programId: string; weekId: string; quiz:
           })}
         </div>
 
-        {quiz.attemptsRemaining > 0 && (
+        {quiz.attemptsRemaining > 0 ? (
           <button
             type="button"
             onClick={() => {
@@ -80,15 +94,14 @@ export function QuizExperience(props: { programId: string; weekId: string; quiz:
               setJustScored(undefined);
               setMode('take');
             }}
-            className="rounded-xl bg-zinc-900 py-3 font-semibold text-white"
+            className="btn btn--primary btn--block"
           >
             Retake quiz ({quiz.attemptsRemaining} attempt{quiz.attemptsRemaining === 1 ? '' : 's'}{' '}
             left)
           </button>
-        )}
-        {quiz.attemptsRemaining === 0 && (
-          <p className="text-center text-xs text-zinc-500">
-            You&rsquo;ve used both attempts for this quiz.
+        ) : (
+          <p className="muted" style={{ fontSize: 13, textAlign: 'center' }}>
+            You’ve used both attempts for this quiz.
           </p>
         )}
       </div>
@@ -120,46 +133,40 @@ export function QuizExperience(props: { programId: string; weekId: string; quiz:
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="stack">
       {quiz.questions.length === 0 && (
-        <p className="rounded-xl border-2 border-dashed border-zinc-300 p-5 text-center text-sm text-zinc-500">
-          This quiz has no questions yet.
-        </p>
+        <div className="empty">This quiz has no questions yet.</div>
       )}
       {quiz.questions.map((q, i) => (
-        <div key={q.id} className="rounded-xl border border-zinc-200 bg-white p-3">
-          <div className="text-sm font-semibold">
+        <div key={q.id} className="card">
+          <div style={{ fontWeight: 600 }}>
             {i + 1}. {q.prompt}
           </div>
-          <div className="mt-2 flex flex-col gap-1.5">
+          <div className="col" style={{ gap: 'var(--s2)', marginTop: 'var(--s3)' }}>
             {q.options.map((o) => (
-              <label
+              <button
                 key={o.id}
-                className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm ${
-                  selections[q.id] === o.id ? 'border-orange-400 bg-orange-50' : 'border-zinc-200'
-                }`}
+                type="button"
+                className="option"
+                aria-pressed={selections[q.id] === o.id}
+                onClick={() => setSelections((prev) => ({ ...prev, [q.id]: o.id }))}
               >
-                <input
-                  type="radio"
-                  name={q.id}
-                  checked={selections[q.id] === o.id}
-                  onChange={() => setSelections((prev) => ({ ...prev, [q.id]: o.id }))}
-                />
+                <span className="dot" />
                 {o.label}
-              </label>
+              </button>
             ))}
           </div>
         </div>
       ))}
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p style={{ color: 'var(--coral)', fontSize: 14 }}>{error}</p>}
 
       {quiz.questions.length > 0 && (
         <button
           type="button"
           onClick={handleSubmit}
           disabled={!allAnswered || submitting}
-          className="rounded-xl bg-orange-500 py-3 font-semibold text-white disabled:opacity-40"
+          className="btn btn--accent btn--block"
         >
           {submitting ? 'Submitting…' : 'Submit quiz'}
         </button>

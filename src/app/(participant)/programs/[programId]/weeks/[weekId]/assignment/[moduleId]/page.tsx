@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { verifySession } from '@/lib/dal';
-import { getAssignmentForTaking } from '@/modules/learning';
+import { getAssignmentForTaking, getModuleNeighbors } from '@/modules/learning';
 import { AssignmentExperience } from './assignment-experience';
+import { ModuleNav } from '../../module-nav';
 
 export default async function AssignmentPage({
   params,
@@ -9,7 +10,10 @@ export default async function AssignmentPage({
   const { programId, weekId, moduleId } = await params;
   const { userId } = await verifySession();
 
-  const assignment = await getAssignmentForTaking(userId, moduleId);
+  const [assignment, neighbors] = await Promise.all([
+    getAssignmentForTaking(userId, moduleId),
+    getModuleNeighbors(programId, moduleId),
+  ]);
 
   return (
     <div className="stack">
@@ -37,6 +41,7 @@ export default async function AssignmentPage({
         weekId={weekId}
         assignment={assignment}
       />
+      <ModuleNav programId={programId} prev={neighbors.prev} next={neighbors.next} />
     </div>
   );
 }

@@ -52,6 +52,14 @@ export {
   computeModuleState,
   computeCohortProgressPercent,
 } from './module-state';
+export {
+  getSyllabus,
+  getModuleNeighbors,
+  MODULE_ROUTE,
+  type Syllabus,
+  type SyllabusWeek,
+  type SyllabusModule,
+} from './syllabus';
 export type { ModuleState, ModuleStateTone } from './module-state';
 export { computeCohortAttendanceAverage, computeUserAttendancePercent } from './attendance-summary';
 export {

@@ -5,12 +5,6 @@ import { useState } from 'react';
 import type { AssignmentForTaking } from '@/modules/learning';
 import { submitAssignmentAction } from './actions';
 
-const GRADE_STYLE: Record<string, string> = {
-  NEEDS_WORK: 'border-amber-300 bg-amber-50 text-amber-800',
-  GOOD: 'border-emerald-300 bg-emerald-50 text-emerald-800',
-  EXCELLENT: 'border-emerald-400 bg-emerald-50 text-emerald-900',
-};
-
 const GRADE_LABEL: Record<string, string> = {
   NEEDS_WORK: 'Needs work',
   GOOD: 'Good',
@@ -50,56 +44,55 @@ export function AssignmentExperience(props: {
     router.refresh();
   }
 
+  const grade = assignment.latestSubmission?.grade;
+  const goodGrade = grade?.label === 'GOOD' || grade?.label === 'EXCELLENT';
+
   return (
-    <div className="flex flex-col gap-3">
+    <div className="stack">
       {assignment.latestSubmission && (
-        <div className="rounded-2xl border border-zinc-200 bg-white p-4">
-          <div className="flex items-center justify-between text-xs text-zinc-500">
-            <span>
+        <div className="card stack" style={{ gap: 'var(--s3)' }}>
+          <div className="row row--between">
+            <span className="mono">
               Submission {assignment.latestSubmission.attemptNumber}
               {assignment.latestSubmission.isLate && ' · late'}
             </span>
-            <span>{new Date(assignment.latestSubmission.submittedAt).toLocaleDateString()}</span>
+            <span className="mono">
+              {new Date(assignment.latestSubmission.submittedAt).toLocaleDateString()}
+            </span>
           </div>
-          <p className="mt-2 whitespace-pre-wrap text-sm text-zinc-700">
+          <p style={{ whiteSpace: 'pre-wrap', margin: 0 }}>
             {assignment.latestSubmission.bodyText}
           </p>
-          {assignment.latestSubmission.grade && (
-            <div
-              className={`mt-3 rounded-xl border p-3 text-sm ${GRADE_STYLE[assignment.latestSubmission.grade.label]}`}
-            >
-              <div className="font-semibold">
-                {GRADE_LABEL[assignment.latestSubmission.grade.label]}
-              </div>
-              <p className="mt-1">{assignment.latestSubmission.grade.feedback}</p>
+          {grade ? (
+            <div className={`review ${goodGrade ? 'review--ok' : ''}`}>
+              <div style={{ fontWeight: 700 }}>{GRADE_LABEL[grade.label]}</div>
+              <p style={{ margin: '4px 0 0' }}>{grade.feedback}</p>
             </div>
-          )}
-          {!assignment.latestSubmission.grade && (
-            <p className="mt-3 text-xs text-zinc-500">Awaiting feedback from your facilitator.</p>
+          ) : (
+            <p className="muted" style={{ fontSize: 13, margin: 0 }}>
+              Awaiting feedback from your facilitator.
+            </p>
           )}
         </div>
       )}
 
       {assignment.canSubmit && (
-        <div className="flex flex-col gap-2">
+        <div className="stack" style={{ gap: 'var(--s2)' }}>
           {isResubmission && (
-            <p className="text-xs font-semibold text-amber-700">
-              Revise your response below and resubmit.
-            </p>
+            <p className="mono mono--coral">Revise your response below and resubmit.</p>
           )}
           <textarea
             value={bodyText}
             onChange={(e) => setBodyText(e.target.value)}
             rows={6}
             placeholder="Write your response…"
-            className="rounded-xl border border-zinc-300 p-3 text-sm"
           />
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p style={{ color: 'var(--coral)', fontSize: 14 }}>{error}</p>}
           <button
             type="button"
             onClick={handleSubmit}
             disabled={!bodyText.trim() || submitting}
-            className="rounded-xl bg-orange-500 py-3 font-semibold text-white disabled:opacity-40"
+            className="btn btn--accent btn--block"
           >
             {submitting
               ? 'Submitting…'
@@ -110,9 +103,9 @@ export function AssignmentExperience(props: {
         </div>
       )}
 
-      {!assignment.canSubmit && assignment.latestSubmission?.grade?.label === 'NEEDS_WORK' && (
-        <p className="text-center text-xs text-zinc-500">
-          You&rsquo;ve used both submission attempts for this assignment.
+      {!assignment.canSubmit && grade?.label === 'NEEDS_WORK' && (
+        <p className="muted" style={{ fontSize: 13, textAlign: 'center' }}>
+          You’ve used both submission attempts for this assignment.
         </p>
       )}
     </div>

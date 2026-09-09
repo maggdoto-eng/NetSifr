@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { verifySession } from '@/lib/dal';
-import { getQuizForTaking } from '@/modules/learning';
+import { getQuizForTaking, getModuleNeighbors } from '@/modules/learning';
 import { QuizExperience } from './quiz-experience';
+import { ModuleNav } from '../../module-nav';
 
 export default async function QuizPage({
   params,
@@ -9,7 +10,10 @@ export default async function QuizPage({
   const { programId, weekId, moduleId } = await params;
   const { userId } = await verifySession();
 
-  const quiz = await getQuizForTaking(userId, moduleId);
+  const [quiz, neighbors] = await Promise.all([
+    getQuizForTaking(userId, moduleId),
+    getModuleNeighbors(programId, moduleId),
+  ]);
 
   return (
     <div className="stack">
@@ -27,6 +31,7 @@ export default async function QuizPage({
 
       {/* Forces a full remount when navigating between different quiz modules — same class of bug as ModuleInspector's stale defaultValue fields. */}
       <QuizExperience key={quiz.quizModuleId} programId={programId} weekId={weekId} quiz={quiz} />
+      <ModuleNav programId={programId} prev={neighbors.prev} next={neighbors.next} />
     </div>
   );
 }
