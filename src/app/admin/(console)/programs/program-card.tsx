@@ -1,10 +1,12 @@
 import Link from 'next/link';
 import { duplicateProgramAction, publishProgramAction, archiveProgramAction } from './actions';
 
-const STATUS_STYLES: Record<string, string> = {
-  DRAFT: 'bg-zinc-200 text-zinc-700',
-  LIVE: 'bg-emerald-200 text-emerald-900',
-  ARCHIVED: 'bg-zinc-800 text-zinc-100',
+const MARK_COLORS = ['#86E5BC', '#FF6A45', '#123B2E', '#E3D9C2'];
+
+const STATUS_PILL: Record<string, string> = {
+  DRAFT: 'pill pill--draft',
+  LIVE: 'pill pill--live',
+  ARCHIVED: 'pill pill--archived',
 };
 
 export function ProgramCard(props: {
@@ -15,62 +17,60 @@ export function ProgramCard(props: {
   enrolledCount: number;
   weekCount: number;
   attendanceAverage: number | null;
+  index: number;
 }) {
   const { cohortId, title, cohortLabel, status, enrolledCount, weekCount, attendanceAverage } =
     props;
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-zinc-200 p-4">
-      <div className="flex items-start justify-between gap-3">
-        <span
-          className={`rounded px-2 py-0.5 font-mono text-[10px] tracking-wide ${STATUS_STYLES[status]}`}
-        >
-          {status}
-        </span>
+    <div className="card prog-tile">
+      <div className="row row--between">
+        <span className="mark" style={{ background: MARK_COLORS[props.index % MARK_COLORS.length] }} />
+        <span className={STATUS_PILL[status]}>{status}</span>
       </div>
+
       <div>
-        <h3 className="font-semibold leading-tight">{title}</h3>
-        <p className="mt-1 font-mono text-[10px] tracking-wide text-zinc-500">
-          {cohortLabel.toUpperCase()}
-        </p>
-      </div>
-      <div className="flex gap-5 text-sm">
-        <div>
-          <div className="font-mono text-base font-semibold">{enrolledCount}</div>
-          <div className="font-mono text-[9px] text-zinc-500">ENROLLED</div>
-        </div>
-        <div>
-          <div className="font-mono text-base font-semibold">{weekCount}</div>
-          <div className="font-mono text-[9px] text-zinc-500">WEEKS</div>
-        </div>
-        <div>
-          <div className="font-mono text-base font-semibold">
-            {attendanceAverage === null ? '—' : `${attendanceAverage}%`}
-          </div>
-          <div className="font-mono text-[9px] text-zinc-500">ATTEND</div>
+        <h3 className="display-sm">{title}</h3>
+        <div className="mono" style={{ marginTop: 6 }}>
+          {cohortLabel}
         </div>
       </div>
-      <div className="mt-1 flex gap-2">
-        <Link
-          href={`/admin/programs/${cohortId}/builder`}
-          className="rounded bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white"
-        >
+
+      <div className="prog-tile__figures">
+        <div className="prog-tile__figure">
+          <div className="v">{enrolledCount}</div>
+          <div className="mono">Enrolled</div>
+        </div>
+        <div className="prog-tile__figure">
+          <div className="v">{weekCount}</div>
+          <div className="mono">Weeks</div>
+        </div>
+        <div className="prog-tile__figure">
+          <div className="v">{attendanceAverage === null ? '—' : `${attendanceAverage}%`}</div>
+          <div className="mono">Attendance</div>
+        </div>
+      </div>
+
+      <div className="row" style={{ gap: 'var(--s2)' }}>
+        <Link href={`/admin/programs/${cohortId}/builder`} className="btn btn--primary btn--sm">
           Open
         </Link>
         <form action={duplicateProgramAction.bind(null, cohortId)}>
-          <button type="submit" className="rounded border border-zinc-300 px-3 py-1.5 text-sm">
+          <button type="submit" className="btn btn--ghost btn--sm">
             Duplicate
           </button>
         </form>
-        {status !== 'ARCHIVED' && (
-          <form
-            action={(status === 'DRAFT' ? publishProgramAction : archiveProgramAction).bind(
-              null,
-              cohortId,
-            )}
-          >
-            <button type="submit" className="rounded border border-zinc-300 px-3 py-1.5 text-sm">
-              {status === 'DRAFT' ? 'Publish' : 'Archive'}
+        {status === 'DRAFT' && (
+          <form action={publishProgramAction.bind(null, cohortId)}>
+            <button type="submit" className="btn btn--ghost btn--sm">
+              Publish
+            </button>
+          </form>
+        )}
+        {status === 'LIVE' && (
+          <form action={archiveProgramAction.bind(null, cohortId)}>
+            <button type="submit" className="btn btn--ghost btn--sm">
+              Archive
             </button>
           </form>
         )}

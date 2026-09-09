@@ -194,6 +194,52 @@ export async function updateCohortStatus(input: {
   ]);
 }
 
+/**
+ * Updates a cohort's editable identity/delivery settings — the program
+ * Settings screen. Title/summary live on the shared Opportunity; the cohort
+ * label and attendance-unlock minutes live on the Cohort. Curriculum content
+ * is never touched here (that is CourseVersion-immutable). Org-scoped.
+ */
+export async function updateCohortSettings(input: {
+  cohortId: string;
+  organizationId: string;
+  actingUserId: string;
+  title: string;
+  cohortLabel: string;
+  summary: string;
+  attendanceUnlockMinutes: number;
+}): Promise<void> {
+  const cohort = await prisma.cohort.findUniqueOrThrow({ where: { id: input.cohortId } });
+  assertInOrg(cohort.organizationId, input.organizationId);
+
+  const title = input.title.trim();
+  const cohortLabel = input.cohortLabel.trim();
+  if (!title) throw new Error('Title is required.');
+  if (!cohortLabel) throw new Error('Cohort label is required.');
+  const minutes = Math.min(240, Math.max(0, Math.round(input.attendanceUnlockMinutes)));
+
+  await prisma.$transaction([
+    prisma.opportunity.update({
+      where: { id: cohort.opportunityId },
+      data: { title, summary: input.summary.trim() || null },
+    }),
+    prisma.cohort.update({
+      where: { id: cohort.id },
+      data: { cohortLabel, attendanceUnlockMinutes: minutes },
+    }),
+    prisma.auditEvent.create({
+      data: {
+        organizationId: cohort.organizationId,
+        actorUserId: input.actingUserId,
+        action: 'cohort.settings_updated',
+        targetType: 'Cohort',
+        targetId: cohort.id,
+        metadata: { title, cohortLabel, attendanceUnlockMinutes: minutes },
+      },
+    }),
+  ]);
+}
+
 /** Adds a week to the curriculum and a matching CohortSession to every cohort currently running this CourseVersion. */
 export async function addWeek(input: {
   courseVersionId: string;

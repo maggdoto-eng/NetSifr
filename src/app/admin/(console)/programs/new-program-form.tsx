@@ -5,86 +5,72 @@ import { createProgramAction } from './actions';
 
 export function NewProgramForm() {
   const [open, setOpen] = useState(false);
+  const [weeks, setWeeks] = useState(6);
   const [state, action, pending] = useActionState(createProgramAction, undefined);
 
   if (!open) {
     return (
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="self-start rounded bg-zinc-900 px-4 py-2 text-sm font-medium text-white"
-      >
+      <button type="button" onClick={() => setOpen(true)} className="btn btn--primary self-start">
         + New program
       </button>
     );
   }
 
   return (
-    <form
-      action={action}
-      className="flex flex-col gap-4 rounded-lg border-2 border-zinc-900 bg-zinc-50 p-5"
-    >
-      <h2 className="text-lg font-semibold">New program</h2>
+    <form action={action} className="card card--sel stack">
+      <h2 className="display-sm">New program</h2>
 
-      <div className="flex flex-wrap gap-4">
-        <div className="flex min-w-64 flex-2 flex-col gap-1">
-          <label htmlFor="title" className="font-mono text-xs text-zinc-500">
-            TITLE
+      <div className="row wrap row--top" style={{ gap: 'var(--s4)' }}>
+        <div className="field grow" style={{ minWidth: 260 }}>
+          <label htmlFor="title" className="mono">
+            Title
           </label>
-          <input
-            id="title"
-            name="title"
-            required
-            placeholder="e.g. Heat Resilience for Informal Workers"
-            className="rounded border border-zinc-300 px-3 py-2 text-sm"
-          />
+          <input id="title" name="title" required placeholder="e.g. Heat Resilience for Informal Workers" />
         </div>
-        <div className="flex min-w-40 flex-1 flex-col gap-1">
-          <label htmlFor="cohortLabel" className="font-mono text-xs text-zinc-500">
-            COHORT LABEL
+        <div className="field" style={{ minWidth: 180 }}>
+          <label htmlFor="cohortLabel" className="mono">
+            Cohort label
           </label>
-          <input
-            id="cohortLabel"
-            name="cohortLabel"
-            required
-            defaultValue="Cohort 1"
-            className="rounded border border-zinc-300 px-3 py-2 text-sm"
-          />
+          <input id="cohortLabel" name="cohortLabel" required defaultValue="Cohort 1" />
         </div>
-        <div className="flex w-32 flex-col gap-1">
-          <label htmlFor="weekCount" className="font-mono text-xs text-zinc-500">
-            WEEKS
-          </label>
-          <input
-            id="weekCount"
-            name="weekCount"
-            type="number"
-            min={1}
-            max={20}
-            required
-            defaultValue={6}
-            className="rounded border border-zinc-300 px-3 py-2 text-sm"
-          />
+        <div className="field">
+          <label className="mono">Weeks</label>
+          <div className="stepper" style={{ height: 44 }}>
+            <button
+              type="button"
+              onClick={() => setWeeks((w) => Math.max(1, w - 1))}
+              aria-label="Fewer weeks"
+            >
+              −
+            </button>
+            <output>{weeks}</output>
+            <button
+              type="button"
+              onClick={() => setWeeks((w) => Math.min(20, w + 1))}
+              aria-label="More weeks"
+            >
+              +
+            </button>
+            <input type="hidden" name="weekCount" value={weeks} />
+          </div>
         </div>
       </div>
 
-      {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
+      <p className="muted" style={{ fontSize: 14 }}>
+        Creates {weeks} empty weeks, each with an unpublished recording and reading slot. Starts as a
+        draft: you can enrol a cohort ahead of launch, but nobody can open the sessions until you
+        publish it.
+      </p>
 
-      <div className="flex items-center gap-3">
-        <button
-          type="submit"
-          disabled={pending}
-          className="rounded bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
-        >
+      {state?.error && <p style={{ color: 'var(--coral)', fontSize: 14 }}>{state.error}</p>}
+
+      <div className="row" style={{ gap: 'var(--s2)' }}>
+        <button type="submit" disabled={pending} className="btn btn--primary">
           {pending ? 'Creating…' : 'Create program'}
         </button>
-        <button type="button" onClick={() => setOpen(false)} className="text-sm text-zinc-500">
+        <button type="button" onClick={() => setOpen(false)} className="btn btn--ghost">
           Cancel
         </button>
-        <p className="text-xs text-zinc-500">
-          Creates the given number of empty weeks, each pre-seeded with a recording + reading slot.
-          Starts as a draft — invisible to participants until published.
-        </p>
       </div>
     </form>
   );

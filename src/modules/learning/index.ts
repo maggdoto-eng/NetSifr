@@ -9,6 +9,7 @@ export {
   createProgram,
   duplicateProgram,
   updateCohortStatus,
+  updateCohortSettings,
   addWeek,
   reorderWeeks,
 } from './programs';
