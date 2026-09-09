@@ -60,6 +60,7 @@ export {
   type SyllabusWeek,
   type SyllabusModule,
 } from './syllabus';
+export { getProgressReport, type ProgressReport, type ProgressItem } from './progress-report';
 export type { ModuleState, ModuleStateTone } from './module-state';
 export { computeCohortAttendanceAverage, computeUserAttendancePercent } from './attendance-summary';
 export {
