@@ -1,13 +1,14 @@
 import Link from 'next/link';
 import { getDefaultOrganization } from '@/lib/org';
 import { getEventsForOrg } from '@/modules/events';
+import { AdminTopbar } from '../admin-topbar';
 import { NewEventForm } from './new-event-form';
 
-const STATUS_STYLES: Record<string, string> = {
-  DRAFT: 'bg-zinc-200 text-zinc-700',
-  LIVE: 'bg-emerald-200 text-emerald-900',
-  COMPLETED: 'bg-zinc-800 text-zinc-100',
-  CANCELLED: 'bg-red-200 text-red-900',
+const STATUS_PILL: Record<string, string> = {
+  DRAFT: 'pill pill--draft',
+  LIVE: 'pill pill--live',
+  COMPLETED: 'pill pill--archived',
+  CANCELLED: 'pill pill--due',
 };
 
 export default async function EventsPage() {
@@ -15,50 +16,42 @@ export default async function EventsPage() {
   const events = await getEventsForOrg(org.id);
 
   return (
-    <div className="flex flex-col gap-6 p-8">
-      <div>
-        <h1 className="text-2xl font-bold">Events</h1>
-        <p className="mt-1 max-w-xl text-sm text-zinc-600">
-          Self-service, discoverable activities — unlike Programs, anyone can register from Discover
-          without an invite.
-        </p>
+    <>
+      <AdminTopbar trail={[{ label: 'Events' }]} />
+      <div className="a-main stack">
+        <div>
+          <h1 className="display-lg">Events</h1>
+          <p className="lede" style={{ marginTop: 8 }}>
+            Self-service, discoverable activities — unlike Programs, anyone can register from
+            Discover without an invite.
+          </p>
+        </div>
+
+        <NewEventForm />
+
+        {events.length === 0 ? (
+          <div className="empty">No events yet — create the first one above.</div>
+        ) : (
+          <div className="prog-grid">
+            {events.map((event) => (
+              <Link key={event.id} href={`/admin/events/${event.id}`} className="card card--pick col" style={{ gap: 'var(--s3)' }}>
+                <h3 className="display-sm">{event.title}</h3>
+                <p className="muted truncate" style={{ fontSize: 14 }}>
+                  {event.description}
+                </p>
+                <div className="row wrap" style={{ gap: 'var(--s2)' }}>
+                  {event.occurrences.length === 0 && <span className="pill">No occurrences yet</span>}
+                  {event.occurrences.map((occ) => (
+                    <span key={occ.id} className={STATUS_PILL[occ.status]}>
+                      {occ.status}
+                    </span>
+                  ))}
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
-
-      <NewEventForm />
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {events.map((event) => (
-          <Link
-            key={event.id}
-            href={`/admin/events/${event.id}`}
-            className="flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 hover:border-zinc-400"
-          >
-            <h3 className="font-semibold leading-tight">{event.title}</h3>
-            <p className="line-clamp-2 text-sm text-zinc-600">{event.description}</p>
-            <div className="mt-1 flex flex-wrap gap-1.5">
-              {event.occurrences.length === 0 && (
-                <span className="rounded bg-zinc-100 px-2 py-0.5 font-mono text-[10px] text-zinc-500">
-                  NO OCCURRENCES YET
-                </span>
-              )}
-              {event.occurrences.map((occ) => (
-                <span
-                  key={occ.id}
-                  className={`rounded px-2 py-0.5 font-mono text-[10px] tracking-wide ${STATUS_STYLES[occ.status]}`}
-                >
-                  {occ.status}
-                </span>
-              ))}
-            </div>
-          </Link>
-        ))}
-      </div>
-
-      {events.length === 0 && (
-        <p className="rounded border-2 border-dashed border-zinc-300 p-6 text-center text-sm text-zinc-500">
-          No events yet — create the first one above.
-        </p>
-      )}
-    </div>
+    </>
   );
 }
