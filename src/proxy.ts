@@ -36,11 +36,16 @@ export default auth((req) => {
     return NextResponse.redirect(loginUrl);
   }
 
-  if (isAuthed && pathname === '/login') {
+  // Convenience: send an already-signed-in user from a login page to their app.
+  // Skip it when ?stale=1 is set — that marks a session whose DB user is gone
+  // (see getCurrentUser), so bouncing back into the app would loop forever.
+  const isStale = req.nextUrl.searchParams.has('stale');
+
+  if (isAuthed && pathname === '/login' && !isStale) {
     return NextResponse.redirect(new URL('/programs', req.nextUrl));
   }
 
-  if (isAuthed && pathname === '/admin/login') {
+  if (isAuthed && pathname === '/admin/login' && !isStale) {
     return NextResponse.redirect(new URL('/admin', req.nextUrl));
   }
 

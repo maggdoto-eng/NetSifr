@@ -22,7 +22,11 @@ export const verifySession = cache(async () => {
 export const getCurrentUser = cache(async () => {
   const { userId } = await verifySession();
   const user = await prisma.user.findUnique({ where: { id: userId } });
-  if (!user || user.status !== 'ACTIVE') redirect('/login');
+  // An orphaned/suspended session (valid JWT, but the user no longer exists or
+  // is inactive — e.g. after a DB re-seed or an account deletion) is sent to
+  // /login with ?stale=1 so the proxy does NOT bounce it back to an app route
+  // (which would loop). The stale cookie is replaced on the next sign-in.
+  if (!user || user.status !== 'ACTIVE') redirect('/login?stale=1');
   return user;
 });
 
