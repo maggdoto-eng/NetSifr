@@ -1,18 +1,18 @@
 import Link from 'next/link';
 import { addModuleAction, moveModuleAction, toggleModulePublishAction } from './actions';
 
-const TYPE_META: Record<string, { icon: string; label: string }> = {
-  RECORDING: { icon: '▶', label: 'RECORDING' },
-  READING: { icon: '▤', label: 'READING' },
-  QUIZ: { icon: '◉', label: 'QUIZ' },
-  ASSIGNMENT: { icon: '✎', label: 'ASSIGNMENT' },
+const TYPE_META: Record<string, { icon: string; label: string; cls: string }> = {
+  RECORDING: { icon: '▶', label: 'Recording', cls: 'mod-icon--recording' },
+  READING: { icon: '▤', label: 'Reading', cls: 'mod-icon--reading' },
+  QUIZ: { icon: '◉', label: 'Quiz', cls: 'mod-icon--quiz' },
+  ASSIGNMENT: { icon: '✎', label: 'Assignment', cls: 'mod-icon--assignment' },
 };
 
 const ADD_TYPES: Array<{ type: 'RECORDING' | 'READING' | 'QUIZ' | 'ASSIGNMENT'; label: string }> = [
-  { type: 'RECORDING', label: 'Recording' },
-  { type: 'READING', label: 'Reading' },
-  { type: 'QUIZ', label: 'Quiz' },
-  { type: 'ASSIGNMENT', label: 'Assignment' },
+  { type: 'RECORDING', label: '▶ Recording' },
+  { type: 'READING', label: '▤ Reading' },
+  { type: 'QUIZ', label: '◉ Quiz' },
+  { type: 'ASSIGNMENT', label: '✎ Assignment' },
 ];
 
 export function ModuleList(props: {
@@ -26,28 +26,33 @@ export function ModuleList(props: {
   const { programId, weekId, weekTitle, modules, selectedModuleId, locked } = props;
 
   if (!weekId) {
-    return <div className="flex-1 p-6 text-sm text-zinc-500">Add a week to get started.</div>;
+    return (
+      <div className="builder__canvas">
+        <div className="empty">Add a week to get started.</div>
+      </div>
+    );
   }
 
   return (
-    <div className="flex min-w-0 flex-1 flex-col gap-4 overflow-y-auto p-6">
+    <div className="builder__canvas">
       <div>
-        <div className="font-mono text-[10px] tracking-wide text-zinc-500">WEEK</div>
-        <h2 className="mt-1 text-xl font-bold">{weekTitle}</h2>
+        <div className="mono">Editing week</div>
+        <h2 className="display-md" style={{ marginTop: 4 }}>
+          {weekTitle}
+        </h2>
       </div>
 
-      <div className="flex flex-col gap-2">
+      <div className="col" style={{ gap: 'var(--s3)' }}>
         {modules.map((module, index) => {
           const meta = TYPE_META[module.type];
           return (
             <div
               key={module.id}
-              className={`flex items-center gap-3 rounded-lg border px-3 py-2 ${
-                module.id === selectedModuleId ? 'border-zinc-900' : 'border-zinc-200'
-              }`}
+              className="builder__row"
+              aria-current={module.id === selectedModuleId ? 'true' : undefined}
             >
               {!locked && (
-                <div className="flex flex-none flex-col text-xs text-zinc-400">
+                <span className="col" style={{ gap: 0 }}>
                   <form
                     action={moveModuleAction.bind(null, {
                       weekId,
@@ -56,7 +61,7 @@ export function ModuleList(props: {
                       programId,
                     })}
                   >
-                    <button type="submit" disabled={index === 0} className="disabled:opacity-30">
+                    <button type="submit" disabled={index === 0} aria-label="Move up" style={{ fontSize: 9, opacity: index === 0 ? 0.3 : 0.6 }}>
                       ▲
                     </button>
                   </form>
@@ -71,33 +76,34 @@ export function ModuleList(props: {
                     <button
                       type="submit"
                       disabled={index === modules.length - 1}
-                      className="disabled:opacity-30"
+                      aria-label="Move down"
+                      style={{ fontSize: 9, opacity: index === modules.length - 1 ? 0.3 : 0.6 }}
                     >
                       ▼
                     </button>
                   </form>
-                </div>
+                </span>
               )}
-              <span className="flex h-9 w-9 flex-none items-center justify-center rounded-lg bg-zinc-100 text-base">
-                {meta?.icon}
-              </span>
+              <span className={`mod-icon ${meta?.cls ?? ''}`}>{meta?.icon}</span>
               <Link
                 href={`/admin/programs/${programId}/builder?week=${weekId}&module=${module.id}`}
-                className="min-w-0 flex-1"
+                className="grow truncate"
+                style={{ color: 'inherit' }}
               >
-                <div className="truncate text-sm font-semibold">{module.title}</div>
-                <div className="font-mono text-[10px] text-zinc-500">{meta?.label}</div>
+                <div style={{ fontWeight: 700 }} className="truncate">
+                  {module.title}
+                </div>
+                <div className="mono" style={{ marginTop: 2 }}>
+                  {meta?.label}
+                </div>
               </Link>
               <form action={toggleModulePublishAction.bind(null, module.id, programId)}>
                 <button
                   type="submit"
-                  className={`rounded px-2 py-1 font-mono text-[10px] ${
-                    module.isPublished
-                      ? 'bg-emerald-200 text-emerald-900'
-                      : 'bg-zinc-200 text-zinc-600'
-                  }`}
+                  className={module.isPublished ? 'pill pill--done' : 'pill pill--draft'}
+                  style={{ cursor: 'pointer' }}
                 >
-                  {module.isPublished ? 'PUBLISHED' : 'DRAFT'}
+                  {module.isPublished ? 'Published' : 'Draft'}
                 </button>
               </form>
             </div>
@@ -105,33 +111,29 @@ export function ModuleList(props: {
         })}
       </div>
 
-      {!locked && (
-        <div className="flex items-center justify-center gap-2 rounded-xl border-2 border-dashed border-zinc-300 p-4">
-          <span className="font-mono text-[11px] text-zinc-500">ADD MODULE</span>
-          <div className="flex gap-2">
-            {ADD_TYPES.map((t) => (
-              <form
-                key={t.type}
-                action={addModuleAction.bind(null, { weekId, type: t.type, programId })}
-              >
-                <button
-                  type="submit"
-                  className="rounded-md border border-zinc-300 bg-zinc-50 px-3 py-1 text-sm"
-                >
-                  {t.label}
-                </button>
-              </form>
-            ))}
-          </div>
+      {!locked ? (
+        <div className="builder__add">
+          <span className="mono">Add module</span>
+          {ADD_TYPES.map((t) => (
+            <form key={t.type} action={addModuleAction.bind(null, { weekId, type: t.type, programId })}>
+              <button type="submit" className="btn btn--ghost btn--sm">
+                {t.label}
+              </button>
+            </form>
+          ))}
+        </div>
+      ) : (
+        <div className="card card--notice">
+          This program has learner activity, so its content is locked. Publish a new version to make
+          content changes (not built yet — publish state can still be toggled above).
         </div>
       )}
 
-      {locked && (
-        <p className="rounded-lg bg-zinc-100 p-3 text-xs text-zinc-600">
-          This program has learner activity, so its content is locked. Publish a new version to make
-          content changes (not built yet — publish state can still be toggled above).
-        </p>
-      )}
+      <div className="card card--notice">
+        Structure is shared across programs — <strong>Program → Week → Module</strong>. Content,
+        roster and settings belong to one program, so a new cohort is a new program, not a new build.
+        Unpublishing a module hides it from participants immediately.
+      </div>
     </div>
   );
 }

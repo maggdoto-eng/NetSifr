@@ -1,8 +1,16 @@
 import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
+import { AdminTopbar } from '../../../admin-topbar';
+import { publishProgramAction } from '../../actions';
 import { WeekList } from './week-list';
 import { ModuleList } from './module-list';
 import { ModuleInspector, type ModuleDetail } from './module-inspector';
+
+const STATUS_ORDER_PILL: Record<string, string> = {
+  DRAFT: 'pill pill--draft',
+  LIVE: 'pill pill--live',
+  ARCHIVED: 'pill pill--archived',
+};
 
 async function loadModuleDetail(moduleId: string, type: string): Promise<ModuleDetail | undefined> {
   if (type === 'RECORDING') {
@@ -64,6 +72,7 @@ export default async function BuilderPage({
   const cohort = await prisma.cohort.findUnique({
     where: { id: programId },
     include: {
+      opportunity: { select: { title: true } },
       courseVersion: {
         include: {
           weeks: {
@@ -87,7 +96,26 @@ export default async function BuilderPage({
     : undefined;
 
   return (
-    <div className="flex h-full min-h-0">
+    <>
+      <AdminTopbar
+        trail={[
+          { label: 'Programs', href: '/admin/programs' },
+          {
+            label: `${cohort.cohortLabel} — ${cohort.opportunity.title}`,
+            pill: <span className={STATUS_ORDER_PILL[cohort.status]}>{cohort.status}</span>,
+          },
+        ]}
+        actions={
+          cohort.status === 'DRAFT' ? (
+            <form action={publishProgramAction.bind(null, programId)}>
+              <button type="submit" className="btn btn--primary btn--sm">
+                Publish program
+              </button>
+            </form>
+          ) : undefined
+        }
+      />
+      <div className="builder">
       <WeekList
         programId={programId}
         courseVersionId={cohort.courseVersionId}
@@ -133,6 +161,7 @@ export default async function BuilderPage({
         detail={moduleDetail}
         locked={locked}
       />
-    </div>
+      </div>
+    </>
   );
 }

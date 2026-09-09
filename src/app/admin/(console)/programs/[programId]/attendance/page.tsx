@@ -1,12 +1,15 @@
 import Link from 'next/link';
-import { getCohortRoster } from '@/modules/learning';
+import { notFound } from 'next/navigation';
+import { prisma } from '@/lib/prisma';
+import { getCohortRoster, getSubmissionsForCohort } from '@/modules/learning';
 import { requireAdminContext } from '@/app/admin/action-context';
+import { AdminTopbar } from '../../../admin-topbar';
 import { overrideAttendanceAction } from './actions';
 
-const METHOD_LABEL: Record<string, string> = {
-  ENGAGEMENT_PROXY: 'Proxy',
-  ADMIN_OVERRIDE: 'Override',
-  LIVE_ATTENDANCE: 'Live',
+const STATUS_ORDER_PILL: Record<string, string> = {
+  DRAFT: 'pill pill--draft',
+  LIVE: 'pill pill--live',
+  ARCHIVED: 'pill pill--archived',
 };
 
 export default async function AttendancePage({
@@ -14,108 +17,137 @@ export default async function AttendancePage({
 }: PageProps<'/admin/programs/[programId]/attendance'>) {
   const { programId } = await params;
   const { organizationId } = await requireAdminContext();
-  const { recordings, rows } = await getCohortRoster(programId, organizationId);
+
+  const cohort = await prisma.cohort.findFirst({
+    where: { id: programId, organizationId },
+    include: { opportunity: { select: { title: true } } },
+  });
+  if (!cohort) notFound();
+
+  const [{ recordings, rows }, submissions] = await Promise.all([
+    getCohortRoster(programId, organizationId),
+    getSubmissionsForCohort(programId, organizationId),
+  ]);
+
+  const enrolled = rows.length;
+  const avgAttendance =
+    enrolled === 0 ? 0 : Math.round(rows.reduce((s, r) => s + r.attendancePercent, 0) / enrolled);
+  const atRisk = rows.filter((r) => r.attendancePercent < 50).length;
+  const toGrade = submissions.filter((s) => !s.grade).length;
+
+  const gridCols = '2.2fr 1fr 1.6fr 1fr';
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-4 p-8">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold">Attendance</h2>
-        <Link
-          href={`/admin/programs/${programId}/attendance/export`}
-          className="rounded bg-zinc-900 px-4 py-2 text-sm font-medium text-white"
-        >
-          Export CSV
-        </Link>
-      </div>
+    <>
+      <AdminTopbar
+        trail={[
+          { label: 'Programs', href: '/admin/programs' },
+          {
+            label: `${cohort.cohortLabel} — ${cohort.opportunity.title}`,
+            pill: <span className={STATUS_ORDER_PILL[cohort.status]}>{cohort.status}</span>,
+          },
+        ]}
+        actions={
+          <Link
+            href={`/admin/programs/${programId}/attendance/export`}
+            className="btn btn--accent btn--sm"
+          >
+            Export CSV for partners
+          </Link>
+        }
+      />
+      <div className="a-main stack">
+        <div className="a-stats">
+          <div className="a-stat">
+            <div className="a-stat__value">{enrolled}</div>
+            <div className="mono" style={{ marginTop: 6 }}>
+              Enrolled
+            </div>
+          </div>
+          <div className="a-stat a-stat--dark">
+            <div className="a-stat__value">{enrolled === 0 ? '—' : `${avgAttendance}%`}</div>
+            <div className="mono" style={{ marginTop: 6 }}>
+              Avg attendance
+            </div>
+          </div>
+          <div className="a-stat">
+            <div className="a-stat__value">{toGrade}</div>
+            <div className="mono" style={{ marginTop: 6 }}>
+              To grade
+            </div>
+          </div>
+          <div className={`a-stat ${atRisk > 0 ? 'a-stat--alert' : ''}`}>
+            <div className="a-stat__value">{atRisk}</div>
+            <div className="mono" style={{ marginTop: 6 }}>
+              At risk · missed half
+            </div>
+          </div>
+        </div>
 
-      {recordings.length === 0 ? (
-        <p className="rounded-lg border-2 border-dashed border-zinc-300 p-6 text-center text-sm text-zinc-500">
-          No recordings published yet.
-        </p>
-      ) : (
-        <div className="min-h-0 flex-1 overflow-auto rounded-lg border border-zinc-200">
-          <table className="w-full min-w-max border-collapse text-sm">
-            <thead>
-              <tr className="sticky top-0 bg-zinc-50 text-left">
-                <th className="border-b border-zinc-200 px-4 py-2 font-mono text-[10px] text-zinc-500">
-                  NAME
-                </th>
-                <th className="border-b border-zinc-200 px-4 py-2 font-mono text-[10px] text-zinc-500">
-                  EMAIL
-                </th>
-                <th className="border-b border-zinc-200 px-4 py-2 font-mono text-[10px] text-zinc-500">
-                  STATUS
-                </th>
-                <th className="border-b border-zinc-200 px-4 py-2 font-mono text-[10px] text-zinc-500">
-                  ATTENDANCE %
-                </th>
-                {recordings.map((r) => (
-                  <th
-                    key={r.moduleId}
-                    className="min-w-40 border-b border-zinc-200 px-4 py-2 font-mono text-[10px] text-zinc-500"
-                  >
-                    {r.title}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
+        {recordings.length === 0 ? (
+          <div className="empty">No recordings published yet.</div>
+        ) : rows.length === 0 ? (
+          <div className="empty">Nobody enrolled yet.</div>
+        ) : (
+          <div className="card" style={{ padding: 0, overflowX: 'auto' }}>
+            <div style={{ minWidth: 640 }}>
+              <div
+                className="table__head"
+                style={{ gridTemplateColumns: gridCols, borderBottom: '2px solid var(--ink)' }}
+              >
+                <span className="mono">Participant</span>
+                <span className="mono">Attend</span>
+                <span className="mono">Weeks 1–{recordings.length}</span>
+                <span className="mono">Status</span>
+              </div>
               {rows.map((row) => (
-                <tr key={row.enrolmentId} className="border-b border-zinc-100 last:border-0">
-                  <td className="px-4 py-3 font-medium">{row.name}</td>
-                  <td className="px-4 py-3 text-zinc-600">{row.email}</td>
-                  <td className="px-4 py-3 text-zinc-600">{row.status}</td>
-                  <td className="px-4 py-3 text-zinc-600">{row.attendancePercent}%</td>
-                  {row.recordings.map((r) => (
-                    <td key={r.moduleId} className="px-4 py-3">
-                      {r.confirmedAt ? (
-                        <span
-                          className="rounded bg-emerald-100 px-2 py-0.5 font-mono text-[10px] text-emerald-800"
+                <div
+                  key={row.enrolmentId}
+                  className="table__row"
+                  style={{ gridTemplateColumns: gridCols }}
+                >
+                  <span style={{ fontWeight: 600 }} className="truncate">
+                    {row.name}
+                  </span>
+                  <span className="figure">{row.attendancePercent}%</span>
+                  <span className="heat">
+                    {row.recordings.map((r) =>
+                      r.confirmedAt ? (
+                        <i
+                          key={r.moduleId}
+                          className="on"
                           title={`${Math.round(r.engagedSeconds / 60)} min engaged`}
-                        >
-                          ✓ {METHOD_LABEL[r.method ?? ''] ?? r.method}
-                        </span>
+                        />
                       ) : (
                         <form
+                          key={r.moduleId}
                           action={overrideAttendanceAction.bind(null, {
                             cohortId: programId,
                             userId: row.userId,
                             recordingModuleId: r.moduleId,
                           })}
-                          className="flex items-center gap-1"
+                          style={{ display: 'inline-flex' }}
                         >
-                          <input
-                            name="note"
-                            type="text"
-                            placeholder="Note (optional)"
-                            className="w-28 rounded border border-zinc-300 px-1.5 py-1 text-xs"
-                          />
                           <button
                             type="submit"
-                            className="flex-none rounded bg-zinc-200 px-2 py-1 text-xs font-medium text-zinc-700 hover:bg-zinc-300"
+                            title="Mark attended (admin override)"
+                            aria-label="Mark attended"
+                            className="heat"
+                            style={{ padding: 0, border: 0, background: 'none' }}
                           >
-                            Override
+                            <i className="miss" />
                           </button>
                         </form>
-                      )}
-                    </td>
-                  ))}
-                </tr>
+                      ),
+                    )}
+                  </span>
+                  <span className="mono">{row.status}</span>
+                </div>
               ))}
-              {rows.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={4 + recordings.length}
-                    className="px-4 py-8 text-center text-zinc-500"
-                  >
-                    Nobody enrolled yet.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </>
   );
 }

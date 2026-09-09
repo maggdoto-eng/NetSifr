@@ -1,21 +1,30 @@
+import { notFound } from 'next/navigation';
+import { prisma } from '@/lib/prisma';
 import { getInvitationsForCohort } from '@/modules/learning';
 import { requireAdminContext } from '@/app/admin/action-context';
+import { AdminTopbar } from '../../../admin-topbar';
 import { InviteForm } from './invite-form';
 
 const STATUS_LABEL: Record<string, string> = {
-  PENDING: 'SENT',
-  ACCEPTED: 'USED',
-  DECLINED: 'DECLINED',
-  EXPIRED: 'EXPIRED',
-  REVOKED: 'REVOKED',
+  PENDING: 'Sent',
+  ACCEPTED: 'Used',
+  DECLINED: 'Declined',
+  EXPIRED: 'Expired',
+  REVOKED: 'Revoked',
 };
 
-const STATUS_STYLE: Record<string, string> = {
-  PENDING: 'bg-zinc-200 text-zinc-700',
-  ACCEPTED: 'bg-emerald-200 text-emerald-900',
-  DECLINED: 'bg-zinc-200 text-zinc-500',
-  EXPIRED: 'bg-zinc-200 text-zinc-500',
-  REVOKED: 'bg-zinc-200 text-zinc-500',
+const STATUS_PILL: Record<string, string> = {
+  PENDING: 'pill pill--due',
+  ACCEPTED: 'pill pill--done',
+  DECLINED: 'pill pill--archived',
+  EXPIRED: 'pill pill--archived',
+  REVOKED: 'pill pill--archived',
+};
+
+const STATUS_ORDER_PILL: Record<string, string> = {
+  DRAFT: 'pill pill--draft',
+  LIVE: 'pill pill--live',
+  ARCHIVED: 'pill pill--archived',
 };
 
 export default async function InvitesPage({
@@ -23,37 +32,52 @@ export default async function InvitesPage({
 }: PageProps<'/admin/programs/[programId]/invites'>) {
   const { programId } = await params;
   const { organizationId } = await requireAdminContext();
+
+  const cohort = await prisma.cohort.findFirst({
+    where: { id: programId, organizationId },
+    include: { opportunity: { select: { title: true } } },
+  });
+  if (!cohort) notFound();
+
   const invites = await getInvitationsForCohort(programId, organizationId);
 
   return (
-    <div className="flex h-full min-h-0 gap-8 overflow-y-auto p-8">
-      <InviteForm cohortId={programId} />
+    <>
+      <AdminTopbar
+        trail={[
+          { label: 'Programs', href: '/admin/programs' },
+          {
+            label: `${cohort.cohortLabel} — ${cohort.opportunity.title}`,
+            pill: <span className={STATUS_ORDER_PILL[cohort.status]}>{cohort.status}</span>,
+          },
+        ]}
+      />
+      <div className="a-main">
+        <div className="split">
+          <InviteForm cohortId={programId} cohortLabel={cohort.cohortLabel} isDraft={cohort.status === 'DRAFT'} />
 
-      <div className="flex min-w-0 flex-1 flex-col gap-3">
-        <div className="font-mono text-[10px] tracking-wide text-zinc-500">
-          SENT FOR THIS PROGRAM · {invites.length}
-        </div>
-        {invites.map((invite) => (
-          <div key={invite.id} className="flex items-center gap-3 rounded-lg bg-zinc-50 px-4 py-3">
-            <div className="min-w-0 flex-1">
-              <div className="truncate text-sm font-medium">{invite.normalizedEmail}</div>
-              <div className="font-mono text-[10px] text-zinc-500">
-                SENT {invite.createdAt.toLocaleDateString()}
-              </div>
-            </div>
-            <span
-              className={`rounded px-2 py-0.5 font-mono text-[10px] tracking-wide ${STATUS_STYLE[invite.status]}`}
-            >
-              {STATUS_LABEL[invite.status]}
-            </span>
+          <div className="stack">
+            <div className="mono">Sent for this program · {invites.length}</div>
+            {invites.length === 0 ? (
+              <div className="empty">Nobody invited to this program yet.</div>
+            ) : (
+              invites.map((invite) => (
+                <div key={invite.id} className="card card--pad-sm row">
+                  <div className="grow">
+                    <div className="truncate" style={{ fontWeight: 500 }}>
+                      {invite.normalizedEmail}
+                    </div>
+                    <div className="mono" style={{ marginTop: 2 }}>
+                      Sent {invite.createdAt.toLocaleDateString()}
+                    </div>
+                  </div>
+                  <span className={STATUS_PILL[invite.status]}>{STATUS_LABEL[invite.status]}</span>
+                </div>
+              ))
+            )}
           </div>
-        ))}
-        {invites.length === 0 && (
-          <p className="rounded-lg border-2 border-dashed border-zinc-300 p-6 text-center text-sm text-zinc-500">
-            Nobody invited to this program yet.
-          </p>
-        )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

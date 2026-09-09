@@ -11,80 +11,78 @@ export function WeekList(props: {
   const { programId, courseVersionId, weeks, selectedWeekId, locked } = props;
 
   return (
-    <div className="flex w-72 flex-none flex-col gap-2 overflow-y-auto border-r border-zinc-200 bg-zinc-50 p-4">
-      <div className="flex items-center justify-between px-1">
-        <span className="font-mono text-[10px] tracking-wide text-zinc-500">
-          WEEKS · {weeks.length}
-        </span>
+    <div className="builder__weeks">
+      <div className="row row--between" style={{ padding: '0 4px var(--s3)' }}>
+        <span className="mono">Weeks · {weeks.length}</span>
         {!locked && (
           <form action={addWeekAction.bind(null, courseVersionId, programId)}>
-            <button type="submit" className="font-mono text-xs font-semibold text-orange-600">
-              + ADD
+            <button type="submit" className="mono mono--coral" style={{ fontWeight: 700 }}>
+              + Add
             </button>
           </form>
         )}
       </div>
 
-      {weeks.map((week, index) => (
-        <div
-          key={week.id}
-          className={`flex items-center gap-2 rounded-lg px-3 py-2 ${
-            week.id === selectedWeekId ? 'bg-zinc-900 text-white' : 'bg-white'
-          }`}
-        >
-          <Link
-            href={`/admin/programs/${programId}/builder?week=${week.id}`}
-            className="min-w-0 flex-1"
+      <div className="col" style={{ gap: 2 }}>
+        {weeks.map((week, index) => (
+          <div
+            key={week.id}
+            className="week-item"
+            aria-current={week.id === selectedWeekId ? 'true' : undefined}
           >
-            <div className="truncate text-sm font-medium">
-              {index + 1}. {week.title}
-            </div>
-            <div
-              className={`font-mono text-[10px] ${week.id === selectedWeekId ? 'text-zinc-300' : 'text-zinc-500'}`}
+            <span className="grip" aria-hidden>
+              ⠿
+            </span>
+            <span className="week-item__n">{String(index + 1).padStart(2, '0')}</span>
+            <Link
+              href={`/admin/programs/${programId}/builder?week=${week.id}`}
+              className="grow truncate"
+              style={{ color: 'inherit' }}
             >
-              {week.moduleCount} module{week.moduleCount === 1 ? '' : 's'}
-            </div>
-          </Link>
-          {!locked && (
-            <div className="flex flex-none flex-col">
-              <form
-                action={moveWeekAction.bind(null, {
-                  courseVersionId,
-                  weekId: week.id,
-                  direction: 'up',
-                  programId,
-                })}
-              >
-                <button
-                  type="submit"
-                  disabled={index === 0}
-                  className={`text-xs disabled:opacity-30 ${week.id === selectedWeekId ? 'text-white' : ''}`}
-                  aria-label="Move week up"
+              {week.title}
+            </Link>
+            <span className="mono">{week.moduleCount}</span>
+            {!locked && (
+              <span className="col" style={{ gap: 0, marginLeft: 4 }}>
+                <form
+                  action={moveWeekAction.bind(null, {
+                    courseVersionId,
+                    weekId: week.id,
+                    direction: 'up',
+                    programId,
+                  })}
                 >
-                  ▲
-                </button>
-              </form>
-              <form
-                action={moveWeekAction.bind(null, {
-                  courseVersionId,
-                  weekId: week.id,
-                  direction: 'down',
-                  programId,
-                })}
-              >
-                <button
-                  type="submit"
-                  disabled={index === weeks.length - 1}
-                  className={`text-xs disabled:opacity-30 ${week.id === selectedWeekId ? 'text-white' : ''}`}
-                  aria-label="Move week down"
+                  <button
+                    type="submit"
+                    disabled={index === 0}
+                    aria-label="Move week up"
+                    style={{ fontSize: 9, opacity: index === 0 ? 0.3 : 0.6 }}
+                  >
+                    ▲
+                  </button>
+                </form>
+                <form
+                  action={moveWeekAction.bind(null, {
+                    courseVersionId,
+                    weekId: week.id,
+                    direction: 'down',
+                    programId,
+                  })}
                 >
-                  ▼
-                </button>
-              </form>
-            </div>
-          )}
-        </div>
-      ))}
+                  <button
+                    type="submit"
+                    disabled={index === weeks.length - 1}
+                    aria-label="Move week down"
+                    style={{ fontSize: 9, opacity: index === weeks.length - 1 ? 0.3 : 0.6 }}
+                  >
+                    ▼
+                  </button>
+                </form>
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

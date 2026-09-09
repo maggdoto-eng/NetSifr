@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useState } from 'react';
 import { saveModuleAction, deleteModuleAction } from './actions';
 import { QuizQuestionsEditor } from './quiz-questions-editor';
 
@@ -14,6 +14,13 @@ export type ModuleDetail =
       questions: Array<{ prompt: string; options: Array<{ label: string; isCorrect: boolean }> }>;
     };
 
+const TYPE_META: Record<string, { icon: string; label: string; cls: string }> = {
+  RECORDING: { icon: '▶', label: 'Recording', cls: 'mod-icon--recording' },
+  READING: { icon: '▤', label: 'Reading', cls: 'mod-icon--reading' },
+  QUIZ: { icon: '◉', label: 'Quiz', cls: 'mod-icon--quiz' },
+  ASSIGNMENT: { icon: '✎', label: 'Assignment', cls: 'mod-icon--assignment' },
+};
+
 export function ModuleInspector(props: {
   programId: string;
   weekId: string;
@@ -23,117 +30,126 @@ export function ModuleInspector(props: {
 }) {
   const { programId, weekId, module: mod, detail, locked } = props;
   const [state, action, pending] = useActionState(saveModuleAction, undefined);
+  const [published, setPublished] = useState(mod?.isPublished ?? false);
 
   if (!mod || !detail) {
     return (
-      <div className="w-80 flex-none border-l border-zinc-200 bg-zinc-50 p-5 text-sm text-zinc-500">
-        Select a module to edit it.
+      <div className="builder__inspector">
+        <div className="muted" style={{ fontSize: 14 }}>
+          Select a module to edit it.
+        </div>
       </div>
     );
   }
 
-  return (
-    <div className="flex w-80 flex-none flex-col gap-4 overflow-y-auto border-l border-zinc-200 bg-zinc-50 p-5">
-      <div className="font-mono text-[10px] tracking-wide text-zinc-500">MODULE INSPECTOR</div>
+  const meta = TYPE_META[detail.type];
 
-      <form action={action} className="flex flex-col gap-3">
+  return (
+    <div className="builder__inspector">
+      <div className="mono">Module inspector</div>
+
+      <div className="row">
+        <span className={`mod-icon ${meta?.cls ?? ''}`}>{meta?.icon}</span>
+        <div className="title">{meta?.label}</div>
+      </div>
+
+      <form action={action} className="stack" style={{ gap: 'var(--s4)' }}>
         <input type="hidden" name="moduleId" value={mod.id} />
         <input type="hidden" name="weekId" value={weekId} />
         <input type="hidden" name="programId" value={programId} />
         <input type="hidden" name="type" value={detail.type} />
 
-        <div className="flex flex-col gap-1">
-          <label className="font-mono text-[10px] text-zinc-500">TITLE</label>
-          <input
-            name="title"
-            defaultValue={mod.title}
-            disabled={locked}
-            className="rounded border border-zinc-300 px-3 py-2 text-sm disabled:bg-zinc-100"
-          />
+        <div className="field">
+          <label className="mono">Title</label>
+          <input name="title" defaultValue={mod.title} disabled={locked} />
         </div>
 
         {detail.type === 'RECORDING' && (
           <>
-            <div className="flex flex-col gap-1">
-              <label className="font-mono text-[10px] text-zinc-500">GOOGLE DRIVE FILE ID</label>
+            <div className="field">
+              <label className="mono">Google Drive file ID</label>
               <input
                 name="driveFileId"
                 defaultValue={detail.driveFileId}
                 disabled={locked}
-                className="rounded border border-zinc-300 px-3 py-2 font-mono text-xs disabled:bg-zinc-100"
+                className="figure"
+                style={{ fontSize: 13 }}
               />
+              <span className="mono" style={{ color: 'var(--pine)' }}>
+                Sharing must be “anyone with the link · viewer”
+              </span>
             </div>
-            <div className="flex flex-col gap-1">
-              <label className="font-mono text-[10px] text-zinc-500">
-                ATTENDANCE RULE OVERRIDE (MINUTES, BLANK = USE PROGRAM DEFAULT)
-              </label>
-              <input
-                name="unlockMinutesOverride"
-                type="number"
-                min={0}
-                defaultValue={detail.unlockMinutesOverride ?? ''}
-                disabled={locked}
-                className="rounded border border-zinc-300 px-3 py-2 text-sm disabled:bg-zinc-100"
-              />
+            <div className="field">
+              <label className="mono">Attendance rule · this program</label>
+              <div className="row">
+                <span style={{ fontSize: 14 }}>Self-mark after</span>
+                <input
+                  name="unlockMinutesOverride"
+                  type="number"
+                  min={0}
+                  defaultValue={detail.unlockMinutesOverride ?? ''}
+                  disabled={locked}
+                  placeholder="default"
+                  style={{ width: 90 }}
+                />
+                <span className="mono">min</span>
+              </div>
+            </div>
+            <div className="placeholder" style={{ height: 130 }}>
+              <span className="mono mono--onDark">Embed preview</span>
             </div>
           </>
         )}
 
         {detail.type === 'READING' && (
-          <div className="flex flex-col gap-1">
-            <label className="font-mono text-[10px] text-zinc-500">CONTENT URL</label>
-            <input
-              name="contentUrl"
-              defaultValue={detail.contentUrl}
-              disabled={locked}
-              className="rounded border border-zinc-300 px-3 py-2 text-sm disabled:bg-zinc-100"
-            />
+          <div className="field">
+            <label className="mono">Content URL</label>
+            <input name="contentUrl" defaultValue={detail.contentUrl} disabled={locked} />
           </div>
         )}
 
         {detail.type === 'ASSIGNMENT' && (
           <>
-            <div className="flex flex-col gap-1">
-              <label className="font-mono text-[10px] text-zinc-500">PROMPT</label>
-              <textarea
-                name="prompt"
-                defaultValue={detail.prompt}
-                disabled={locked}
-                rows={4}
-                className="rounded border border-zinc-300 px-3 py-2 text-sm disabled:bg-zinc-100"
-              />
+            <div className="field">
+              <label className="mono">Prompt</label>
+              <textarea name="prompt" defaultValue={detail.prompt} disabled={locked} rows={4} />
             </div>
-            <div className="flex flex-col gap-1">
-              <label className="font-mono text-[10px] text-zinc-500">SOFT DEADLINE</label>
+            <div className="field">
+              <label className="mono">Soft deadline</label>
               <input
                 name="softDeadline"
                 type="datetime-local"
                 defaultValue={detail.softDeadline}
                 disabled={locked}
-                className="rounded border border-zinc-300 px-3 py-2 text-sm disabled:bg-zinc-100"
               />
             </div>
           </>
         )}
 
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" name="isPublished" defaultChecked={mod.isPublished} />
-          Published
-        </label>
+        <div className="card row row--between" style={{ padding: 'var(--s3) var(--s4)' }}>
+          <span style={{ fontWeight: 600 }}>Published</span>
+          <button
+            type="button"
+            className="switch"
+            role="switch"
+            aria-checked={published}
+            aria-disabled={locked}
+            onClick={() => !locked && setPublished((p) => !p)}
+          >
+            <i />
+          </button>
+          {published && <input type="hidden" name="isPublished" value="on" />}
+        </div>
 
-        {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
+        {state?.error && <p style={{ color: 'var(--coral)', fontSize: 14 }}>{state.error}</p>}
 
-        <button
-          type="submit"
-          disabled={pending}
-          className="rounded bg-zinc-900 px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
-        >
+        <button type="submit" disabled={pending} className="btn btn--primary btn--block">
           {pending ? 'Saving…' : 'Save module'}
         </button>
       </form>
 
       <form action={deleteModuleAction.bind(null, { moduleId: mod.id, weekId, programId })}>
-        <button type="submit" className="w-full rounded border border-zinc-300 px-3 py-2 text-sm">
+        <button type="submit" className="btn btn--ghost btn--block">
           Delete module
         </button>
       </form>
