@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import {
   updateCohortSettings,
   updateCohortStatus,
+  markCohortEnrolmentsComplete,
 } from '@/modules/learning';
 import { requireAdminContext } from '@/app/admin/action-context';
 
@@ -46,6 +47,13 @@ export async function setStatusAction(
 ): Promise<void> {
   const { userId, organizationId } = await requireAdminContext();
   await updateCohortStatus({ cohortId, organizationId, actingUserId: userId, status });
+  revalidatePath(`/admin/programs/${cohortId}/settings`);
+  revalidatePath('/admin/programs');
+}
+
+export async function completeCohortAction(cohortId: string): Promise<void> {
+  const { userId, organizationId } = await requireAdminContext();
+  await markCohortEnrolmentsComplete({ cohortId, organizationId, actingUserId: userId });
   revalidatePath(`/admin/programs/${cohortId}/settings`);
   revalidatePath('/admin/programs');
 }

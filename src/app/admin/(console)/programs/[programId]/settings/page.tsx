@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { getDefaultOrganization } from '@/lib/org';
 import { AdminTopbar } from '../../../admin-topbar';
 import { SettingsForm } from './settings-form';
-import { setStatusAction } from './actions';
+import { setStatusAction, completeCohortAction } from './actions';
 
 const STATUS_PILL: Record<string, string> = {
   DRAFT: 'pill pill--draft',
@@ -95,6 +95,19 @@ export default async function SettingsPage({
                   </button>
                 </form>
               )}
+            </div>
+
+            <div className="card stack">
+              <div className="mono">Completion</div>
+              <p className="muted" style={{ fontSize: 14, margin: 0 }}>
+                Marks every active participant complete, unlocks their certificate, and notifies
+                them.
+              </p>
+              <form action={completeCohortAction.bind(null, cohort.id)}>
+                <button type="submit" className="btn btn--done btn--block">
+                  Mark cohort complete
+                </button>
+              </form>
             </div>
 
             <div className="card card--notice">

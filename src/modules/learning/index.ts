@@ -27,6 +27,7 @@ export {
   getActiveEnrolment,
   withdrawEnrolment,
   reinstateEnrolment,
+  markCohortEnrolmentsComplete,
 } from './enrolment';
 export { markReadingDone } from './reading';
 export { getQuizForTaking, submitQuizAttempt, QuizError } from './quiz';

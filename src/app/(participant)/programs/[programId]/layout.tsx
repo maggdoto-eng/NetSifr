@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { verifySession } from '@/lib/dal';
-import { getActiveEnrolment } from '@/modules/learning';
+import { getEnrolment } from '@/modules/learning';
 import { ProgramTabs } from './program-tabs';
 
 export default async function ProgramLayout({
@@ -12,8 +12,12 @@ export default async function ProgramLayout({
   const { programId } = await params;
   const { userId } = await verifySession();
 
-  const enrolment = await getActiveEnrolment(userId, programId);
-  if (!enrolment) notFound();
+  // Active and completed enrolments can both view the program (completed is
+  // read-only + gets the certificate). Withdrawn/declined cannot.
+  const enrolment = await getEnrolment(userId, programId);
+  if (!enrolment || (enrolment.status !== 'ACTIVE' && enrolment.status !== 'COMPLETED')) {
+    notFound();
+  }
 
   const cohort = await prisma.cohort.findUnique({
     where: { id: programId },

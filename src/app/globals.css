@@ -1347,3 +1347,29 @@ textarea::placeholder {
     background-position: 0 50%;
   }
 }
+
+/* Certificate print: hide app chrome so only the certificate prints. */
+@media print {
+  .p-topbar,
+  .tabs,
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+  }
+  .certificate {
+    box-shadow: none !important;
+    border-width: 2px !important;
+  }
+}
+.certificate {
+  border: 3px solid var(--pine);
+  border-radius: var(--r-card);
+  background: var(--bg-card);
+  padding: var(--s8) var(--s7);
+  text-align: center;
+  box-shadow: var(--shadow-float);
+  position: relative;
+  overflow: hidden;
+}

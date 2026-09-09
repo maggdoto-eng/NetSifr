@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { verifySession } from '@/lib/dal';
-import { getSyllabus, computeUserAttendancePercent } from '@/modules/learning';
+import { getSyllabus, computeUserAttendancePercent, getEnrolment } from '@/modules/learning';
 import { getCohortPoints, getCohortStreak } from '@/modules/recognition';
 import { getAnnouncementsForCohort } from '@/modules/communications';
 
@@ -34,14 +34,17 @@ export default async function ProgramHomePage({ params }: PageProps<'/programs/[
   const cohort = await prisma.cohort.findUnique({ where: { id: programId } });
   if (!cohort) notFound();
 
-  const [user, syllabus, attendancePercent, points, streak, announcements] = await Promise.all([
-    prisma.user.findUniqueOrThrow({ where: { id: userId } }),
-    getSyllabus(userId, programId),
-    computeUserAttendancePercent(userId, programId),
-    getCohortPoints(userId, programId),
-    getCohortStreak(userId, programId),
-    getAnnouncementsForCohort(programId, 3),
-  ]);
+  const [user, syllabus, attendancePercent, points, streak, announcements, enrolment] =
+    await Promise.all([
+      prisma.user.findUniqueOrThrow({ where: { id: userId } }),
+      getSyllabus(userId, programId),
+      computeUserAttendancePercent(userId, programId),
+      getCohortPoints(userId, programId),
+      getCohortStreak(userId, programId),
+      getAnnouncementsForCohort(programId, 3),
+      getEnrolment(userId, programId),
+    ]);
+  const completed = enrolment?.status === 'COMPLETED';
 
   const currentWeek = syllabus.weeks.find((w) => w.current);
   const next = syllabus.nextModule;
@@ -57,6 +60,20 @@ export default async function ProgramHomePage({ params }: PageProps<'/programs/[
 
   return (
     <div className="stack">
+      {completed && (
+        <div className="card card--invite row row--between wrap" style={{ gap: 'var(--s3)' }}>
+          <div>
+            <div className="title">🎉 Course complete</div>
+            <div className="muted" style={{ fontSize: 14, marginTop: 2 }}>
+              You’ve finished this program. Your certificate is ready.
+            </div>
+          </div>
+          <Link href={`/programs/${programId}/certificate`} className="btn btn--accent">
+            View certificate
+          </Link>
+        </div>
+      )}
+
       {/* Progress hero */}
       <div className="p-hero contour">
         <div className="mono mono--onDark">
