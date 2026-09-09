@@ -1326,3 +1326,24 @@ textarea::placeholder {
   font-weight: 600;
   font-size: 20px;
 }
+
+/* Skeleton shimmer for loading.tsx instant-navigation placeholders. */
+.skel {
+  background: linear-gradient(
+    90deg,
+    var(--bg-sunk) 25%,
+    var(--fill-inactive) 37%,
+    var(--bg-sunk) 63%
+  );
+  background-size: 400% 100%;
+  border-radius: 8px;
+  animation: skel 1.2s ease infinite;
+}
+@keyframes skel {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
