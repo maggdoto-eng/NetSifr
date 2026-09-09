@@ -12,20 +12,20 @@ export default async function JoinPage({ params, searchParams }: PageProps<'/joi
 
   const preview = await previewInvitationByToken(token);
   if (!preview) {
-    return <p className="text-sm text-red-600">This invite link is invalid.</p>;
+    return <p style={{ color: 'var(--coral)', fontSize: 14 }}>This invite link is invalid.</p>;
   }
 
   const { invitation, cohort } = preview;
 
   if (invitation.status === 'EXPIRED') {
     return (
-      <p className="text-sm text-red-600">
+      <p style={{ color: 'var(--coral)', fontSize: 14 }}>
         This invite has expired. Ask your facilitator to resend it.
       </p>
     );
   }
   if (invitation.status !== 'PENDING') {
-    return <p className="text-sm text-zinc-600">This invite has already been used.</p>;
+    return <p className="muted" style={{ fontSize: 14 }}>This invite has already been used.</p>;
   }
 
   const title = cohort.opportunity.title;

@@ -18,17 +18,17 @@ export function LoginAndAcceptForm({
   );
 
   return (
-    <form action={action} className="flex flex-col gap-4">
+    <form action={action} className="stack">
       <div>
-        <h1 className="text-xl font-semibold">You&apos;re invited</h1>
-        <p className="mt-1 text-sm text-zinc-600">
+        <h1 className="display-sm">You’re invited</h1>
+        <p className="muted" style={{ fontSize: 14, marginTop: 4 }}>
           Join <strong>{title}</strong>. You already have a NetSifr account for{' '}
-          <span className="font-mono text-xs">{email}</span> — log in to accept.
+          <span className="mono">{email}</span> — log in to accept.
         </p>
       </div>
 
-      <div className="flex flex-col gap-1">
-        <label htmlFor="password" className="text-sm font-medium">
+      <div className="field">
+        <label htmlFor="password" className="mono">
           Password
         </label>
         <input
@@ -37,17 +37,16 @@ export function LoginAndAcceptForm({
           type="password"
           required
           autoComplete="current-password"
-          className="rounded border border-zinc-300 px-3 py-2"
         />
       </div>
 
-      {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
+      {state?.error && (
+        <p style={{ color: 'var(--coral)', fontSize: 14 }} role="alert">
+          {state.error}
+        </p>
+      )}
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
-      >
+      <button type="submit" disabled={pending} className="btn btn--primary btn--block">
         {pending ? 'Joining…' : 'Log in & accept'}
       </button>
     </form>

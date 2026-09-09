@@ -10,27 +10,28 @@ export function AcceptPanel({
   errorMessage?: string;
 }) {
   return (
-    <div className="flex flex-col gap-4">
+    <div className="stack">
       <div>
-        <h1 className="text-xl font-semibold">You&apos;re invited</h1>
-        <p className="mt-1 text-sm text-zinc-600">
+        <h1 className="display-sm">You’re invited</h1>
+        <p className="muted" style={{ fontSize: 14, marginTop: 4 }}>
           Join <strong>{title}</strong> with your current account.
         </p>
       </div>
 
-      {errorMessage && <p className="text-sm text-red-600">{errorMessage}</p>}
+      {errorMessage && (
+        <p style={{ color: 'var(--coral)', fontSize: 14 }} role="alert">
+          {errorMessage}
+        </p>
+      )}
 
-      <div className="flex gap-3">
-        <form action={acceptInvitationTokenAction.bind(null, token)} className="flex-1">
-          <button
-            type="submit"
-            className="w-full rounded bg-zinc-900 px-4 py-2 text-sm font-medium text-white"
-          >
-            Accept & join
+      <div className="row" style={{ gap: 'var(--s3)' }}>
+        <form action={acceptInvitationTokenAction.bind(null, token)} className="grow">
+          <button type="submit" className="btn btn--accent btn--block">
+            Accept &amp; join
           </button>
         </form>
         <form action={declineInvitationTokenAction.bind(null, token)}>
-          <button type="submit" className="rounded border border-zinc-300 px-4 py-2 text-sm">
+          <button type="submit" className="btn btn--ghost">
             Later
           </button>
         </form>

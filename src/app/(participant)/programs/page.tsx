@@ -1,106 +1,128 @@
-import Link from 'next/link';
 import { verifySession } from '@/lib/dal';
 import { prisma } from '@/lib/prisma';
 import {
   getEnrolmentsForUser,
   getPendingInvitationsForUser,
   computeCohortProgressPercent,
+  computeUserAttendancePercent,
 } from '@/modules/learning';
+import { getCohortPoints } from '@/modules/recognition';
 import { InvitationCard } from './invitation-card';
 import { ProgramCard, MARK_COLORS } from './program-card';
-import { BottomNav } from '../bottom-nav';
 
 export default async function ProgramsPage() {
   const { userId } = await verifySession();
 
-  const [invitations, enrolments, user] = await Promise.all([
+  const [invitations, enrolments] = await Promise.all([
     getPendingInvitationsForUser(userId),
     getEnrolmentsForUser(userId),
-    prisma.user.findUnique({ where: { id: userId }, include: { persona: true } }),
   ]);
 
   const active = enrolments.filter((e) => e.status === 'ACTIVE');
   const completed = enrolments.filter((e) => e.status === 'COMPLETED');
 
-  const activeCards = await Promise.all(
-    active.map(async (enrolment, i) => ({
-      cohortId: enrolment.cohortId,
-      title: enrolment.cohort.opportunity.title,
-      cohortLabel: enrolment.cohort.cohortLabel,
-      weekCount: enrolment.cohort.courseVersion.weeks.length,
-      progressPercent: await computeCohortProgressPercent(userId, enrolment.cohortId),
-      markColor: MARK_COLORS[i % MARK_COLORS.length],
-    })),
-  );
+  const buildCard = async (
+    enrolment: (typeof enrolments)[number],
+    i: number,
+    forceComplete = false,
+  ) => {
+    const cohort = enrolment.cohort;
+    const weekCount = cohort.courseVersion.weeks.length;
+    const isDraft = cohort.status === 'DRAFT';
+    const [progressPercent, points, attendancePercent, releasedWeeks] = await Promise.all([
+      computeCohortProgressPercent(userId, enrolment.cohortId),
+      getCohortPoints(userId, enrolment.cohortId),
+      computeUserAttendancePercent(userId, enrolment.cohortId),
+      isDraft
+        ? Promise.resolve(0)
+        : prisma.cohortSession.count({
+            where: { cohortId: enrolment.cohortId, startsOn: { lte: new Date() } },
+          }),
+    ]);
 
-  const glyph = user?.persona?.glyph ?? user?.name?.charAt(0)?.toUpperCase() ?? '·';
+    return {
+      cohortId: enrolment.cohortId,
+      title: cohort.opportunity.title,
+      meta: `${cohort.cohortLabel} · ${weekCount} weeks`,
+      markColor: MARK_COLORS[i % MARK_COLORS.length],
+      state: (forceComplete ? 'completed' : isDraft ? 'notopen' : 'active') as
+        | 'active'
+        | 'completed'
+        | 'notopen',
+      currentWeek: releasedWeeks || undefined,
+      progressPercent: forceComplete ? 100 : progressPercent,
+      points,
+      attendancePercent,
+    };
+  };
+
+  const [activeCards, completedCards] = await Promise.all([
+    Promise.all(active.map((e, i) => buildCard(e, i))),
+    Promise.all(completed.map((e, i) => buildCard(e, i, true))),
+  ]);
 
   return (
-    <>
-      <div className="mx-auto flex w-full max-w-md flex-1 flex-col">
-        <header className="ns-hero px-[22px] pb-6 pt-7">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="ns-label text-mint">
-                {active.length} active · {invitations.length} invited
-              </div>
-              <h1 className="mt-1.5 text-[28px] leading-none text-cream">Your programs</h1>
-            </div>
-            <Link
-              href="/me"
-              className="flex h-11 w-11 flex-none items-center justify-center rounded-full bg-[rgba(245,242,234,0.12)] text-lg text-mint"
-            >
-              {glyph}
-            </Link>
-          </div>
-        </header>
-
-        <div className="flex flex-col gap-3.5 p-[22px]">
-          {invitations.length > 0 && (
-            <>
-              <div className="ns-label text-coral">Invitations</div>
-              {invitations.map((invitation) => (
-                <InvitationCard
-                  key={invitation.id}
-                  invitationId={invitation.id}
-                  title={invitation.cohort.opportunity.title}
-                  cohortLabel={invitation.cohort.cohortLabel}
-                />
-              ))}
-            </>
-          )}
-
-          <div className="ns-label text-[#4A6258]">Active · {active.length}</div>
-          {activeCards.map((card) => (
-            <ProgramCard key={card.cohortId} {...card} />
-          ))}
-          {activeCards.length === 0 && (
-            <p className="rounded-2xl border-[1.5px] border-dashed border-[rgba(16,36,30,0.22)] p-4 text-[13px] leading-relaxed text-[#4A6258]">
-              Programs are invite-only. Your facilitator sends a link, or adds you to a cohort
-              directly — it lands here.
-            </p>
-          )}
-
-          {completed.length > 0 && (
-            <>
-              <div className="ns-label mt-1.5 text-[#4A6258]">Completed</div>
-              {completed.map((enrolment, i) => (
-                <ProgramCard
-                  key={enrolment.cohortId}
-                  cohortId={enrolment.cohortId}
-                  title={enrolment.cohort.opportunity.title}
-                  cohortLabel={enrolment.cohort.cohortLabel}
-                  weekCount={enrolment.cohort.courseVersion.weeks.length}
-                  progressPercent={100}
-                  markColor={MARK_COLORS[i % MARK_COLORS.length]}
-                  completed
-                />
-              ))}
-            </>
-          )}
+    <div className="shell stack">
+      <div>
+        <div className="mono">
+          {enrolments.length} enrolments · {invitations.length} invitations
         </div>
+        <h1 className="display-lg" style={{ marginTop: 6 }}>
+          Your programs
+        </h1>
+        <p className="lede" style={{ marginTop: 8 }}>
+          Each program keeps its own sessions, attendance and points. Your profile is shared across
+          all of them.
+        </p>
       </div>
-      <BottomNav active="/programs" />
-    </>
+
+      {invitations.length > 0 && (
+        <div className="stack">
+          <div className="mono mono--coral">Invitations · {invitations.length}</div>
+          <div className="grid-3">
+            {invitations.map((invitation) => (
+              <InvitationCard
+                key={invitation.id}
+                invitationId={invitation.id}
+                title={invitation.cohort.opportunity.title}
+                cohortLabel={invitation.cohort.cohortLabel}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="stack">
+        <div className="mono">Active · {activeCards.length}</div>
+        {activeCards.length > 0 ? (
+          <div className="grid-3">
+            {activeCards.map((card) => (
+              <ProgramCard key={card.cohortId} {...card} />
+            ))}
+          </div>
+        ) : (
+          <div className="empty">
+            Programs are invite-only. Your facilitator sends a link, or adds you to a cohort
+            directly — it lands here.
+          </div>
+        )}
+      </div>
+
+      {completedCards.length > 0 && (
+        <div className="stack">
+          <div className="mono">Completed</div>
+          <div className="grid-3">
+            {completedCards.map((card) => (
+              <ProgramCard key={card.cohortId} {...card} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="card card--notice">
+        Programs are invite-only. A facilitator sends a link or adds you to a cohort directly — it
+        arrives here.
+      </div>
+    </div>
   );
 }

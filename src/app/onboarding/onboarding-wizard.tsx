@@ -7,12 +7,27 @@ import { completeOnboardingAction } from './actions';
 
 type Topic = { id: string; label: string };
 
+// Mirrors computePersonaIndex in src/modules/identity/onboarding.ts (which is
+// server-only and can't be imported here): majority vote over the three
+// answers, ties broken toward the lowest index.
+function computePersonaIndex(answers: Array<number | null>): number {
+  const counts = [0, 0, 0];
+  for (const a of answers) if (a !== null && a >= 0 && a <= 2) counts[a]++;
+  return counts.indexOf(Math.max(...counts));
+}
+
+// Option position → mark colour, matching the prototype's persona quiz.
+const OPTION_COLORS = ['var(--mint)', 'var(--coral)', 'var(--pine)'];
+const PERSONA_COLORS = ['var(--mint)', 'var(--coral)', 'var(--pine)'];
+
 export function OnboardingWizard({
   defaultName,
   topics,
+  personas,
 }: {
   defaultName: string;
   topics: Topic[];
+  personas: string[];
 }) {
   const [step, setStep] = useState(1);
   const [name, setName] = useState(defaultName);
@@ -23,7 +38,6 @@ export function OnboardingWizard({
   const [error, setError] = useState<string | undefined>();
   const [pending, startTransition] = useTransition();
 
-  const canGoBack = step > 1;
   const canGoNext =
     step === 1 ||
     (step === 2 && name.trim().length > 0) ||
@@ -34,12 +48,8 @@ export function OnboardingWizard({
     setError(undefined);
     if (step === 3) {
       if (answers[qIndex] === null) return;
-      if (qIndex < 2) {
-        setQIndex(qIndex + 1);
-        return;
-      }
-      setStep(4);
-      return;
+      if (qIndex < 2) return setQIndex(qIndex + 1);
+      return setStep(4);
     }
     if (step === 4) {
       startTransition(async () => {
@@ -59,155 +69,208 @@ export function OnboardingWizard({
 
   function back() {
     setError(undefined);
-    if (step === 3 && qIndex > 0) {
-      setQIndex(qIndex - 1);
-      return;
-    }
+    if (step === 3 && qIndex > 0) return setQIndex(qIndex - 1);
     setStep(Math.max(1, step - 1));
   }
 
+  const personaIndex = computePersonaIndex(answers);
+  const nextLabel =
+    step === 1
+      ? 'Let’s go'
+      : step === 3
+        ? qIndex < 2
+          ? 'Next question'
+          : 'See my persona'
+        : step === 4
+          ? pending
+            ? 'Finishing…'
+            : 'Go to my programs'
+          : 'Continue';
+  const nextAccent = step === 1 || step === 4;
+
   return (
-    <div className="mx-auto flex min-h-dvh max-w-md flex-col gap-6 p-6">
-      <div className="flex items-center justify-between">
-        <div className="text-lg font-bold">NetSifr</div>
-        <div className="font-mono text-xs text-zinc-500">STEP {step} / 4</div>
-      </div>
-      <div className="flex gap-1.5">
-        {[1, 2, 3, 4].map((s) => (
-          <div
-            key={s}
-            className={`h-1 flex-1 rounded-full ${s <= step ? 'bg-zinc-900' : 'bg-zinc-200'}`}
-          />
-        ))}
-      </div>
-
-      {step === 1 && (
-        <div className="flex flex-col gap-3">
-          <h1 className="text-2xl font-bold">You&apos;re in.</h1>
-          <p className="text-sm text-zinc-600">
-            Set up your NetSifr account once. It carries across every program you join — this one,
-            and any you&apos;re invited to later.
-          </p>
-        </div>
-      )}
-
-      {step === 2 && (
-        <div className="flex flex-col gap-4">
-          <div>
-            <h1 className="text-xl font-bold">Who&apos;s joining us?</h1>
-            <p className="mt-1 text-sm text-zinc-600">One profile, every program.</p>
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="font-mono text-[10px] text-zinc-500">FULL NAME</label>
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Your name"
-              className="rounded-xl border-2 border-zinc-900 px-4 py-3 text-base"
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <label className="font-mono text-[10px] text-zinc-500">PICK AN AVATAR</label>
-            <div className="grid grid-cols-4 gap-3">
-              {AVATARS.map((a, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => setAvatarKey(i)}
-                  aria-label={`Avatar ${i + 1}`}
-                  className={`flex aspect-square items-center justify-center rounded-2xl text-xl ${
-                    avatarKey === i ? 'ring-2 ring-offset-2 ring-zinc-900' : ''
-                  }`}
-                  style={{ background: a.bg, color: a.fg }}
-                >
-                  {a.glyph}
-                </button>
-              ))}
+    <div className="join">
+      <div className="join__card">
+        <div className="join__head contour">
+          <div className="row row--between">
+            <div className="p-topbar__brand">NetSifr</div>
+            <div className="mono" style={{ color: 'var(--on-dark-faint)' }}>
+              Step {step} of 4
             </div>
           </div>
-        </div>
-      )}
-
-      {step === 3 && (
-        <div className="flex flex-col gap-4">
-          <div className="font-mono text-[10px] text-orange-600">
-            YOUR CLIMATE PERSONA · Q{qIndex + 1} OF 3
-          </div>
-          <h1 className="text-xl font-bold">{PERSONA_QUESTIONS[qIndex].prompt}</h1>
-          <div className="flex flex-col gap-2.5">
-            {PERSONA_QUESTIONS[qIndex].options.map((option, oIndex) => (
-              <button
-                key={oIndex}
-                type="button"
-                onClick={() => {
-                  const next = [...answers];
-                  next[qIndex] = oIndex;
-                  setAnswers(next);
-                }}
-                className={`rounded-xl border-2 p-3 text-left ${
-                  answers[qIndex] === oIndex ? 'border-zinc-900' : 'border-zinc-200'
-                }`}
-              >
-                <div className="font-semibold">{option.title}</div>
-                <div className="text-sm text-zinc-500">{option.desc}</div>
-              </button>
+          <div className="join__steps" style={{ marginTop: 'var(--s4)' }}>
+            {[1, 2, 3, 4].map((s) => (
+              <i key={s} className={s <= step ? 'on' : ''} />
             ))}
           </div>
-        </div>
-      )}
-
-      {step === 4 && (
-        <div className="flex flex-col gap-4">
-          <div>
-            <h1 className="text-xl font-bold">What are you here for?</h1>
-            <p className="mt-1 text-sm text-zinc-600">
-              Used to suggest programs later. ({topicIds.length} chosen)
-            </p>
+          <div className="mono mono--onDark" style={{ marginTop: 'var(--s4)' }}>
+            Setting up your NetSifr account
           </div>
-          <div className="flex flex-wrap gap-2">
-            {topics.map((topic) => {
-              const selected = topicIds.includes(topic.id);
-              return (
-                <button
-                  key={topic.id}
-                  type="button"
-                  onClick={() =>
-                    setTopicIds((ids) =>
-                      selected ? ids.filter((id) => id !== topic.id) : [...ids, topic.id],
-                    )
-                  }
-                  className={`rounded-full border-2 px-3 py-1.5 text-sm ${
-                    selected ? 'border-zinc-900 bg-zinc-900 text-white' : 'border-zinc-200'
-                  }`}
+        </div>
+
+        <div className="join__body stack">
+          {step === 1 && (
+            <>
+              <div className="placeholder" style={{ height: 220 }}>
+                <span className="play">▶</span>
+                <span className="mono mono--onDark">Welcome from the team · 0:48</span>
+              </div>
+              <h2 className="display-md">Set up your account</h2>
+              <p className="lede">
+                This profile is yours across every NetSifr program — this one, and any you’re invited
+                to later. Two minutes.
+              </p>
+            </>
+          )}
+
+          {step === 2 && (
+            <>
+              <div>
+                <h2 className="display-md">Who’s joining us?</h2>
+                <p className="muted" style={{ marginTop: 4 }}>
+                  This is what your cohort will see.
+                </p>
+              </div>
+              <div className="field">
+                <label htmlFor="ob-name" className="mono">
+                  Full name
+                </label>
+                <input
+                  id="ob-name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Your name"
+                />
+              </div>
+              <div className="field">
+                <label className="mono">Pick an avatar — or upload</label>
+                <div className="avatar-grid">
+                  {AVATARS.map((a, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => setAvatarKey(i)}
+                      aria-label={`Avatar ${i + 1}`}
+                      aria-pressed={avatarKey === i}
+                      className="avatar-pick"
+                      style={{ background: a.bg, color: a.fg }}
+                    >
+                      {a.glyph}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    className="avatar-pick avatar-pick--upload"
+                    aria-label="Upload a photo"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+
+          {step === 3 && (
+            <>
+              <div className="mono mono--coral">
+                Your climate persona · question {qIndex + 1} of 3
+              </div>
+              <h2 className="display-md">{PERSONA_QUESTIONS[qIndex].prompt}</h2>
+              <div className="persona-grid">
+                {PERSONA_QUESTIONS[qIndex].options.map((option, oIndex) => (
+                  <button
+                    key={oIndex}
+                    type="button"
+                    aria-pressed={answers[qIndex] === oIndex}
+                    onClick={() => {
+                      const nextAnswers = [...answers];
+                      nextAnswers[qIndex] = oIndex;
+                      setAnswers(nextAnswers);
+                    }}
+                    className="persona-card"
+                  >
+                    <span
+                      className="persona-card__swatch"
+                      style={{ background: OPTION_COLORS[oIndex] }}
+                    />
+                    <div className="title">{option.title}</div>
+                    <div className="muted" style={{ fontSize: 14 }}>
+                      {option.desc}
+                    </div>
+                  </button>
+                ))}
+              </div>
+              <div className="mono">Not graded — it just becomes your cohort tag</div>
+            </>
+          )}
+
+          {step === 4 && (
+            <>
+              <div className="card card--dark row" style={{ gap: 'var(--s4)' }}>
+                <span
+                  className="avatar avatar--lg"
+                  style={{ background: PERSONA_COLORS[personaIndex], color: 'var(--fg-on-coral)' }}
                 >
-                  {topic.label}
-                </button>
-              );
-            })}
+                  ◉
+                </span>
+                <div>
+                  <div className="mono mono--onDark">You are a</div>
+                  <div className="display-md" style={{ color: 'var(--fg-on-dark)' }}>
+                    {personas[personaIndex] ?? 'Member'}
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h2 className="display-md">What are you here for?</h2>
+                <p className="muted" style={{ marginTop: 4 }}>
+                  Used to suggest future programs. {topicIds.length} chosen.
+                </p>
+              </div>
+              <div className="row wrap" style={{ gap: 'var(--s2)' }}>
+                {topics.map((topic) => {
+                  const selected = topicIds.includes(topic.id);
+                  return (
+                    <button
+                      key={topic.id}
+                      type="button"
+                      aria-pressed={selected}
+                      className="chip"
+                      onClick={() =>
+                        setTopicIds((ids) =>
+                          selected ? ids.filter((id) => id !== topic.id) : [...ids, topic.id],
+                        )
+                      }
+                    >
+                      {topic.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
+
+          {error && (
+            <p style={{ color: 'var(--coral)', fontSize: 14 }} role="alert">
+              {error}
+            </p>
+          )}
+
+          <div className="row" style={{ gap: 'var(--s3)', marginTop: 'var(--s2)' }}>
+            {step > 1 && (
+              <button type="button" onClick={back} className="btn btn--ghost">
+                Back
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={next}
+              disabled={!canGoNext || pending}
+              className={`btn btn--block grow ${nextAccent ? 'btn--accent' : 'btn--primary'}`}
+            >
+              {nextLabel}
+            </button>
           </div>
         </div>
-      )}
-
-      {error && <p className="text-sm text-red-600">{error}</p>}
-
-      <div className="mt-auto flex gap-3 pt-4">
-        {canGoBack && (
-          <button
-            type="button"
-            onClick={back}
-            className="rounded-xl border-2 border-zinc-200 px-4 py-3 font-semibold"
-          >
-            ←
-          </button>
-        )}
-        <button
-          type="button"
-          onClick={next}
-          disabled={!canGoNext || pending}
-          className="flex-1 rounded-xl bg-zinc-900 py-3 font-semibold text-white disabled:opacity-50"
-        >
-          {step === 4 ? (pending ? 'Finishing…' : 'Finish') : 'Continue'}
-        </button>
       </div>
     </div>
   );

@@ -18,48 +18,36 @@ export function SignupAndAcceptForm({
   );
 
   return (
-    <form action={action} className="flex flex-col gap-4">
+    <form action={action} className="stack">
       <div>
-        <h1 className="text-xl font-semibold">You&apos;re invited</h1>
-        <p className="mt-1 text-sm text-zinc-600">
-          Join <strong>{title}</strong> as <span className="font-mono text-xs">{email}</span>. Set
-          up your NetSifr account once — it carries across every program you join.
+        <h1 className="display-sm">You’re invited</h1>
+        <p className="muted" style={{ fontSize: 14, marginTop: 4 }}>
+          Join <strong>{title}</strong> as <span className="mono">{email}</span>. Set up your
+          NetSifr account once — it carries across every program you join.
         </p>
       </div>
 
-      <div className="flex flex-col gap-1">
-        <label htmlFor="name" className="text-sm font-medium">
+      <div className="field">
+        <label htmlFor="name" className="mono">
           Your name
         </label>
-        <input
-          id="name"
-          name="name"
-          required
-          className="rounded border border-zinc-300 px-3 py-2"
-        />
+        <input id="name" name="name" required />
       </div>
 
-      <div className="flex flex-col gap-1">
-        <label htmlFor="password" className="text-sm font-medium">
+      <div className="field">
+        <label htmlFor="password" className="mono">
           Choose a password
         </label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          required
-          autoComplete="new-password"
-          className="rounded border border-zinc-300 px-3 py-2"
-        />
+        <input id="password" name="password" type="password" required autoComplete="new-password" />
       </div>
 
-      {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
+      {state?.error && (
+        <p style={{ color: 'var(--coral)', fontSize: 14 }} role="alert">
+          {state.error}
+        </p>
+      )}
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
-      >
+      <button type="submit" disabled={pending} className="btn btn--accent btn--block">
         {pending ? 'Joining…' : 'Accept & join'}
       </button>
     </form>
