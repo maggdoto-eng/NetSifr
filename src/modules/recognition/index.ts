@@ -10,3 +10,4 @@ export {
   getTotalPoints,
   getCohortStreak,
 } from './points';
+export { getUserBadges, type Badge } from './badges';

@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { verifySession } from '@/lib/dal';
 import { getEnrolmentsForUser, computeUserAttendancePercent } from '@/modules/learning';
-import { getTotalPoints, getCohortPoints } from '@/modules/recognition';
+import { getTotalPoints, getCohortPoints, getUserBadges } from '@/modules/recognition';
 import { avatarFor } from '@/lib/avatars';
 import { logoutAction } from '@/app/(auth)/actions';
 
@@ -23,8 +23,9 @@ export default async function MePage() {
   const avatar = avatarFor(user.avatarKey);
   const joinedCount = enrolments.length;
 
-  const [totalPoints, enrolmentStats] = await Promise.all([
+  const [totalPoints, badges, enrolmentStats] = await Promise.all([
     getTotalPoints(userId),
+    getUserBadges(userId),
     Promise.all(
       enrolments.map(async (enrolment) => ({
         enrolmentId: enrolment.id,
@@ -85,6 +86,45 @@ export default async function MePage() {
                 <span key={t.topicId} className="chip" style={{ cursor: 'default' }}>
                   {t.topic.label}
                 </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="card stack">
+            <div className="title">Achievements</div>
+            <div className="row wrap" style={{ gap: 'var(--s3)' }}>
+              {badges.map((b) => (
+                <div
+                  key={b.key}
+                  title={b.description}
+                  className="col"
+                  style={{
+                    alignItems: 'center',
+                    width: 96,
+                    gap: 4,
+                    opacity: b.earned ? 1 : 0.32,
+                    filter: b.earned ? undefined : 'grayscale(1)',
+                    textAlign: 'center',
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 44,
+                      height: 44,
+                      display: 'grid',
+                      placeItems: 'center',
+                      borderRadius: 999,
+                      background: b.earned ? 'var(--mint-tint)' : 'var(--bg-sunk)',
+                      fontSize: 22,
+                    }}
+                    aria-hidden
+                  >
+                    {b.icon}
+                  </span>
+                  <span className="mono" style={{ lineHeight: 1.2 }}>
+                    {b.label}
+                  </span>
+                </div>
               ))}
             </div>
           </div>
