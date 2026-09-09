@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { verifySession } from '@/lib/dal';
 import { getSyllabus, computeUserAttendancePercent } from '@/modules/learning';
 import { getCohortPoints, getCohortStreak } from '@/modules/recognition';
+import { getAnnouncementsForCohort } from '@/modules/communications';
 
 const MODULE_ICON: Record<string, string> = {
   RECORDING: '▶',
@@ -33,12 +34,13 @@ export default async function ProgramHomePage({ params }: PageProps<'/programs/[
   const cohort = await prisma.cohort.findUnique({ where: { id: programId } });
   if (!cohort) notFound();
 
-  const [user, syllabus, attendancePercent, points, streak] = await Promise.all([
+  const [user, syllabus, attendancePercent, points, streak, announcements] = await Promise.all([
     prisma.user.findUniqueOrThrow({ where: { id: userId } }),
     getSyllabus(userId, programId),
     computeUserAttendancePercent(userId, programId),
     getCohortPoints(userId, programId),
     getCohortStreak(userId, programId),
+    getAnnouncementsForCohort(programId, 3),
   ]);
 
   const currentWeek = syllabus.weeks.find((w) => w.current);
@@ -116,6 +118,22 @@ export default async function ProgramHomePage({ params }: PageProps<'/programs/[
           </div>
         ) : null}
       </div>
+
+      {/* Announcements */}
+      {announcements.length > 0 && (
+        <div className="stack" style={{ gap: 'var(--s2)' }}>
+          <div className="mono mono--coral">From your facilitator</div>
+          {announcements.map((a) => (
+            <div key={a.id} className="card card--notice stack" style={{ gap: 4 }}>
+              <div className="row row--between">
+                <div className="title">{a.title}</div>
+                <span className="mono">{a.createdAt.toLocaleDateString()}</span>
+              </div>
+              <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{a.body}</p>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Up next */}
       {next && (

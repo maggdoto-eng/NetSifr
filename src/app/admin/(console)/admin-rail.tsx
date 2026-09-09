@@ -19,6 +19,7 @@ const PROGRAM_TABS = [
   { seg: 'builder', label: 'Builder' },
   { seg: 'attendance', label: 'Attendance' },
   { seg: 'submissions', label: 'Submissions' },
+  { seg: 'announcements', label: 'Announcements' },
   { seg: 'invites', label: 'Invites' },
   { seg: 'settings', label: 'Settings' },
 ];

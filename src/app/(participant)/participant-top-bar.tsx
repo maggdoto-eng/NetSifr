@@ -18,6 +18,7 @@ const NAV_ITEMS = [
 export function ParticipantTopBar(props: {
   personaLabel: string;
   avatar: { glyph: string; bg: string; fg: string };
+  unreadCount: number;
 }) {
   const pathname = usePathname();
 
@@ -37,9 +38,40 @@ export function ParticipantTopBar(props: {
         })}
       </nav>
       <Link
+        href="/notifications"
+        aria-label={`Notifications${props.unreadCount > 0 ? `, ${props.unreadCount} unread` : ''}`}
+        aria-current={pathname === '/notifications' ? 'page' : undefined}
+        className="row"
+        style={{ marginLeft: 'auto', position: 'relative', color: 'var(--fg-on-dark)', fontSize: 18 }}
+      >
+        <span aria-hidden>🔔</span>
+        {props.unreadCount > 0 && (
+          <span
+            aria-hidden
+            style={{
+              position: 'absolute',
+              top: -6,
+              right: -8,
+              minWidth: 16,
+              height: 16,
+              padding: '0 4px',
+              borderRadius: 999,
+              background: 'var(--coral)',
+              color: 'var(--fg-on-coral)',
+              fontSize: 10,
+              fontWeight: 700,
+              display: 'grid',
+              placeItems: 'center',
+            }}
+          >
+            {props.unreadCount > 9 ? '9+' : props.unreadCount}
+          </span>
+        )}
+      </Link>
+      <Link
         href="/me"
         className="row"
-        style={{ marginLeft: 'auto', gap: 'var(--s3)', color: 'var(--fg-on-dark)' }}
+        style={{ gap: 'var(--s3)', color: 'var(--fg-on-dark)' }}
       >
         <span className="mono" style={{ color: 'var(--on-dark-faint)' }}>
           {props.personaLabel}

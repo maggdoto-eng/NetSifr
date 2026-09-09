@@ -178,5 +178,27 @@ export async function gradeSubmission(input: {
       assignmentModuleId: submission.assignmentModuleId,
       gradeId: grade.id,
     });
+
+    // Notify the learner their assignment was graded, deep-linked to it.
+    const mod = await prisma.module.findUnique({
+      where: { id: submission.assignmentModuleId },
+      select: { weekId: true, title: true },
+    });
+    const GRADE_WORD: Record<string, string> = {
+      NEEDS_WORK: 'needs work',
+      GOOD: 'good',
+      EXCELLENT: 'excellent',
+    };
+    await prisma.notification.create({
+      data: {
+        userId: submission.userId,
+        type: 'ASSIGNMENT_GRADED',
+        title: 'Your assignment was graded',
+        body: `${mod?.title ?? 'Assignment'} — ${GRADE_WORD[input.label] ?? input.label}`,
+        linkUrl: mod?.weekId
+          ? `/programs/${cohortContext.cohortId}/weeks/${mod.weekId}/assignment/${submission.assignmentModuleId}`
+          : `/programs/${cohortContext.cohortId}`,
+      },
+    });
   }
 }

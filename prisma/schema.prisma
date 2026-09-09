@@ -44,6 +44,7 @@ model Organization {
   eventOccurrences       EventOccurrence[]
   volunteerOpportunities VolunteerOpportunity[]
   skills                 Skill[]
+  announcements          Announcement[]
 }
 
 enum OrgRole {
@@ -126,6 +127,8 @@ model User {
   shiftSignups                 ShiftSignup[]
   serviceLogs                  ServiceLog[]
   serviceVerificationsGiven    ServiceVerification[]    @relation("ServiceVerifiedBy")
+  announcementsAuthored        Announcement[]           @relation("AnnouncementAuthor")
+  notifications                Notification[]
   skills                       UserSkill[]
 }
 
@@ -535,6 +538,7 @@ model Cohort {
   enrolments         Enrolment[]
   invitations        Invitation[]
   contributionEvents ContributionEvent[]
+  announcements      Announcement[]
 
   @@index([organizationId, status])
 }
@@ -1241,4 +1245,52 @@ model RateLimitBucket {
   updatedAt   DateTime @updatedAt
 
   @@unique([key, windowStart])
+}
+
+// ============================================================================
+// Announcements & Notifications (instructor presence + in-app feed)
+// ============================================================================
+
+/// A facilitator post to a specific cohort. Shown on the participant program
+/// home; posting fans out a Notification to every ACTIVE enrolled participant.
+model Announcement {
+  id             String   @id @default(uuid())
+  cohortId       String
+  organizationId String
+  authorUserId   String
+  title          String
+  body           String
+  createdAt      DateTime @default(now())
+
+  cohort       Cohort       @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id])
+  author       User         @relation("AnnouncementAuthor", fields: [authorUserId], references: [id])
+
+  @@index([cohortId, createdAt])
+}
+
+enum NotificationType {
+  ANNOUNCEMENT
+  ASSIGNMENT_GRADED
+  MODULE_PUBLISHED
+  INVITATION
+  GENERIC
+}
+
+/// Per-user in-app notification. `linkUrl` is a relative app path the bell
+/// deep-links to; `readAt` null means unread.
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  type      NotificationType
+  title     String
+  body      String?
+  linkUrl   String?
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([userId, readAt])
 }
