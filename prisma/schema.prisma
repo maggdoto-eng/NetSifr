@@ -46,6 +46,7 @@ model Organization {
   skills                 Skill[]
   announcements          Announcement[]
   posts                  Post[]
+  reports                Report[]
 }
 
 enum OrgRole {
@@ -132,6 +133,10 @@ model User {
   notifications                Notification[]
   posts                        Post[]                   @relation("PostAuthor")
   comments                     Comment[]                @relation("CommentAuthor")
+  reactions                    Reaction[]
+  following                    Follow[]                 @relation("Follower")
+  followers                    Follow[]                 @relation("Followee")
+  reportsMade                  Report[]                 @relation("Reporter")
   skills                       UserSkill[]
 }
 
@@ -1316,17 +1321,20 @@ enum PostAudience {
 
 model Post {
   id             String       @id @default(uuid())
-  cohortId       String
+  cohortId       String?
   organizationId String
   authorUserId   String
   audience       PostAudience @default(COHORT)
   body           String
+  hiddenAt       DateTime?
   createdAt      DateTime     @default(now())
 
-  cohort       Cohort       @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  cohort       Cohort?      @relation(fields: [cohortId], references: [id], onDelete: Cascade)
   organization Organization @relation(fields: [organizationId], references: [id])
   author       User         @relation("PostAuthor", fields: [authorUserId], references: [id])
   comments     Comment[]
+  reactions    Reaction[]
+  reports      Report[]
 
   @@index([cohortId, createdAt])
 }
@@ -1342,4 +1350,55 @@ model Comment {
   author User @relation("CommentAuthor", fields: [authorUserId], references: [id])
 
   @@index([postId, createdAt])
+}
+
+/// A like on a post (one per user per post).
+model Reaction {
+  id        String   @id @default(uuid())
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+  @@index([postId])
+}
+
+/// A directed follow between two people (follower -> followee).
+model Follow {
+  id         String   @id @default(uuid())
+  followerId String
+  followeeId String
+  createdAt  DateTime @default(now())
+
+  follower User @relation("Follower", fields: [followerId], references: [id], onDelete: Cascade)
+  followee User @relation("Followee", fields: [followeeId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followeeId])
+  @@index([followeeId])
+}
+
+enum ReportStatus {
+  OPEN
+  ACTIONED
+  DISMISSED
+}
+
+/// A participant report on a post, for admin moderation.
+model Report {
+  id             String       @id @default(uuid())
+  postId         String
+  organizationId String
+  reporterUserId String
+  reason         String
+  status         ReportStatus @default(OPEN)
+  createdAt      DateTime     @default(now())
+
+  post         Post         @relation(fields: [postId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id])
+  reporter     User         @relation("Reporter", fields: [reporterUserId], references: [id])
+
+  @@index([organizationId, status])
 }

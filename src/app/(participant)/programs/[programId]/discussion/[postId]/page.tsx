@@ -4,6 +4,7 @@ import { verifySession } from '@/lib/dal';
 import { getPostWithComments } from '@/modules/community';
 import { avatarFor } from '@/lib/avatars';
 import { CommentForm } from './comment-form';
+import { PostActionsBar } from '../../../../post-actions-bar';
 
 function when(d: Date): string {
   return new Date(d).toLocaleString('en-US', {
@@ -18,9 +19,9 @@ export default async function PostPage({
   params,
 }: PageProps<'/programs/[programId]/discussion/[postId]'>) {
   const { programId, postId } = await params;
-  await verifySession();
+  const { userId } = await verifySession();
 
-  const post = await getPostWithComments(postId, programId);
+  const post = await getPostWithComments(postId, programId, userId);
   if (!post) notFound();
 
   const authorAvatar = avatarFor(post.author.avatarKey);
@@ -42,6 +43,11 @@ export default async function PostPage({
           </div>
         </div>
         <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{post.body}</p>
+        <PostActionsBar
+          postId={post.id}
+          initialLiked={post.reactions.length > 0}
+          initialCount={post._count.reactions}
+        />
       </div>
 
       <div className="mono">

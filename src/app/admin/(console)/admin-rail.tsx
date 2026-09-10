@@ -13,6 +13,7 @@ const ORG_LINKS = [
   { href: '/admin/people', label: 'People' },
   { href: '/admin/events', label: 'Events' },
   { href: '/admin/volunteering', label: 'Volunteering' },
+  { href: '/admin/moderation', label: 'Moderation' },
 ];
 
 const PROGRAM_TABS = [

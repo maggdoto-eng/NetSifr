@@ -1,9 +1,9 @@
-import Link from 'next/link';
 import { verifySession } from '@/lib/dal';
-import { getPostsForCohort } from '@/modules/community';
+import { getDefaultOrganization } from '@/lib/org';
+import { getCommunityFeed } from '@/modules/community';
 import { avatarFor } from '@/lib/avatars';
-import { NewPostForm } from './new-post-form';
-import { PostActionsBar } from '../../../post-actions-bar';
+import { NewCommunityPost } from './new-community-post';
+import { PostActionsBar } from '../post-actions-bar';
 
 function timeAgo(d: Date): string {
   const s = Math.floor((Date.now() - new Date(d).getTime()) / 1000);
@@ -15,31 +15,33 @@ function timeAgo(d: Date): string {
   return new Date(d).toLocaleDateString();
 }
 
-export default async function DiscussionPage({
-  params,
-}: PageProps<'/programs/[programId]/discussion'>) {
-  const { programId } = await params;
+export default async function CommunityPage() {
   const { userId } = await verifySession();
-  const posts = await getPostsForCohort(programId, userId);
+  const org = await getDefaultOrganization();
+  const posts = await getCommunityFeed(org.id, userId);
 
   return (
-    <div className="stack">
-      <h1 className="display-md">Discussion</h1>
-      <NewPostForm cohortId={programId} />
+    <div className="shell stack" style={{ maxWidth: 720 }}>
+      <div>
+        <div className="mono">{org.name}</div>
+        <h1 className="display-lg" style={{ marginTop: 6 }}>
+          Community
+        </h1>
+        <p className="lede" style={{ marginTop: 8 }}>
+          Everyone across NetSifr — share wins, questions, and calls to action.
+        </p>
+      </div>
+
+      <NewCommunityPost />
 
       {posts.length === 0 ? (
-        <div className="empty">No posts yet — start the conversation.</div>
+        <div className="empty">No posts yet — be the first to say something.</div>
       ) : (
         <div className="stack">
           {posts.map((p) => {
             const avatar = avatarFor(p.author.avatarKey);
             return (
-              <Link
-                key={p.id}
-                href={`/programs/${programId}/discussion/${p.id}`}
-                className="card card--pick stack"
-                style={{ gap: 'var(--s2)' }}
-              >
+              <div key={p.id} className="card stack" style={{ gap: 'var(--s3)' }}>
                 <div className="row">
                   <span className="avatar" style={{ background: avatar.bg, color: avatar.fg }}>
                     {avatar.glyph}
@@ -49,16 +51,13 @@ export default async function DiscussionPage({
                     <div className="mono">{timeAgo(p.createdAt)}</div>
                   </div>
                 </div>
-                <p className="truncate" style={{ margin: 0 }}>
-                  {p.body}
-                </p>
+                <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{p.body}</p>
                 <PostActionsBar
                   postId={p.id}
                   initialLiked={p.reactions.length > 0}
                   initialCount={p._count.reactions}
-                  replyCount={p._count.comments}
                 />
-              </Link>
+              </div>
             );
           })}
         </div>
