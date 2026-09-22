@@ -1,0 +1,199 @@
+/* NetSifr Surveys — design system, ported from the Custom Interactive Survey
+   Tool folder (_ds: colors/typography/spacing/effects). Scoped under .ns-ds so
+   the leaf-green/slate brand and Poppins/Roboto fonts apply ONLY to the survey
+   builder / runner / analytics, never to the LMS. */
+.ns-ds {
+  /* Brand green scale (leaf) */
+  --green-50: #f2faeb;
+  --green-100: #e3f4d3;
+  --green-200: #cbe9ad;
+  --green-300: #b2dd88;
+  --green-400: #9ad571;
+  --green-500: #7fc24e;
+  --green-600: #63a834;
+  --green-700: #437c1f;
+  --green-800: #33611a;
+  --green-900: #264913;
+
+  /* Slate ink scale */
+  --slate-900: #323546;
+  --slate-800: #3d4152;
+  --slate-700: #4c5163;
+  --slate-600: #646a7d;
+  --slate-500: #838a9c;
+  --slate-400: #a7adba;
+  --slate-300: #c9cdd6;
+  --slate-200: #e2e5ea;
+  --slate-100: #eff1f4;
+  --slate-50: #f7f8fa;
+  --white: #ffffff;
+
+  --success: #437c1f;
+  --success-surface: #e3f4d3;
+  --warning: #c9861a;
+  --warning-surface: #fbeecf;
+  --danger: #c43d3d;
+  --danger-surface: #f8dede;
+  --info: #2f6fc4;
+  --info-surface: #dceaf9;
+
+  /* Semantic aliases */
+  --brand: var(--green-400);
+  --brand-strong: var(--green-700);
+  --brand-hover: var(--green-800);
+  --brand-soft: var(--green-100);
+  --on-brand: var(--white);
+  --on-leaf: var(--slate-900);
+
+  --ink: var(--slate-900);
+  --text-body: var(--slate-700);
+  --text-muted: var(--slate-500);
+  --text-on-dark: var(--white);
+  --text-on-dark-muted: #c2c6d2;
+
+  --surface-page: var(--white);
+  --surface-subtle: var(--slate-50);
+  --surface-card: var(--white);
+  --surface-sunken: var(--slate-100);
+  --surface-inverse: var(--slate-900);
+  --surface-brand: var(--green-700);
+
+  --border: var(--slate-200);
+  --border-strong: var(--slate-300);
+  --border-brand: var(--green-400);
+  --focus-ring: var(--green-600);
+
+  /* Fonts — mapped to the app's next/font CSS variables */
+  --font-display: var(--font-poppins), 'Segoe UI', sans-serif;
+  --font-body: var(--font-roboto), 'Segoe UI', sans-serif;
+  --font-mono: var(--font-roboto-mono), ui-monospace, monospace;
+
+  /* Radius / shadow (effects.css) */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
+  --radius-pill: 999px;
+  --shadow-xs: 0 1px 2px rgba(50, 53, 70, 0.06);
+  --shadow-sm: 0 1px 3px rgba(50, 53, 70, 0.08), 0 1px 2px rgba(50, 53, 70, 0.05);
+  --shadow-md: 0 4px 12px rgba(50, 53, 70, 0.09), 0 2px 4px rgba(50, 53, 70, 0.05);
+  --shadow-lg: 0 12px 28px rgba(50, 53, 70, 0.12), 0 4px 8px rgba(50, 53, 70, 0.06);
+
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.ns-ds h1,
+.ns-ds h2,
+.ns-ds h3,
+.ns-ds h4 {
+  font-family: var(--font-display);
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+.ns-ds a {
+  color: var(--brand-strong);
+  text-decoration: none;
+}
+.ns-ds a:hover {
+  color: var(--brand-hover);
+}
+/* Reset the app's global input styling within the survey DS (components style
+   themselves inline, matching the prototype). */
+.ns-ds input,
+.ns-ds textarea,
+.ns-ds select,
+.ns-ds button {
+  font-family: var(--font-body);
+}
+.ns-ds :focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Buttons — the prototype used a DS Button component; this reproduces its
+   variants (primary green, ghost, outline, secondary dark, danger). */
+.ns-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 14px;
+  border: 1.5px solid transparent;
+  border-radius: 10px;
+  padding: 0 16px;
+  height: 42px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+}
+.ns-btn--sm {
+  height: 38px;
+  font-size: 13.5px;
+  padding: 0 13px;
+}
+.ns-btn--lg {
+  height: 54px;
+  font-size: 15.5px;
+  padding: 0 22px;
+  border-radius: 12px;
+}
+.ns-btn--primary {
+  background: var(--brand-strong);
+  color: #fff;
+}
+.ns-btn--primary:hover {
+  background: var(--brand-hover);
+}
+.ns-btn--secondary {
+  background: var(--slate-900);
+  color: #fff;
+}
+.ns-btn--secondary:hover {
+  background: var(--slate-800);
+}
+.ns-btn--outline {
+  background: #fff;
+  border-color: var(--border-strong);
+  color: var(--ink);
+}
+.ns-btn--outline:hover {
+  border-color: var(--brand-strong);
+  color: var(--brand-strong);
+}
+.ns-btn--ghost {
+  background: transparent;
+  color: var(--text-body);
+}
+.ns-btn--ghost:hover {
+  background: var(--slate-100);
+}
+.ns-btn--danger {
+  background: var(--danger);
+  color: #fff;
+}
+.ns-btn--danger:hover {
+  background: #a82f2f;
+}
+.ns-btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.ns-eyebrow {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--brand-strong);
+}

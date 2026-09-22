@@ -1,9 +1,29 @@
 import type { Metadata } from 'next';
-import { Archivo, Inter, IBM_Plex_Mono } from 'next/font/google';
+import { Archivo, Inter, IBM_Plex_Mono, Poppins, Roboto, Roboto_Mono } from 'next/font/google';
 // tokens.css must load before globals.css: it defines the design-system CSS
 // variables (--pine, --bg-app, …) in a plain stylesheet Tailwind won't prune.
 import './tokens.css';
 import './globals.css';
+// The Surveys module uses its own NetSifr brand (leaf-green/slate, Poppins),
+// scoped under .ns-ds so it never touches the rest of the app.
+import './survey-ds.css';
+
+// Surveys design system fonts (from the Custom Interactive Survey Tool folder).
+const poppins = Poppins({
+  variable: '--font-poppins',
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+});
+const roboto = Roboto({
+  variable: '--font-roboto',
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '700'],
+});
+const robotoMono = Roboto_Mono({
+  variable: '--font-roboto-mono',
+  subsets: ['latin'],
+  weight: ['400', '500', '700'],
+});
 
 // Display headings — Archivo, per the NetSifr design prototype.
 const archivo = Archivo({
@@ -35,7 +55,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
     <html
       lang="en"
-      className={`${archivo.variable} ${inter.variable} ${plexMono.variable} h-full antialiased`}
+      className={`${archivo.variable} ${inter.variable} ${plexMono.variable} ${poppins.variable} ${roboto.variable} ${robotoMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">{children}</body>
     </html>
