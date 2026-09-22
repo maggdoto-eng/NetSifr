@@ -16,6 +16,7 @@ const PUBLIC_PREFIXES = [
   '/reset-password/',
   '/join/',
   '/verify-email/',
+  '/s/', // public survey runner (anonymous respondents)
 ];
 
 function isPublicPath(pathname: string): boolean {

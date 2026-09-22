@@ -62,6 +62,22 @@ export function AdminRail({
         ))}
       </div>
 
+      <div
+        className="divider"
+        style={{ background: 'var(--on-dark-fill)', margin: 'var(--s2) 0' }}
+      />
+
+      <div className="a-rail__group">
+        <div className="a-rail__label">Surveys</div>
+        <Link
+          href="/admin/surveys"
+          className="a-rail__link"
+          aria-current={isActive('/admin/surveys') ? 'page' : undefined}
+        >
+          All surveys
+        </Link>
+      </div>
+
       {currentProgram && (
         <>
           <div

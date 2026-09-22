@@ -1373,3 +1373,28 @@ textarea::placeholder {
   position: relative;
   overflow: hidden;
 }
+
+/* ---------- survey runner (public) ---------- */
+.srv-wrap {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: var(--s6) var(--s4);
+  background: var(--bg-app);
+}
+.srv-card {
+  width: 100%;
+  max-width: 640px;
+  background: var(--bg-card);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-float);
+  overflow: hidden;
+}
+.srv-head {
+  background: var(--pine-deep);
+  color: var(--fg-on-dark);
+  padding: var(--s5) var(--s6);
+}
+.srv-body {
+  padding: var(--s6);
+}

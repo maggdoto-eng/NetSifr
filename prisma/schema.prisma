@@ -47,6 +47,7 @@ model Organization {
   announcements          Announcement[]
   posts                  Post[]
   reports                Report[]
+  surveys                Survey[]
 }
 
 enum OrgRole {
@@ -1401,4 +1402,50 @@ model Report {
   reporter     User         @relation("Reporter", fields: [reporterUserId], references: [id])
 
   @@index([organizationId, status])
+}
+
+// ============================================================================
+// Surveys — standalone survey builder / runner / analytics
+// ============================================================================
+
+enum SurveyStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+}
+
+/// The editable structure (subtitle, forWho, estimatedTime, consent, sections
+/// with questions + skip logic, ending) is stored as one JSON document in
+/// `content` — mirroring the prototype's single-document survey shape — while
+/// the fields needed for listing/routing stay as columns.
+model Survey {
+  id             String       @id @default(uuid())
+  organizationId String
+  slug           String       @unique
+  title          String
+  status         SurveyStatus @default(DRAFT)
+  version        Int          @default(1)
+  content        Json
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  publishedAt    DateTime?
+
+  organization Organization     @relation(fields: [organizationId], references: [id])
+  responses    SurveyResponse[]
+
+  @@index([organizationId, status])
+}
+
+/// One submission. `answers` is a map of questionId -> value (string, number,
+/// or array). Anonymous — no user link (public Runner).
+model SurveyResponse {
+  id          String   @id @default(uuid())
+  surveyId    String
+  answers     Json
+  complete    Boolean  @default(true)
+  submittedAt DateTime @default(now())
+
+  survey Survey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+
+  @@index([surveyId, submittedAt])
 }
