@@ -7,6 +7,7 @@ import {
   TYPE_META,
   blankSection,
   blankQuestion,
+  blankSurveyContent,
   uid,
   type SurveyContent,
   type Section,
@@ -37,6 +38,7 @@ export function SurveyBuilder({ surveyId, initial, status }: { surveyId: string;
   const [toast, setToast] = useState<string | null>(null);
   const [typeMenu, setTypeMenu] = useState<string | null>(null);
   const [curStatus, setCurStatus] = useState(status);
+  const [dragQid, setDragQid] = useState<string | null>(null);
 
   const c = draft.content;
   const setContent = (patch: Partial<SurveyContent>) => setDraft((d) => ({ ...d, content: { ...d.content, ...patch } }));
@@ -68,6 +70,28 @@ export function SurveyBuilder({ surveyId, initial, status }: { surveyId: string;
     });
   }
 
+  function resetTemplate() {
+    if (!window.confirm('Reset this survey to a blank template? Your current questions will be cleared.')) return;
+    setDraft((d) => ({ ...d, title: 'Untitled survey', content: blankSurveyContent() }));
+    flash('Reset to a blank template.');
+  }
+
+  // Non-blocking validation warnings (spec §3.2).
+  const warnings: string[] = [];
+  const sectionIds = new Set(c.sections.map((s) => s.id));
+  let wn = 0;
+  c.sections.forEach((s) =>
+    s.questions.forEach((q) => {
+      wn += 1;
+      const label = q.ref ?? `Q${wn}`;
+      if (!q.title.trim()) warnings.push(`${label}: question text is empty.`);
+      if (TYPE_META[q.type].hasOptions && (q.options?.length ?? 0) < 2) warnings.push(`${label}: needs at least 2 options.`);
+      q.logic?.forEach((r) => {
+        if (r.action === 'skipToSection' && (!r.target || !sectionIds.has(r.target))) warnings.push(`${label}: branch points to a section that no longer exists.`);
+      });
+    }),
+  );
+
   const questionCount = c.sections.reduce((n, s) => n + s.questions.length, 0);
   const branchCount = c.sections.reduce((n, s) => n + s.questions.filter((q) => q.logic && q.logic.length).length, 0);
   let qn = 0;
@@ -83,6 +107,7 @@ export function SurveyBuilder({ surveyId, initial, status }: { surveyId: string;
             <span style={{ fontFamily: DISPLAY, fontSize: 11, fontWeight: 600, letterSpacing: '.06em', textTransform: 'uppercase', padding: '3px 9px', borderRadius: 999, background: curStatus === 'PUBLISHED' ? 'var(--green-100)' : 'var(--slate-100)', color: curStatus === 'PUBLISHED' ? 'var(--brand-hover)' : 'var(--text-muted)' }}>{curStatus}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <button type="button" className="ns-btn ns-btn--ghost ns-btn--sm" disabled={pending} onClick={resetTemplate}>Reset</button>
             <Link href={`/admin/surveys/${surveyId}/preview`} target="_blank" className="ns-btn ns-btn--outline ns-btn--sm">Preview</Link>
             <button type="button" className="ns-btn ns-btn--secondary ns-btn--sm" disabled={pending} onClick={() => save()}>Save draft</button>
             <button type="button" className="ns-btn ns-btn--primary ns-btn--sm" disabled={pending} onClick={publish}>Publish</button>
@@ -94,6 +119,16 @@ export function SurveyBuilder({ surveyId, initial, status }: { surveyId: string;
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 264px', gap: 28, alignItems: 'start' }}>
           {/* editing column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 18, minWidth: 0 }}>
+            {warnings.length > 0 && (
+              <div style={{ background: 'var(--warning-surface)', border: '1px solid var(--warning)', borderRadius: 12, padding: '14px 16px' }}>
+                <div style={{ fontFamily: DISPLAY, fontWeight: 600, fontSize: 13.5, color: '#8a6d1f', marginBottom: 6 }}>
+                  {warnings.length} thing{warnings.length === 1 ? '' : 's'} to fix before publishing
+                </div>
+                <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13.5, color: '#8a6d1f', lineHeight: 1.6 }}>
+                  {warnings.slice(0, 8).map((w, i) => <li key={i}>{w}</li>)}
+                </ul>
+              </div>
+            )}
             {/* survey meta */}
             <div style={{ background: '#fff', border: '1px solid var(--border)', borderTop: '5px solid var(--brand-strong)', borderRadius: 16, boxShadow: 'var(--shadow-sm)', padding: '24px 26px' }}>
               <input style={{ ...inpBase, fontFamily: DISPLAY, fontWeight: 600, fontSize: 'clamp(22px,3vw,30px)', lineHeight: 1.15 }} value={draft.title} onChange={(e) => setDraft((d) => ({ ...d, title: e.target.value }))} placeholder="Survey title" />
@@ -141,6 +176,22 @@ export function SurveyBuilder({ surveyId, initial, status }: { surveyId: string;
                       laterSections={c.sections.slice(si + 1)}
                       typeMenuOpen={typeMenu === q.id}
                       onToggleTypeMenu={() => setTypeMenu((t) => (t === q.id ? null : q.id))}
+                      dragging={dragQid === q.id}
+                      onDragStart={() => setDragQid(q.id)}
+                      onDragEnd={() => setDragQid(null)}
+                      onDropHere={() => {
+                        const from = dragQid;
+                        setDragQid(null);
+                        if (!from || from === q.id) return;
+                        mut((s) => {
+                          const arr = s[si].questions;
+                          const fi = arr.findIndex((x) => x.id === from);
+                          const ti = arr.findIndex((x) => x.id === q.id);
+                          if (fi < 0 || ti < 0) return;
+                          const [moved] = arr.splice(fi, 1);
+                          arr.splice(ti, 0, moved);
+                        });
+                      }}
                       onChange={(fn) => mut((s) => fn(s[si].questions[qi]))}
                       onType={(t) => { mut((s) => applyType(s[si].questions[qi], t)); setTypeMenu(null); }}
                       onMove={(dir) => mut((s) => { const arr = s[si].questions; const j = qi + dir; if (j < 0 || j >= arr.length) return; [arr[j], arr[qi]] = [arr[qi], arr[j]]; })}
@@ -230,6 +281,10 @@ function QCard({
   laterSections,
   typeMenuOpen,
   onToggleTypeMenu,
+  dragging,
+  onDragStart,
+  onDragEnd,
+  onDropHere,
   onChange,
   onType,
   onMove,
@@ -243,6 +298,10 @@ function QCard({
   laterSections: Section[];
   typeMenuOpen: boolean;
   onToggleTypeMenu: () => void;
+  dragging: boolean;
+  onDragStart: () => void;
+  onDragEnd: () => void;
+  onDropHere: () => void;
   onChange: (fn: (q: Question) => void) => void;
   onType: (t: QuestionType) => void;
   onMove: (dir: -1 | 1) => void;
@@ -256,8 +315,21 @@ function QCard({
   const preview: Record<string, string> = { short_text: 'Short answer text', long_text: 'Long-form answer text', number: '123 (number input)', email: 'name@example.org', date: 'Date picker' };
 
   return (
-    <div style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: 16, boxShadow: 'var(--shadow-sm)', padding: '22px 24px' }}>
-      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+    <div
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={(e) => { e.preventDefault(); onDropHere(); }}
+      style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: 16, boxShadow: 'var(--shadow-sm)', padding: '22px 24px', opacity: dragging ? 0.45 : 1 }}
+    >
+      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+        <span
+          draggable
+          onDragStart={(e) => { e.dataTransfer.effectAllowed = 'move'; onDragStart(); }}
+          onDragEnd={onDragEnd}
+          title="Drag to reorder"
+          style={{ display: 'grid', placeItems: 'center', width: 26, height: 30, cursor: 'grab', color: 'var(--slate-400)', flex: 'none', fontSize: 16, userSelect: 'none' }}
+        >
+          ⠿
+        </span>
         <div style={{ flex: 1, minWidth: 240 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
             <span style={{ fontFamily: MONO, fontSize: 12, fontWeight: 600, color: 'var(--brand-strong)' }}>{refLabel}</span>

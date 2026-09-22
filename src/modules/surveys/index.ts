@@ -7,7 +7,8 @@ export {
   duplicateSurvey,
   deleteSurvey,
   getPublishedSurveyBySlug,
-  submitSurveyResponse,
+  startResponse,
+  patchResponse,
   getResponses,
   SurveyError,
 } from './surveys';

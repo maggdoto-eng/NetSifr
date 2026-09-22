@@ -1,7 +1,7 @@
 import { getPublishedSurveyBySlug } from '@/modules/surveys';
 import type { SurveyContent } from '@/lib/survey-schema';
 import { SurveyRunner } from '@/components/survey-runner';
-import { submitResponseAction } from './actions';
+import { startResponseAction, patchResponseAction } from './actions';
 
 export const metadata = { title: 'Survey · NetSifr' };
 
@@ -26,8 +26,10 @@ export default async function PublicSurveyPage({ params }: PageProps<'/s/[slug]'
   return (
     <SurveyRunner
       title={survey.title}
+      slug={survey.slug}
       content={survey.content as unknown as SurveyContent}
-      submit={submitResponseAction.bind(null, survey.id)}
+      startAction={startResponseAction}
+      patchAction={patchResponseAction}
     />
   );
 }

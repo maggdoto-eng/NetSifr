@@ -169,7 +169,14 @@ export function SurveysDashboard({ rows }: { rows: Row[] }) {
           <div onClick={(e) => e.stopPropagation()} style={{ background: '#fff', borderRadius: 18, boxShadow: 'var(--shadow-lg)', maxWidth: 460, width: '100%', padding: 28 }}>
             <div className="ns-eyebrow">Share survey</div>
             <h3 style={{ fontFamily: DISPLAY, fontWeight: 600, fontSize: 21, color: 'var(--ink)', margin: '6px 0 0', lineHeight: 1.25 }}>{shareRow.title}</h3>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center', background: 'var(--slate-50)', border: '1px solid var(--border)', borderRadius: 11, padding: '10px 12px', marginTop: 18 }}>
+            <div style={{ display: 'flex', justifyContent: 'center', margin: '20px 0 18px' }}>
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=8&color=323546&data=${encodeURIComponent(`${origin}/s/${shareRow.slug}`)}`}
+                alt="QR code for the survey link"
+                style={{ width: 180, height: 180, border: '1px solid var(--border)', borderRadius: 14, padding: 8, background: '#fff' }}
+              />
+            </div>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', background: 'var(--slate-50)', border: '1px solid var(--border)', borderRadius: 11, padding: '10px 12px' }}>
               <code style={{ flex: 1, fontFamily: MONO, fontSize: 13, color: 'var(--ink)', wordBreak: 'break-all' }}>{origin}/s/{shareRow.slug}</code>
             </div>
             {shareRow.status !== 'PUBLISHED' && (

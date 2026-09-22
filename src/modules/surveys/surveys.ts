@@ -108,20 +108,47 @@ export async function getPublishedSurveyBySlug(slug: string) {
   return prisma.survey.findFirst({ where: { slug, status: 'PUBLISHED' } });
 }
 
-export async function submitSurveyResponse(input: {
-  surveyId: string;
+/**
+ * Begin a response (partial submission, spec §5.3): create a `complete=false`
+ * row stamped with the survey version + consent, and return its id. The Runner
+ * then streams answers to it via patchResponse and flips complete on finish.
+ */
+export async function startResponse(input: {
+  slug: string;
+  consent?: { agreed: boolean; text: string };
+}): Promise<{ responseId: string }> {
+  const survey = await prisma.survey.findFirst({
+    where: { slug: input.slug, status: 'PUBLISHED' },
+    select: { id: true, version: true },
+  });
+  if (!survey) throw new SurveyError('This survey isn’t accepting responses.');
+
+  const response = await prisma.surveyResponse.create({
+    data: {
+      surveyId: survey.id,
+      surveyVersion: survey.version,
+      answers: {},
+      complete: false,
+      consent: input.consent
+        ? { agreed: input.consent.agreed, text: input.consent.text, at: new Date().toISOString() }
+        : undefined,
+    },
+    select: { id: true },
+  });
+  return { responseId: response.id };
+}
+
+/** Upsert answers / set complete on an in-progress response (partial-save + finish). */
+export async function patchResponse(input: {
+  responseId: string;
   answers: Answers;
   complete: boolean;
-}) {
-  const survey = await prisma.survey.findUnique({
-    where: { id: input.surveyId },
-    select: { status: true },
-  });
-  if (!survey || survey.status !== 'PUBLISHED') {
-    throw new SurveyError('This survey isn’t accepting responses.');
-  }
-  await prisma.surveyResponse.create({
-    data: { surveyId: input.surveyId, answers: input.answers as object, complete: input.complete },
+}): Promise<void> {
+  // updateMany so a bad/expired id is a no-op rather than a throw (the id is a
+  // capability token handed to an anonymous client).
+  await prisma.surveyResponse.updateMany({
+    where: { id: input.responseId },
+    data: { answers: input.answers as object, complete: input.complete },
   });
 }
 

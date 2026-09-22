@@ -15,6 +15,20 @@ prototype (Downloads). See the "Surveys" section below for scope.
 - [ ] Decide: surveys as their own top-level area vs. attached to programs/events
 - [ ] Design-system note: prototype ships a *newer* NetSifr brand (leaf-green/slate, UNODC-report style) — app currently uses pine/mint/coral. Decide whether to keep app system or adopt the new one.
 
+## 🧩 Surveys — spec-gap closure (working through, top→bottom)
+From DEVELOPMENT_SPEC.md review. Design system + core behaviours already match.
+- [ ] 1. Partial submission + consent/version stamp (§3.1/§5.2/§5.3) — response model (surveyVersion, consent), start+patch flow, stream answers, complete flag
+- [ ] 2. Save & resume in the Runner (localStorage; Resume vs Start over)
+- [ ] 3. Rate-limit the public submission endpoints (§9 anti-spam)
+- [ ] 4. Runner end screen: image, secondary link, personalized summary tiles, "Submit another response"
+- [ ] 5. Runner polish: enter animation (fade+rise), saved-dot indicator
+- [ ] 6. Share modal QR code
+- [ ] 7. Builder: Reset to template + validation warnings (empty titles, <2 options, dangling branch targets)
+- [ ] 8. Builder: drag-to-reorder questions
+- [ ] 9. Admin: single-response drill-down + pagination for large sets
+- [ ] 10. Accessibility: aria-live progress, focus management on step change
+- [ ] (deferred/prod) researcher role, PII separation/retention, i18n/RTL, server-side aggregation, per-invite tokens
+
 ## 📋 Backlog (deferred roadmap)
 
 ### Phase 5 — Action Projects
