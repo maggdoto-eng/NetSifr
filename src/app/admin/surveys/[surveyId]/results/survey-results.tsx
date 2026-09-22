@@ -72,6 +72,7 @@ export function SurveyResults({
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <Link href="/admin/surveys" className="ns-btn ns-btn--ghost ns-btn--sm">← All surveys</Link>
+            <Link href={`/admin/surveys/${surveyId}/responses`} className="ns-btn ns-btn--ghost ns-btn--sm">Responses</Link>
             <a href={`/admin/surveys/${surveyId}/results/export`} className="ns-btn ns-btn--outline ns-btn--sm">Export CSV</a>
           </div>
         </div>

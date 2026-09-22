@@ -53,6 +53,13 @@ export function SurveyRunner({
   const advRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const responseIdRef = useRef<string | null>(null);
+  const stageRef = useRef<HTMLDivElement | null>(null);
+
+  // Focus the stage on every step change so keyboard/screen-reader users land
+  // on the new content (spec §9 accessibility).
+  useEffect(() => {
+    stageRef.current?.focus();
+  }, [stepIndex, started, finished]);
 
   const consent = content.consent;
   const needConsent = !!consent?.require;
@@ -326,7 +333,7 @@ export function SurveyRunner({
           </div>
           {inSurvey && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-              <span style={{ fontFamily: MONO, fontSize: 12.5, color: 'var(--text-muted)', fontVariantNumeric: 'tabular-nums' }}>Question {Math.min(curNo || 1, total)} of {total}</span>
+              <span role="status" aria-live="polite" style={{ fontFamily: MONO, fontSize: 12.5, color: 'var(--text-muted)', fontVariantNumeric: 'tabular-nums' }}>Question {Math.min(curNo || 1, total)} of {total}</span>
               <span title="Progress saved" style={{ width: 8, height: 8, borderRadius: '50%', background: savedFlash ? 'var(--brand-strong)' : 'var(--slate-300)', transition: 'background .3s ease' }} />
             </div>
           )}
@@ -339,7 +346,7 @@ export function SurveyRunner({
       </header>
 
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 'clamp(28px,6vh,72px) clamp(20px,5vw,40px)' }}>
-        <div style={{ width: '100%', maxWidth: 720 }}>
+        <div ref={stageRef} tabIndex={-1} style={{ width: '100%', maxWidth: 720, outline: 'none' }}>
           {!started && (
             <div className="ns-anim">
               <div className="ns-eyebrow" style={{ marginBottom: 18 }}>NetSifr Research Study</div>
@@ -475,12 +482,12 @@ function QuestionView({
 
       <div style={{ marginTop: 'clamp(24px,4vh,38px)' }}>
         {(q.type === 'single_select' || q.type === 'multi_select' || q.type === 'yes_no') && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 11 }}>
+          <div role={q.type === 'multi_select' ? 'group' : 'radiogroup'} aria-label={q.title} style={{ display: 'flex', flexDirection: 'column', gap: 11 }}>
             {options.map((o, i) => {
               const multi = q.type === 'multi_select';
               const sel = multi ? Array.isArray(value) && value.includes(o.value) : value === o.value;
               return (
-                <button key={o.id} type="button" onClick={() => {
+                <button key={o.id} type="button" role={multi ? 'checkbox' : 'radio'} aria-checked={sel} onClick={() => {
                   if (multi) {
                     const arr = Array.isArray(value) ? (value as string[]) : [];
                     onChange(q.id, arr.includes(o.value) ? arr.filter((x) => x !== o.value) : [...arr, o.value]);

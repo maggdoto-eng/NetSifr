@@ -10,5 +10,6 @@ export {
   startResponse,
   patchResponse,
   getResponses,
+  getResponsesPage,
   SurveyError,
 } from './surveys';

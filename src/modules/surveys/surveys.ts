@@ -161,3 +161,23 @@ export async function getResponses(surveyId: string, organizationId: string) {
     orderBy: { submittedAt: 'desc' },
   });
 }
+
+/** A page of raw responses for the drill-down browser (spec §3.3). */
+export async function getResponsesPage(
+  surveyId: string,
+  organizationId: string,
+  page: number,
+  pageSize = 20,
+) {
+  await loadOwned(surveyId, organizationId);
+  const [responses, total] = await Promise.all([
+    prisma.surveyResponse.findMany({
+      where: { surveyId },
+      orderBy: { submittedAt: 'desc' },
+      skip: Math.max(0, (page - 1) * pageSize),
+      take: pageSize,
+    }),
+    prisma.surveyResponse.count({ where: { surveyId } }),
+  ]);
+  return { responses, total, pageSize };
+}

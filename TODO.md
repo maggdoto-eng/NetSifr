@@ -7,26 +7,26 @@ Living list of what's shipped, what's next, and what's blocked. Newest prioritie
 ### Surveys (native) — NEW, top priority
 Native survey builder + runner + analytics, from the `Custom Interactive Survey Tool`
 prototype (Downloads). See the "Surveys" section below for scope.
-- [ ] Schema: `Survey`, `SurveySection`, `SurveyQuestion`, `SurveyResponse` (+ answer storage), status (draft/published), versioning
-- [ ] Module: create/update/publish, submit response, aggregate/crosstab/filter (port `survey-schema.js` logic server-side)
-- [ ] Admin **Builder** — sections, 12 question types, options, required, skip logic, consent + ending pages, preview, publish
-- [ ] **Runner** — consent → stepwise sections/questions, skip logic, ending page (participant + optionally public link)
-- [ ] Admin **dashboard** — list, response counts, completion rate, per-question distributions, scale/rating averages, ranking, cross-tabs by segment, date/segment filters, **CSV export**
-- [ ] Decide: surveys as their own top-level area vs. attached to programs/events
-- [ ] Design-system note: prototype ships a *newer* NetSifr brand (leaf-green/slate, UNODC-report style) — app currently uses pine/mint/coral. Decide whether to keep app system or adopt the new one.
+- [x] Schema: `Survey`, `SurveySection`, `SurveyQuestion`, `SurveyResponse` (+ answer storage), status (draft/published), versioning
+- [x] Module: create/update/publish, submit response, aggregate/crosstab/filter (port `survey-schema.js` logic server-side)
+- [x] Admin **Builder** — sections, 12 question types, options, required, skip logic, consent + ending pages, preview, publish
+- [x] **Runner** — consent → stepwise sections/questions, skip logic, ending page (participant + optionally public link)
+- [x] Admin **dashboard** — list, response counts, completion rate, per-question distributions, scale/rating averages, ranking, cross-tabs by segment, date/segment filters, **CSV export**
+- [x] Decide: surveys as their own top-level area vs. attached to programs/events
+- [x] Design-system note: prototype ships a *newer* NetSifr brand (leaf-green/slate, UNODC-report style) — app currently uses pine/mint/coral. Decide whether to keep app system or adopt the new one.
 
 ## 🧩 Surveys — spec-gap closure (working through, top→bottom)
 From DEVELOPMENT_SPEC.md review. Design system + core behaviours already match.
-- [ ] 1. Partial submission + consent/version stamp (§3.1/§5.2/§5.3) — response model (surveyVersion, consent), start+patch flow, stream answers, complete flag
-- [ ] 2. Save & resume in the Runner (localStorage; Resume vs Start over)
-- [ ] 3. Rate-limit the public submission endpoints (§9 anti-spam)
-- [ ] 4. Runner end screen: image, secondary link, personalized summary tiles, "Submit another response"
-- [ ] 5. Runner polish: enter animation (fade+rise), saved-dot indicator
-- [ ] 6. Share modal QR code
-- [ ] 7. Builder: Reset to template + validation warnings (empty titles, <2 options, dangling branch targets)
-- [ ] 8. Builder: drag-to-reorder questions
-- [ ] 9. Admin: single-response drill-down + pagination for large sets
-- [ ] 10. Accessibility: aria-live progress, focus management on step change
+- [x] 1. Partial submission + consent/version stamp (§3.1/§5.2/§5.3) — response model (surveyVersion, consent), start+patch flow, stream answers, complete flag
+- [x] 2. Save & resume in the Runner (localStorage; Resume vs Start over)
+- [x] 3. Rate-limit the public submission endpoints (§9 anti-spam)
+- [x] 4. Runner end screen: image, secondary link, personalized summary tiles, "Submit another response"
+- [x] 5. Runner polish: enter animation (fade+rise), saved-dot indicator
+- [x] 6. Share modal QR code
+- [x] 7. Builder: Reset to template + validation warnings (empty titles, <2 options, dangling branch targets)
+- [x] 8. Builder: drag-to-reorder questions
+- [x] 9. Admin: single-response drill-down + pagination for large sets
+- [x] 10. Accessibility: aria-live progress, focus management on step change
 - [ ] (deferred/prod) researcher role, PII separation/retention, i18n/RTL, server-side aggregation, per-invite tokens
 
 ## 📋 Backlog (deferred roadmap)
