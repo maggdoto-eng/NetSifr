@@ -8,11 +8,15 @@ import {
   blankSection,
   blankQuestion,
   blankSurveyContent,
+  getTheme,
+  ANIMATION_OPTIONS,
+  BACKGROUND_OPTIONS,
   uid,
   type SurveyContent,
   type Section,
   type Question,
   type QuestionType,
+  type SurveyTheme,
 } from '@/lib/survey-schema';
 import { saveSurveyAction, setSurveyStatusAction } from '../../actions';
 
@@ -226,6 +230,8 @@ export function SurveyBuilder({ surveyId, initial, status }: { surveyId: string;
                 <input style={inpBase} value={c.ending.ctaUrl ?? ''} onChange={(e) => setContent({ ending: { ...c.ending, ctaUrl: e.target.value } })} placeholder="CTA url" />
               </div>
             </div>
+
+            <ExperiencePanel theme={getTheme(c)} onChange={(theme) => setContent({ theme })} />
           </div>
 
           {/* side rail */}
@@ -262,6 +268,59 @@ export function SurveyBuilder({ surveyId, initial, status }: { surveyId: string;
 }
 
 const fieldLabel: React.CSSProperties = { fontSize: 12, fontWeight: 600, letterSpacing: '.04em', textTransform: 'uppercase', color: 'var(--text-muted)' };
+
+/** Experience panel — edits the survey theme (spec §13.6). */
+function ExperiencePanel({ theme, onChange }: { theme: SurveyTheme; onChange: (t: SurveyTheme) => void }) {
+  const set = (patch: Partial<SurveyTheme>) => onChange({ ...theme, ...patch });
+  const setEng = (patch: Partial<SurveyTheme['engagement']>) => onChange({ ...theme, engagement: { ...theme.engagement, ...patch } });
+  const toggles: Array<{ k: keyof SurveyTheme['engagement']; label: string; hint: string }> = [
+    { k: 'enabled', label: 'Engagement cues', hint: 'Master switch for milestones + encouragements' },
+    { k: 'milestones', label: 'Milestone toasts', hint: 'Celebrate at 25 / 50 / 75% complete' },
+    { k: 'encouragements', label: 'Section encouragements', hint: 'A friendly note on each section divider' },
+  ];
+  return (
+    <div style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: 16, boxShadow: 'var(--shadow-sm)', padding: '22px 24px' }}>
+      <div style={{ fontFamily: DISPLAY, fontWeight: 600, fontSize: 16, color: 'var(--ink)', marginBottom: 4 }}>Experience</div>
+      <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 16px' }}>Motion, décor and engagement cues for the runner.</p>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(190px,1fr))', gap: 16 }}>
+        <label style={{ display: 'block' }}>
+          <span style={fieldLabel}>Question animation</span>
+          <select value={theme.animation} onChange={(e) => set({ animation: e.target.value as SurveyTheme['animation'] })} style={{ ...selStyle, width: '100%', marginTop: 6 }}>
+            {ANIMATION_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label} — {o.hint}</option>)}
+          </select>
+        </label>
+        <label style={{ display: 'block' }}>
+          <span style={fieldLabel}>Background décor</span>
+          <select value={theme.background} onChange={(e) => set({ background: e.target.value as SurveyTheme['background'] })} style={{ ...selStyle, width: '100%', marginTop: 6 }}>
+            {BACKGROUND_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label} — {o.hint}</option>)}
+          </select>
+        </label>
+      </div>
+
+      <div style={{ marginTop: 16 }}>
+        <span style={fieldLabel}>Animation speed · {theme.animationDuration}ms</span>
+        <input type="range" min={0} max={800} step={20} value={theme.animationDuration} onChange={(e) => set({ animationDuration: Number(e.target.value) })} style={{ width: '100%', marginTop: 8, accentColor: 'var(--brand-strong)' }} disabled={theme.animation === 'none'} />
+      </div>
+
+      <div style={{ marginTop: 18, display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {toggles.map((t) => {
+          const on = theme.engagement[t.k];
+          const disabled = t.k !== 'enabled' && !theme.engagement.enabled;
+          return (
+            <label key={t.k} style={{ display: 'flex', alignItems: 'flex-start', gap: 11, opacity: disabled ? 0.5 : 1, cursor: disabled ? 'default' : 'pointer' }}>
+              <input type="checkbox" style={{ width: 'auto', marginTop: 3, accentColor: 'var(--brand-strong)' }} checked={on} disabled={disabled} onChange={(e) => setEng({ [t.k]: e.target.checked } as Partial<SurveyTheme['engagement']>)} />
+              <span>
+                <span style={{ display: 'block', fontSize: 14, fontWeight: 600, color: 'var(--ink)' }}>{t.label}</span>
+                <span style={{ display: 'block', fontSize: 12.5, color: 'var(--text-muted)', marginTop: 1 }}>{t.hint}</span>
+              </span>
+            </label>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 function applyType(q: Question, t: QuestionType) {
   q.type = t;

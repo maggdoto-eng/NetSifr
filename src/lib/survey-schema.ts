@@ -68,6 +68,15 @@ export type Ending = {
   showSummary?: boolean;
 };
 
+export type AnimationStyle = 'slide-up' | 'fade' | 'slide-left' | 'scale' | 'none';
+export type BackgroundStyle = 'plain' | 'leaves' | 'dots' | 'blobs' | 'gradient';
+export type SurveyTheme = {
+  animation: AnimationStyle;
+  animationDuration: number;
+  background: BackgroundStyle;
+  engagement: { enabled: boolean; milestones: boolean; encouragements: boolean };
+};
+
 /** The editable JSON document stored in Survey.content. */
 export type SurveyContent = {
   subtitle: string;
@@ -76,7 +85,57 @@ export type SurveyContent = {
   consent: Consent;
   sections: Section[];
   ending: Ending;
+  theme?: SurveyTheme;
 };
+
+/* ---- Theme (spec §13) ---- */
+export function defaultTheme(): SurveyTheme {
+  return {
+    animation: 'slide-up',
+    animationDuration: 380,
+    background: 'leaves',
+    engagement: { enabled: true, milestones: true, encouragements: true },
+  };
+}
+/** Merge stored theme over the defaults (deep-merges engagement). */
+export function getTheme(content: SurveyContent): SurveyTheme {
+  const d = defaultTheme();
+  const t = content.theme;
+  if (!t) return d;
+  return {
+    animation: t.animation ?? d.animation,
+    animationDuration: t.animationDuration ?? d.animationDuration,
+    background: t.background ?? d.background,
+    engagement: { ...d.engagement, ...(t.engagement ?? {}) },
+  };
+}
+
+export const ANIMATION_OPTIONS: Array<{ value: AnimationStyle; label: string; hint: string }> = [
+  { value: 'slide-up', label: 'Slide up', hint: 'Rise + fade in' },
+  { value: 'fade', label: 'Fade', hint: 'Simple fade in' },
+  { value: 'slide-left', label: 'Slide in', hint: 'Enter from the right' },
+  { value: 'scale', label: 'Scale', hint: 'Gentle zoom in' },
+  { value: 'none', label: 'None', hint: 'Instant, no motion' },
+];
+export const BACKGROUND_OPTIONS: Array<{ value: BackgroundStyle; label: string; hint: string }> = [
+  { value: 'plain', label: 'Plain', hint: 'No décor' },
+  { value: 'leaves', label: 'Leaves', hint: 'Faint floating sprouts' },
+  { value: 'dots', label: 'Dots', hint: 'Printed-paper dot grid' },
+  { value: 'blobs', label: 'Blobs', hint: 'Soft floating shapes' },
+  { value: 'gradient', label: 'Gradient', hint: 'Pale green wash' },
+];
+export const MILESTONES: Record<number, { title: string; body: string }> = {
+  25: { title: 'Great start!', body: 'You’re a quarter of the way through — thank you.' },
+  50: { title: 'Halfway there!', body: 'Your answers are already valuable. Keep going.' },
+  75: { title: 'Almost done!', body: 'Just a few questions left — you’re nearly finished.' },
+};
+export const ENCOURAGEMENTS: string[] = [
+  'Keep going — your experience matters.',
+  'You’re doing great. Thanks for the thoughtful answers.',
+  'Every answer helps us build something better.',
+  'Nearly there — a little further.',
+  'Thank you for sticking with it.',
+];
 
 export type AnswerValue = string | number | string[];
 export type Answers = Record<string, AnswerValue>;
@@ -141,6 +200,7 @@ export function blankSurveyContent(): SurveyContent {
     consent: { heading: 'Before we begin', body: '', require: false, acknowledgeLabel: 'I understand and agree to take part.' },
     sections: [blankSection()],
     ending: { heading: 'Thank you.', body: '', imageUrl: '', ctaLabel: '', ctaUrl: '', showSummary: false },
+    theme: defaultTheme(),
   };
 }
 

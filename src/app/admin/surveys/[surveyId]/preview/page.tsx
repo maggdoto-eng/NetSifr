@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import { requireAdminContext } from '@/app/admin/action-context';
 import { getSurveyForAdmin, SurveyError } from '@/modules/surveys';
 import type { SurveyContent } from '@/lib/survey-schema';
-import { SurveyRunner } from '@/components/survey-runner';
+import { PreviewFrame } from './preview-frame';
 
 export default async function SurveyPreviewPage({
   params,
@@ -16,5 +16,5 @@ export default async function SurveyPreviewPage({
     if (e instanceof SurveyError) notFound();
     throw e;
   }
-  return <SurveyRunner title={survey.title} content={survey.content as unknown as SurveyContent} preview />;
+  return <PreviewFrame title={survey.title} content={survey.content as unknown as SurveyContent} />;
 }

@@ -5,12 +5,18 @@ import {
   buildSteps,
   evalLogic,
   countQuestions,
+  getTheme,
+  MILESTONES,
+  ENCOURAGEMENTS,
   type SurveyContent,
   type Question,
   type Answers,
   type AnswerValue,
   type Step,
+  type AnimationStyle,
+  type BackgroundStyle,
 } from '@/lib/survey-schema';
+import { SurveyDecor } from './survey-decor';
 
 type StartFn = (slug: string, consent?: { agreed: boolean; text: string }) => Promise<{ responseId?: string; error?: string }>;
 type PatchFn = (responseId: string, data: { answers: Answers; complete: boolean }) => Promise<{ error?: string }>;
@@ -27,6 +33,10 @@ export function SurveyRunner({
   startAction,
   patchAction,
   preview = false,
+  animation = 'auto',
+  background = 'auto',
+  engagement = 'auto',
+  device,
 }: {
   title: string;
   content: SurveyContent;
@@ -34,10 +44,32 @@ export function SurveyRunner({
   startAction?: StartFn;
   patchAction?: PatchFn;
   preview?: boolean;
+  /** Override props (spec §13.7) — 'auto' defers to the survey's saved theme. */
+  animation?: AnimationStyle | 'auto';
+  background?: BackgroundStyle | 'auto';
+  engagement?: boolean | 'auto';
+  /** Force a viewport for the builder preview frame (spec §13.5). */
+  device?: 'desktop' | 'mobile';
 }) {
   const steps = useMemo<Step[]>(() => buildSteps(content), [content]);
   const total = useMemo(() => countQuestions(content), [content]);
   const key = slug ? `netsifr.survey.${slug}` : null;
+
+  // Resolve the effective theme: saved theme, with any override props applied.
+  const theme = useMemo(() => {
+    const t = getTheme(content);
+    return {
+      ...t,
+      animation: animation === 'auto' ? t.animation : animation,
+      background: background === 'auto' ? t.background : background,
+      engagement:
+        engagement === 'auto'
+          ? t.engagement
+          : { ...t.engagement, enabled: engagement, milestones: engagement, encouragements: engagement },
+    };
+  }, [content, animation, background, engagement]);
+  const animClass = `ns-anim-base ns-anim--${theme.animation}`;
+  const animStyle = { animationDuration: `${theme.animationDuration}ms` } as const;
 
   const [started, setStarted] = useState(false);
   const [finished, setFinished] = useState(false);
@@ -48,6 +80,9 @@ export function SurveyRunner({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [savedFlash, setSavedFlash] = useState(false);
   const [resume, setResume] = useState<Saved | null>(null);
+  const [toast, setToast] = useState<{ title: string; body: string } | null>(null);
+  const firedRef = useRef<Set<number>>(new Set());
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const advRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -159,6 +194,8 @@ export function SurveyRunner({
     if (!canStart) return;
     clearLocal();
     responseIdRef.current = null;
+    firedRef.current = new Set();
+    setToast(null);
     setResume(null);
     setAnswers({});
     setHistory([]);
@@ -184,6 +221,8 @@ export function SurveyRunner({
   const restart = useCallback(() => {
     clearLocal();
     responseIdRef.current = null;
+    firedRef.current = new Set();
+    setToast(null);
     setAnswers({});
     setHistory([]);
     setStepIndex(0);
@@ -323,9 +362,52 @@ export function SurveyRunner({
   const answeredCount = Object.values(answers).filter((v) => v !== '' && v != null && !(Array.isArray(v) && v.length === 0)).length;
   const ending = content.ending;
 
+  // Engagement milestone toasts at 25/50/75% — once per attempt (spec §13.3).
+  const showToast = useCallback((m: { title: string; body: string }) => {
+    setToast(m);
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    toastTimerRef.current = setTimeout(() => setToast(null), 3600);
+  }, []);
+  useEffect(() => {
+    if (!inSurvey || !theme.engagement.enabled || !theme.engagement.milestones) return;
+    for (const m of [75, 50, 25]) {
+      if (pct >= m && !firedRef.current.has(m)) {
+        firedRef.current.add(m);
+        showToast(MILESTONES[m]);
+        break;
+      }
+    }
+  }, [pct, inSurvey, theme.engagement.enabled, theme.engagement.milestones, showToast]);
+
+  // Section-divider encouragement note (spec §13.3).
+  const sectionEncouragement =
+    inSurvey && current?.kind === 'section' && theme.engagement.enabled && theme.engagement.encouragements
+      ? ENCOURAGEMENTS[content.sections.findIndex((s) => s.id === current.section.id) % ENCOURAGEMENTS.length] ?? null
+      : null;
+
+  // Builder preview frame (spec §13.5): force a phone-width column when device==='mobile'.
+  const framed = device === 'mobile';
+
   return (
-    <div className="ns-ds" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#fff' }}>
-      <header style={{ position: 'sticky', top: 0, zIndex: 20, background: 'rgba(255,255,255,.92)', backdropFilter: 'saturate(1.1) blur(8px)', borderBottom: '1px solid var(--border)' }}>
+    <div
+      className="ns-ds"
+      style={
+        framed
+          ? { position: 'relative', width: 402, maxWidth: '100%', minHeight: 780, margin: '0 auto', display: 'flex', flexDirection: 'column', background: '#fff', border: '10px solid var(--slate-800,#20222c)', borderRadius: 40, overflow: 'hidden', boxShadow: 'var(--shadow-lg,0 24px 60px rgba(0,0,0,.2))' }
+          : { position: 'relative', minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#fff' }
+      }
+    >
+      <SurveyDecor background={theme.background} />
+      {toast && (
+        <div role="status" aria-live="polite" className="ns-toast" style={{ position: framed ? 'absolute' : 'fixed', top: framed ? 70 : 76, left: '50%', transform: 'translateX(-50%)', zIndex: 60, maxWidth: 'min(92vw,360px)', display: 'flex', gap: 12, alignItems: 'flex-start', padding: '13px 16px', borderRadius: 14, background: '#fff', border: '1px solid var(--border)', boxShadow: 'var(--shadow-lg,0 16px 40px rgba(0,0,0,.16))' }}>
+          <span style={{ width: 30, height: 30, borderRadius: 9, flex: 'none', display: 'grid', placeItems: 'center', background: 'var(--green-100)', fontSize: 16 }}>🌱</span>
+          <span>
+            <span style={{ display: 'block', fontFamily: DISPLAY, fontWeight: 600, fontSize: 14.5, color: 'var(--ink)' }}>{toast.title}</span>
+            <span style={{ display: 'block', fontSize: 13, lineHeight: 1.45, color: 'var(--text-muted)', marginTop: 2 }}>{toast.body}</span>
+          </span>
+        </div>
+      )}
+      <header style={{ position: framed ? 'static' : 'sticky', top: 0, zIndex: 20, background: 'rgba(255,255,255,.92)', backdropFilter: 'saturate(1.1) blur(8px)', borderBottom: '1px solid var(--border)' }}>
         <div style={{ maxWidth: 1120, margin: '0 auto', padding: '12px clamp(16px,4vw,40px)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 18, color: 'var(--ink)' }}>NetSifr</span>
@@ -345,10 +427,10 @@ export function SurveyRunner({
         )}
       </header>
 
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 'clamp(28px,6vh,72px) clamp(20px,5vw,40px)' }}>
+      <main style={{ position: 'relative', zIndex: 1, flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: framed ? 'clamp(24px,5vh,40px) 22px' : 'clamp(28px,6vh,72px) clamp(20px,5vw,40px)' }}>
         <div ref={stageRef} tabIndex={-1} style={{ width: '100%', maxWidth: 720, outline: 'none' }}>
           {!started && (
-            <div className="ns-anim">
+            <div className={animClass} style={animStyle}>
               <div className="ns-eyebrow" style={{ marginBottom: 18 }}>NetSifr Research Study</div>
               <h1 style={{ fontFamily: DISPLAY, fontWeight: 600, fontSize: 'clamp(30px,5vw,50px)', lineHeight: 1.08, letterSpacing: '-.02em', color: 'var(--ink)' }}>{title}</h1>
               {content.subtitle && <p style={{ fontSize: 'clamp(16px,2vw,19px)', lineHeight: 1.6, color: 'var(--text-body)', margin: '18px 0 0', maxWidth: '60ch' }}>{content.subtitle}</p>}
@@ -390,13 +472,19 @@ export function SurveyRunner({
           )}
 
           {inSurvey && current?.kind === 'section' && (
-            <div className="ns-anim" key={`sec-${stepIndex}`}>
+            <div className={animClass} style={animStyle} key={`sec-${stepIndex}`}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 22 }}>
                 <span style={{ width: 30, height: 30, borderRadius: 8, background: 'var(--brand)', flex: 'none' }} />
                 <span className="ns-eyebrow">{current.section.kicker || 'Section'}</span>
               </div>
               <h2 style={{ fontFamily: DISPLAY, fontWeight: 600, fontSize: 'clamp(28px,4.4vw,44px)', lineHeight: 1.1, letterSpacing: '-.015em', color: 'var(--ink)' }}>{current.section.title}</h2>
               {current.section.subtitle && <p style={{ fontSize: 'clamp(15px,1.9vw,18px)', lineHeight: 1.6, color: 'var(--text-body)', margin: '16px 0 0', maxWidth: '60ch' }}>{current.section.subtitle}</p>}
+              {sectionEncouragement && (
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 9, marginTop: 20, padding: '9px 14px', borderRadius: 999, background: 'var(--green-50)', border: '1px solid var(--green-100)' }}>
+                  <span aria-hidden style={{ fontSize: 14 }}>🌱</span>
+                  <span style={{ fontSize: 13.5, color: 'var(--brand-strong)', fontWeight: 500 }}>{sectionEncouragement}</span>
+                </div>
+              )}
               <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 32 }}>
                 <button type="button" className="ns-btn ns-btn--primary ns-btn--lg" onClick={goNext}>Continue →</button>
                 {history.length > 0 && <button type="button" className="ns-btn ns-btn--ghost" onClick={goBack}>← Back</button>}
@@ -405,13 +493,13 @@ export function SurveyRunner({
           )}
 
           {inSurvey && current?.kind === 'question' && (
-            <div className="ns-anim" key={`q-${stepIndex}`}>
+            <div className={animClass} style={animStyle} key={`q-${stepIndex}`}>
               <QuestionView q={current.q} sectionTitle={current.section.title} refLabel={current.q.ref ?? `Q${curNo}`} value={answers[current.q.id]} onChange={setAnswer} isLast={stepIndex === steps.length - 1} onNext={goNext} onBack={history.length > 0 ? goBack : undefined} />
             </div>
           )}
 
           {finished && (
-            <div style={{ position: 'relative' }} className="ns-anim">
+            <div className={animClass} style={{ position: 'relative', ...animStyle }}>
               <canvas ref={canvasRef} style={{ position: 'absolute', inset: '-40px -80px auto', width: 'calc(100% + 160px)', height: 340, pointerEvents: 'none' }} />
               <div style={{ position: 'relative' }}>
                 <div style={{ width: 60, height: 60, borderRadius: '50%', background: 'var(--green-100)', display: 'grid', placeItems: 'center', marginBottom: 24 }}>

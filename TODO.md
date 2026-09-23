@@ -27,7 +27,21 @@ From DEVELOPMENT_SPEC.md review. Design system + core behaviours already match.
 - [x] 8. Builder: drag-to-reorder questions
 - [x] 9. Admin: single-response drill-down + pagination for large sets
 - [x] 10. Accessibility: aria-live progress, focus management on step change
-- [ ] (deferred/prod) researcher role, PII separation/retention, i18n/RTL, server-side aggregation, per-invite tokens
+### Surveys §13 — engagement, theming & responsive (DONE)
+- [x] 13.1 Data model: `survey.theme` (animation/duration/background/engagement) + defaultTheme/getTheme + ANIMATION/BACKGROUND/MILESTONES/ENCOURAGEMENTS catalogues
+- [x] 13.2 Per-question animations (slide-up/fade/slide-left/scale/none, duration, restart per step, reduced-motion)
+- [x] 13.3 Engagement: 25/50/75% milestone toasts (once per attempt) + section encouragement notes
+- [x] 13.4 Page décor layer (plain/leaves/dots/blobs/gradient) behind content
+- [x] 13.5 Responsive + Desktop/Mobile preview frame in the Runner (PreviewFrame)
+- [x] 13.6 Builder "Experience" panel editing theme
+- [x] 13.7 Runner tweak override props (animation/background/engagement, auto → defer to theme)
+
+### Surveys — production hardening (after §13; the recommended 1,2,4,5)
+- [ ] P1. Researcher role + per-survey ownership (stamp ownerUserId, show creator, scope listing)
+- [ ] P2. PII separation & data-retention (separate contact answers, anonymised export, deletion)
+- [ ] P4. Server-side aggregation for large response sets
+- [ ] P5. Builder extras: "Other → free text" option, undo/redo, per-question image
+- [ ] (still deferred) i18n/RTL, per-invite tokens
 
 ## 📋 Backlog (deferred roadmap)
 
