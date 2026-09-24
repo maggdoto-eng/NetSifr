@@ -11,5 +11,13 @@ export {
   patchResponse,
   getResponses,
   getResponsesPage,
+  countResponses,
+  getAnalytics,
+  setRetention,
+  deleteResponse,
+  anonymiseResponses,
+  purgeExpiredResponses,
+  SERVER_AGG_THRESHOLD,
   SurveyError,
 } from './surveys';
+export type { AnalyticsFilters } from './surveys';

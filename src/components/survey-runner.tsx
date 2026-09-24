@@ -8,6 +8,8 @@ import {
   getTheme,
   MILESTONES,
   ENCOURAGEMENTS,
+  OTHER_VALUE,
+  otherKey,
   type SurveyContent,
   type Question,
   type Answers,
@@ -494,7 +496,7 @@ export function SurveyRunner({
 
           {inSurvey && current?.kind === 'question' && (
             <div className={animClass} style={animStyle} key={`q-${stepIndex}`}>
-              <QuestionView q={current.q} sectionTitle={current.section.title} refLabel={current.q.ref ?? `Q${curNo}`} value={answers[current.q.id]} onChange={setAnswer} isLast={stepIndex === steps.length - 1} onNext={goNext} onBack={history.length > 0 ? goBack : undefined} />
+              <QuestionView q={current.q} sectionTitle={current.section.title} refLabel={current.q.ref ?? `Q${curNo}`} value={answers[current.q.id]} otherValue={(answers[otherKey(current.q.id)] as string) ?? ''} onChange={setAnswer} isLast={stepIndex === steps.length - 1} onNext={goNext} onBack={history.length > 0 ? goBack : undefined} />
             </div>
           )}
 
@@ -541,6 +543,7 @@ function QuestionView({
   sectionTitle,
   refLabel,
   value,
+  otherValue,
   onChange,
   isLast,
   onNext,
@@ -550,12 +553,18 @@ function QuestionView({
   sectionTitle: string;
   refLabel: string;
   value: AnswerValue | undefined;
+  otherValue: string;
   onChange: (qid: string, v: AnswerValue, auto?: boolean) => void;
   isLast: boolean;
   onNext: () => void;
   onBack?: () => void;
 }) {
-  const options = q.type === 'yes_no' ? [{ id: 'y', label: 'Yes', value: 'Yes' }, { id: 'n', label: 'No', value: 'No' }] : q.options ?? [];
+  const baseOptions = q.type === 'yes_no' ? [{ id: 'y', label: 'Yes', value: 'Yes' }, { id: 'n', label: 'No', value: 'No' }] : q.options ?? [];
+  // Append the "Other…" escape hatch when enabled (spec P5).
+  const canOther = q.allowOther && (q.type === 'single_select' || q.type === 'multi_select' || q.type === 'dropdown');
+  const options = canOther ? [...baseOptions, { id: '__other', label: 'Other…', value: OTHER_VALUE }] : baseOptions;
+  const otherSelected =
+    q.type === 'multi_select' ? Array.isArray(value) && value.includes(OTHER_VALUE) : value === OTHER_VALUE;
 
   return (
     <div>
@@ -567,6 +576,7 @@ function QuestionView({
       </div>
       <h2 style={{ fontFamily: DISPLAY, fontWeight: 600, fontSize: 'clamp(22px,3.3vw,34px)', lineHeight: 1.16, letterSpacing: '-.01em', color: 'var(--ink)' }}>{q.title}</h2>
       {q.help && <p style={{ fontSize: 15.5, lineHeight: 1.6, color: 'var(--text-muted)', margin: '12px 0 0', maxWidth: '60ch' }}>{q.help}</p>}
+      {q.imageUrl && <img src={q.imageUrl} alt="" style={{ marginTop: 18, width: '100%', maxHeight: 260, objectFit: 'cover', borderRadius: 16, border: '1px solid var(--border)' }} />}
 
       <div style={{ marginTop: 'clamp(24px,4vh,38px)' }}>
         {(q.type === 'single_select' || q.type === 'multi_select' || q.type === 'yes_no') && (
@@ -574,26 +584,35 @@ function QuestionView({
             {options.map((o, i) => {
               const multi = q.type === 'multi_select';
               const sel = multi ? Array.isArray(value) && value.includes(o.value) : value === o.value;
+              const isOther = o.value === OTHER_VALUE;
               return (
                 <button key={o.id} type="button" role={multi ? 'checkbox' : 'radio'} aria-checked={sel} onClick={() => {
                   if (multi) {
                     const arr = Array.isArray(value) ? (value as string[]) : [];
                     onChange(q.id, arr.includes(o.value) ? arr.filter((x) => x !== o.value) : [...arr, o.value]);
-                  } else onChange(q.id, o.value, true);
+                  } else onChange(q.id, o.value, !isOther); // don't auto-advance into "Other" — let them type
                 }} style={{ display: 'flex', alignItems: 'center', gap: 14, width: '100%', padding: '15px 18px', borderRadius: 14, border: `1.5px solid ${sel ? 'var(--brand-strong)' : 'var(--border)'}`, background: sel ? 'var(--green-50)' : '#fff', color: 'var(--ink)', cursor: 'pointer', fontSize: 17, textAlign: 'left', boxShadow: sel ? 'var(--shadow-sm)' : 'none', transition: 'border-color .16s, background .16s, box-shadow .16s' }}>
                   <span style={{ width: 30, height: 30, borderRadius: 8, display: 'grid', placeItems: 'center', flex: 'none', fontFamily: DISPLAY, fontWeight: 600, fontSize: 13, border: `1.5px solid ${sel ? 'var(--brand-strong)' : 'var(--border-strong)'}`, background: sel ? 'var(--brand-strong)' : '#fff', color: sel ? '#fff' : 'var(--text-muted)' }}>{String.fromCharCode(65 + i)}</span>
                   <span style={{ flex: 1, textAlign: 'left', lineHeight: 1.4 }}>{o.label}</span>
                 </button>
               );
             })}
+            {canOther && otherSelected && (
+              <input autoFocus value={otherValue} placeholder="Please specify…" onChange={(e) => onChange(otherKey(q.id), e.target.value)} style={{ width: '100%', maxWidth: 480, height: 48, padding: '0 16px', fontSize: 16, color: 'var(--ink)', background: '#fff', border: '1.5px solid var(--brand-strong)', borderRadius: 12, marginLeft: 2 }} />
+            )}
           </div>
         )}
 
         {q.type === 'dropdown' && (
-          <select value={(value as string) ?? ''} onChange={(e) => onChange(q.id, e.target.value, true)} style={{ width: '100%', maxWidth: 440, padding: '14px 16px', fontSize: 17, color: 'var(--ink)', background: '#fff', border: '1.5px solid var(--border-strong)', borderRadius: 12, cursor: 'pointer' }}>
-            <option value="">Choose…</option>
-            {(q.options ?? []).map((o) => <option key={o.id} value={o.value}>{o.label}</option>)}
-          </select>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <select value={(value as string) ?? ''} onChange={(e) => onChange(q.id, e.target.value, e.target.value !== OTHER_VALUE)} style={{ width: '100%', maxWidth: 440, padding: '14px 16px', fontSize: 17, color: 'var(--ink)', background: '#fff', border: '1.5px solid var(--border-strong)', borderRadius: 12, cursor: 'pointer' }}>
+              <option value="">Choose…</option>
+              {options.map((o) => <option key={o.id} value={o.value}>{o.label}</option>)}
+            </select>
+            {canOther && otherSelected && (
+              <input autoFocus value={otherValue} placeholder="Please specify…" onChange={(e) => onChange(otherKey(q.id), e.target.value)} style={{ width: '100%', maxWidth: 440, height: 48, padding: '0 16px', fontSize: 16, color: 'var(--ink)', background: '#fff', border: '1.5px solid var(--brand-strong)', borderRadius: 12 }} />
+            )}
+          </div>
         )}
 
         {q.type === 'scale' && q.scale && (

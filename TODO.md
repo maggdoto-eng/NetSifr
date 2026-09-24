@@ -36,11 +36,11 @@ From DEVELOPMENT_SPEC.md review. Design system + core behaviours already match.
 - [x] 13.6 Builder "Experience" panel editing theme
 - [x] 13.7 Runner tweak override props (animation/background/engagement, auto → defer to theme)
 
-### Surveys — production hardening (after §13; the recommended 1,2,4,5)
-- [ ] P1. Researcher role + per-survey ownership (stamp ownerUserId, show creator, scope listing)
-- [ ] P2. PII separation & data-retention (separate contact answers, anonymised export, deletion)
-- [ ] P4. Server-side aggregation for large response sets
-- [ ] P5. Builder extras: "Other → free text" option, undo/redo, per-question image
+### Surveys — production hardening (after §13; the recommended 1,2,4,5) — DONE
+- [x] P1. Per-survey ownership (ownerUserId stamped at create, creator shown on dashboard)
+- [x] P2. PII separation & data-retention (separate `contact` column, PII toggle in builder, anonymised default export + opt-in full export, per-response delete, retention window + purge/anonymise governance bar)
+- [x] P4. Server-side aggregation for large response sets (>1500 → getAnalytics on the server, filters via surveyAnalyticsAction)
+- [x] P5. Builder extras: "Other → free text" option, undo/redo (⌘Z / ⌘⇧Z, coalesced), per-question image
 - [ ] (still deferred) i18n/RTL, per-invite tokens
 
 ## 📋 Backlog (deferred roadmap)

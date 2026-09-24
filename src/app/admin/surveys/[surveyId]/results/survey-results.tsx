@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import {
   aggregate,
@@ -10,6 +10,11 @@ import {
   type SurveyContent,
   type SurveyResponseLite,
 } from '@/lib/survey-schema';
+import { surveyAnalyticsAction } from '../../actions';
+
+type Agg = ReturnType<typeof aggregate>;
+type Ct = ReturnType<typeof crosstab>;
+const EMPTY_AGG: Agg = { total: 0, completed: 0, completionRate: 0, questions: [] };
 
 const DISPLAY = 'var(--font-display,Poppins),sans-serif';
 const MONO = 'var(--font-mono,monospace)';
@@ -26,14 +31,20 @@ export function SurveyResults({
   slug,
   status,
   content,
-  responses,
+  responses = [],
+  totalCount,
+  serverMode = false,
+  initialAnalytics,
 }: {
   surveyId: string;
   title: string;
   slug: string;
   status: string;
   content: SurveyContent;
-  responses: SurveyResponseLite[];
+  responses?: SurveyResponseLite[];
+  totalCount: number;
+  serverMode?: boolean;
+  initialAnalytics?: { agg: Agg; ct: Ct };
 }) {
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
@@ -42,8 +53,32 @@ export function SurveyResults({
   const [targetQid, setTargetQid] = useState('');
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
-  const filtered = useMemo(() => filterResponses(responses, { from, to, completeOnly }), [responses, from, to, completeOnly]);
-  const agg = useMemo(() => aggregate(content, filtered), [content, filtered]);
+  // Server-mode analytics: seeded from the initial server aggregate, refreshed
+  // via a debounced server action whenever the filters change (spec P4).
+  const [remote, setRemote] = useState<{ agg: Agg; ct: Ct }>(() => initialAnalytics ?? { agg: EMPTY_AGG, ct: null });
+  const [loading, setLoading] = useState(false);
+  const firstRun = useRef(true);
+  useEffect(() => {
+    if (!serverMode) return;
+    if (firstRun.current) {
+      firstRun.current = false;
+      return; // initialAnalytics already covers the unfiltered view
+    }
+    let alive = true;
+    setLoading(true);
+    const t = setTimeout(async () => {
+      try {
+        const r = await surveyAnalyticsAction(surveyId, { from, to, completeOnly, segQid, targetQid });
+        if (alive) setRemote({ agg: r.agg, ct: r.ct });
+      } finally {
+        if (alive) setLoading(false);
+      }
+    }, 350);
+    return () => { alive = false; clearTimeout(t); };
+  }, [serverMode, surveyId, from, to, completeOnly, segQid, targetQid]);
+
+  const filtered = useMemo(() => (serverMode ? [] : filterResponses(responses, { from, to, completeOnly })), [serverMode, responses, from, to, completeOnly]);
+  const agg = serverMode ? remote.agg : aggregate(content, filtered);
   const segs = useMemo(() => segmentableQuestions(content), [content]);
   const targets = useMemo(() => {
     const out: { id: string; ref?: string; title: string }[] = [];
@@ -52,7 +87,7 @@ export function SurveyResults({
     }));
     return out;
   }, [content, segQid]);
-  const ct = useMemo(() => (segQid && targetQid ? crosstab(content, filtered, segQid, targetQid) : null), [content, filtered, segQid, targetQid]);
+  const ct = serverMode ? remote.ct : (segQid && targetQid ? crosstab(content, filtered, segQid, targetQid) : null);
 
   const filterActive = !!(from || to || completeOnly);
   const kpis = [
@@ -73,7 +108,8 @@ export function SurveyResults({
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <Link href="/admin/surveys" className="ns-btn ns-btn--ghost ns-btn--sm">← All surveys</Link>
             <Link href={`/admin/surveys/${surveyId}/responses`} className="ns-btn ns-btn--ghost ns-btn--sm">Responses</Link>
-            <a href={`/admin/surveys/${surveyId}/results/export`} className="ns-btn ns-btn--outline ns-btn--sm">Export CSV</a>
+            <a href={`/admin/surveys/${surveyId}/results/export`} className="ns-btn ns-btn--outline ns-btn--sm" title="Anonymised — excludes PII">Export CSV</a>
+            <a href={`/admin/surveys/${surveyId}/results/export?pii=1`} className="ns-btn ns-btn--ghost ns-btn--sm" title="Full export including personal data">Export (with PII)</a>
           </div>
         </div>
       </header>
@@ -110,7 +146,10 @@ export function SurveyResults({
             <span style={{ fontSize: 13.5, color: 'var(--text-body)' }}>Completed only</span>
             <Switch on={completeOnly} onClick={() => setCompleteOnly((x) => !x)} />
           </div>
-          <span style={{ fontSize: 13, color: 'var(--text-muted)', marginLeft: 'auto' }}>{agg.total.toLocaleString()} of {responses.length.toLocaleString()} responses</span>
+          <span style={{ fontSize: 13, color: 'var(--text-muted)', marginLeft: 'auto' }}>
+            {loading ? 'Aggregating…' : `${agg.total.toLocaleString()} of ${totalCount.toLocaleString()} responses`}
+            {serverMode && !loading && <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 600, letterSpacing: '.05em', textTransform: 'uppercase', color: 'var(--brand-strong)' }}>· server</span>}
+          </span>
           {filterActive && (
             <button type="button" onClick={() => { setFrom(''); setTo(''); setCompleteOnly(false); }} style={{ border: 'none', background: 'transparent', color: 'var(--brand-strong)', fontSize: 13.5, fontWeight: 600, cursor: 'pointer' }}>Clear filters</button>
           )}

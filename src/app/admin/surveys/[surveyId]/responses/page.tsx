@@ -2,14 +2,18 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { requireAdminContext } from '@/app/admin/action-context';
 import { getSurveyForAdmin, getResponsesPage, SurveyError } from '@/modules/surveys';
-import type { SurveyContent, Answers, Question } from '@/lib/survey-schema';
+import { OTHER_VALUE, otherKey, type SurveyContent, type Answers, type Question } from '@/lib/survey-schema';
+import { GovernanceBar, DeleteResponseButton } from './responses-tools';
 
 const DISPLAY = 'var(--font-display,Poppins),sans-serif';
 const MONO = 'var(--font-mono,monospace)';
 
-function fmt(v: unknown): string {
+/** Format an answer, resolving an "Other…" pick to its free-text (spec P5). */
+function fmt(q: Question, all: Answers): string {
+  const v = all[q.id];
   if (v === undefined || v === null || v === '') return '—';
-  return Array.isArray(v) ? v.join(' · ') : String(v);
+  const label = (x: string) => (x === OTHER_VALUE ? `Other: ${all[otherKey(q.id)] ?? ''}` : x);
+  return Array.isArray(v) ? v.map(label).join(' · ') : label(String(v));
 }
 
 export default async function SurveyResponsesPage({
@@ -52,18 +56,24 @@ export default async function SurveyResponsesPage({
         <h1 style={{ fontFamily: DISPLAY, fontWeight: 600, fontSize: 'clamp(24px,3.6vw,32px)', letterSpacing: '-.02em', color: 'var(--ink)' }}>{survey.title}</h1>
         <p style={{ fontSize: 14, color: 'var(--text-muted)', marginTop: 6 }}>{total.toLocaleString()} responses · page {page} of {pages}</p>
 
+        <GovernanceBar surveyId={surveyId} retentionDays={survey.retentionDays} />
+
         {responses.length === 0 ? (
           <div style={{ background: '#fff', border: '1px dashed var(--border-strong)', borderRadius: 16, padding: 48, textAlign: 'center', color: 'var(--text-muted)', marginTop: 20 }}>No responses on this page.</div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 20 }}>
             {responses.map((r) => {
               const answers = r.answers as Answers;
-              const answered = Object.values(answers).filter((v) => v !== '' && v != null && !(Array.isArray(v) && v.length === 0)).length;
+              const contact = (r.contact as Answers) ?? {};
+              const all: Answers = { ...answers, ...contact };
+              const hasContact = Object.keys(contact).length > 0;
+              const answered = Object.values(all).filter((v) => v !== '' && v != null && !(Array.isArray(v) && v.length === 0)).length;
               return (
                 <details key={r.id} style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: 14, boxShadow: 'var(--shadow-sm)', padding: '16px 20px' }}>
                   <summary style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
                     <span style={{ fontFamily: MONO, fontSize: 12, color: 'var(--text-muted)' }}>{new Date(r.submittedAt).toLocaleString()}</span>
                     <span style={{ fontFamily: DISPLAY, fontSize: 11, fontWeight: 600, letterSpacing: '.05em', textTransform: 'uppercase', padding: '3px 10px', borderRadius: 999, background: r.complete ? 'var(--green-100)' : 'var(--slate-100)', color: r.complete ? 'var(--brand-hover)' : 'var(--text-muted)' }}>{r.complete ? 'Complete' : 'Partial'}</span>
+                    {hasContact && <span title="Contains personal data" style={{ fontSize: 11, fontWeight: 600, color: 'var(--coral,#c0392b)' }}>🔒 PII</span>}
                     <span style={{ fontSize: 13, color: 'var(--text-muted)', marginLeft: 'auto' }}>{answered} answered</span>
                   </summary>
                   <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -72,10 +82,14 @@ export default async function SurveyResponsesPage({
                         <div style={{ display: 'flex', gap: 8, alignItems: 'baseline' }}>
                           {q.ref && <span style={{ fontFamily: MONO, fontSize: 11, color: 'var(--brand-strong)' }}>{q.ref}</span>}
                           <span style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--ink)' }}>{q.title}</span>
+                          {q.pii && <span style={{ fontSize: 10.5, fontWeight: 600, letterSpacing: '.04em', color: 'var(--coral,#c0392b)', border: '1px solid currentColor', borderRadius: 5, padding: '0 5px' }}>PII</span>}
                         </div>
-                        <div style={{ fontSize: 14, color: 'var(--text-body)', marginTop: 2, whiteSpace: 'pre-wrap' }}>{fmt(answers[q.id])}</div>
+                        <div style={{ fontSize: 14, color: 'var(--text-body)', marginTop: 2, whiteSpace: 'pre-wrap' }}>{fmt(q, all)}</div>
                       </div>
                     ))}
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid var(--border)', paddingTop: 12, marginTop: 2 }}>
+                      <DeleteResponseButton surveyId={surveyId} responseId={r.id} />
+                    </div>
                   </div>
                 </details>
               );

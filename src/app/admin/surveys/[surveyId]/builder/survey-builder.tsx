@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
 import Link from 'next/link';
 import {
   QUESTION_TYPES,
@@ -36,8 +36,52 @@ const inpBase: React.CSSProperties = {
   outline: 'none',
 };
 
+/** Undo/redo history over a single value (spec P5). Rapid successive edits
+ *  within 600ms coalesce into one step so typing doesn't flood the stack. */
+function useHistory<T>(initial: T) {
+  const [state, setState] = useState<T>(initial);
+  const past = useRef<T[]>([]);
+  const future = useRef<T[]>([]);
+  const lastPush = useRef(0);
+  const [, force] = useState(0);
+  const bump = () => force((n) => n + 1);
+
+  const set = useCallback((updater: T | ((prev: T) => T)) => {
+    setState((prev) => {
+      const next = typeof updater === 'function' ? (updater as (p: T) => T)(prev) : updater;
+      const now = Date.now();
+      if (now - lastPush.current >= 600) {
+        past.current.push(prev);
+        if (past.current.length > 100) past.current.shift();
+      }
+      lastPush.current = now;
+      future.current = [];
+      return next;
+    });
+    bump();
+  }, []);
+
+  // Programmatic update that does not record a history step (e.g. slug sync).
+  const replace = useCallback((updater: (prev: T) => T) => setState(updater), []);
+
+  const undo = useCallback(() => {
+    if (!past.current.length) return;
+    lastPush.current = 0;
+    setState((prev) => { future.current.push(prev); return past.current.pop()!; });
+    bump();
+  }, []);
+  const redo = useCallback(() => {
+    if (!future.current.length) return;
+    lastPush.current = 0;
+    setState((prev) => { past.current.push(prev); return future.current.pop()!; });
+    bump();
+  }, []);
+
+  return { state, set, replace, undo, redo, canUndo: past.current.length > 0, canRedo: future.current.length > 0 };
+}
+
 export function SurveyBuilder({ surveyId, initial, status }: { surveyId: string; initial: Draft; status: string }) {
-  const [draft, setDraft] = useState<Draft>(initial);
+  const { state: draft, set: setDraft, replace: replaceDraft, undo, redo, canUndo, canRedo } = useHistory<Draft>(initial);
   const [pending, start] = useTransition();
   const [toast, setToast] = useState<string | null>(null);
   const [typeMenu, setTypeMenu] = useState<string | null>(null);
@@ -58,7 +102,7 @@ export function SurveyBuilder({ surveyId, initial, status }: { surveyId: string;
       const res = await saveSurveyAction(surveyId, draft);
       if (res.error) flash(res.error);
       else {
-        if (res.slug) setDraft((d) => ({ ...d, slug: res.slug! }));
+        if (res.slug) replaceDraft((d) => ({ ...d, slug: res.slug! }));
         after ? after(res.slug ?? draft.slug) : flash('Draft saved.');
       }
     });
@@ -67,7 +111,7 @@ export function SurveyBuilder({ surveyId, initial, status }: { surveyId: string;
     start(async () => {
       const res = await saveSurveyAction(surveyId, draft);
       if (res.error) return flash(res.error);
-      if (res.slug) setDraft((d) => ({ ...d, slug: res.slug! }));
+      if (res.slug) replaceDraft((d) => ({ ...d, slug: res.slug! }));
       await setSurveyStatusAction(surveyId, 'PUBLISHED');
       setCurStatus('PUBLISHED');
       flash('Published — the survey is now live.');
@@ -79,6 +123,18 @@ export function SurveyBuilder({ surveyId, initial, status }: { surveyId: string;
     setDraft((d) => ({ ...d, title: 'Untitled survey', content: blankSurveyContent() }));
     flash('Reset to a blank template.');
   }
+
+  // Undo/redo keyboard shortcuts (spec P5).
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== 'z') return;
+      e.preventDefault();
+      if (e.shiftKey) redo();
+      else undo();
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [undo, redo]);
 
   // Non-blocking validation warnings (spec §3.2).
   const warnings: string[] = [];
@@ -111,6 +167,10 @@ export function SurveyBuilder({ surveyId, initial, status }: { surveyId: string;
             <span style={{ fontFamily: DISPLAY, fontSize: 11, fontWeight: 600, letterSpacing: '.06em', textTransform: 'uppercase', padding: '3px 9px', borderRadius: 999, background: curStatus === 'PUBLISHED' ? 'var(--green-100)' : 'var(--slate-100)', color: curStatus === 'PUBLISHED' ? 'var(--brand-hover)' : 'var(--text-muted)' }}>{curStatus}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 2, marginRight: 2 }}>
+              <button type="button" title="Undo (⌘Z)" aria-label="Undo" disabled={!canUndo} onClick={undo} style={{ width: 34, height: 34, display: 'grid', placeItems: 'center', border: '1px solid var(--border)', background: '#fff', borderRadius: 8, color: canUndo ? 'var(--slate-600)' : 'var(--slate-300)', cursor: canUndo ? 'pointer' : 'default', fontSize: 15 }}>↶</button>
+              <button type="button" title="Redo (⌘⇧Z)" aria-label="Redo" disabled={!canRedo} onClick={redo} style={{ width: 34, height: 34, display: 'grid', placeItems: 'center', border: '1px solid var(--border)', background: '#fff', borderRadius: 8, color: canRedo ? 'var(--slate-600)' : 'var(--slate-300)', cursor: canRedo ? 'pointer' : 'default', fontSize: 15 }}>↷</button>
+            </div>
             <button type="button" className="ns-btn ns-btn--ghost ns-btn--sm" disabled={pending} onClick={resetTemplate}>Reset</button>
             <Link href={`/admin/surveys/${surveyId}/preview`} target="_blank" className="ns-btn ns-btn--outline ns-btn--sm">Preview</Link>
             <button type="button" className="ns-btn ns-btn--secondary ns-btn--sm" disabled={pending} onClick={() => save()}>Save draft</button>
@@ -431,6 +491,12 @@ function QCard({
               </div>
             ))}
             <button type="button" onClick={() => onChange((qq) => { const n = (qq.options?.length ?? 0) + 1; qq.options = [...(qq.options ?? []), { id: uid('o'), label: `Option ${n}`, value: `Option ${n}` }]; })} style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: 7, padding: '7px 10px', border: 'none', background: 'transparent', borderRadius: 8, color: 'var(--brand-strong)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>+ Add option</button>
+            {['single_select', 'multi_select', 'dropdown'].includes(q.type) && (
+              <label style={{ display: 'flex', alignItems: 'center', gap: 9, marginTop: 2, fontSize: 13.5, color: 'var(--text-body)', cursor: 'pointer' }}>
+                <input type="checkbox" style={{ width: 'auto', accentColor: 'var(--brand-strong)' }} checked={!!q.allowOther} onChange={(e) => onChange((qq) => { qq.allowOther = e.target.checked; })} />
+                Add an “Other…” write-in option
+              </label>
+            )}
           </div>
         )}
 
@@ -446,6 +512,13 @@ function QCard({
         {['short_text', 'long_text', 'number', 'email', 'date'].includes(q.type) && (
           <div style={{ border: '1.5px dashed var(--border-strong)', borderRadius: 10, padding: '12px 14px', color: 'var(--slate-400)', fontSize: 14, background: 'var(--slate-50)' }}>{preview[q.type]}</div>
         )}
+
+        {/* per-question image (spec P5) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14 }}>
+          <span style={{ fontSize: 15, flex: 'none', color: 'var(--slate-400)' }} aria-hidden>🖼</span>
+          <input style={{ ...inpBase, flex: 1 }} value={q.imageUrl ?? ''} onChange={(e) => onChange((qq) => { const v = e.target.value.trim(); if (v) qq.imageUrl = v; else delete qq.imageUrl; })} placeholder="Image URL (optional) — shown above the question" />
+        </div>
+        {q.imageUrl && <img src={q.imageUrl} alt="" style={{ marginTop: 10, maxHeight: 140, borderRadius: 10, border: '1px solid var(--border)' }} />}
       </div>
 
       {/* branching */}
@@ -476,6 +549,11 @@ function QCard({
         <ToolBtn label="↓" title="Move down" disabled={last} onClick={() => onMove(1)} />
         <ToolBtn label="⧉" title="Duplicate" onClick={onDuplicate} />
         <ToolBtn label="🗑" title="Delete" danger onClick={onDelete} />
+        <div style={{ width: 1, height: 22, background: 'var(--border)', margin: '0 6px' }} />
+        <span title="Store this answer as personal/contact data, kept separate from analytics and excluded from anonymised exports" style={{ fontSize: 13, color: 'var(--text-muted)', marginRight: 4 }}>PII</span>
+        <button type="button" role="switch" aria-checked={!!q.pii} aria-label="Mark as personal data" onClick={() => onChange((qq) => { qq.pii = !qq.pii; })} style={{ width: 40, height: 24, borderRadius: 999, border: 'none', padding: 2, cursor: 'pointer', background: q.pii ? 'var(--coral,#e5674f)' : 'var(--slate-300)', display: 'inline-flex', justifyContent: q.pii ? 'flex-end' : 'flex-start' }}>
+          <span style={{ width: 20, height: 20, borderRadius: '50%', background: '#fff', boxShadow: '0 1px 2px rgba(50,53,70,.35)' }} />
+        </button>
         <div style={{ width: 1, height: 22, background: 'var(--border)', margin: '0 6px' }} />
         <span style={{ fontSize: 13, color: 'var(--text-muted)', marginRight: 4 }}>Required</span>
         <button type="button" role="switch" aria-checked={!!q.required} onClick={() => onChange((qq) => { qq.required = !qq.required; })} style={{ width: 40, height: 24, borderRadius: 999, border: 'none', padding: 2, cursor: 'pointer', background: q.required ? 'var(--brand-strong)' : 'var(--slate-300)', display: 'inline-flex', justifyContent: q.required ? 'flex-end' : 'flex-start' }}>

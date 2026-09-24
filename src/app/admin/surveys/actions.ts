@@ -9,6 +9,12 @@ import {
   deleteSurvey,
   setSurveyStatus,
   updateSurvey,
+  getAnalytics,
+  setRetention,
+  deleteResponse,
+  anonymiseResponses,
+  purgeExpiredResponses,
+  type AnalyticsFilters,
 } from '@/modules/surveys';
 import type { SurveyContent } from '@/lib/survey-schema';
 
@@ -27,8 +33,8 @@ export async function saveSurveyAction(
 }
 
 export async function createSurveyAction(): Promise<void> {
-  const { organizationId } = await requireAdminContext();
-  const survey = await createSurvey({ organizationId });
+  const { organizationId, userId } = await requireAdminContext();
+  const survey = await createSurvey({ organizationId, ownerUserId: userId });
   redirect(`/admin/surveys/${survey.id}/builder`);
 }
 
@@ -52,4 +58,40 @@ export async function setSurveyStatusAction(
   await setSurveyStatus({ id, organizationId, status });
   revalidatePath('/admin/surveys');
   revalidatePath(`/admin/surveys/${id}/builder`);
+}
+
+/** Server-side aggregation for the results page filters (spec P4). */
+export async function surveyAnalyticsAction(surveyId: string, filters: AnalyticsFilters) {
+  const { organizationId } = await requireAdminContext();
+  const { agg, ct, total } = await getAnalytics(surveyId, organizationId, filters);
+  return { agg, ct, total };
+}
+
+/* ---- Data governance (spec P2) ---- */
+
+export async function setRetentionAction(surveyId: string, retentionDays: number | null): Promise<void> {
+  const { organizationId } = await requireAdminContext();
+  await setRetention(surveyId, organizationId, retentionDays);
+  revalidatePath(`/admin/surveys/${surveyId}/responses`);
+}
+
+export async function deleteResponseAction(surveyId: string, responseId: string): Promise<void> {
+  const { organizationId } = await requireAdminContext();
+  await deleteResponse(surveyId, responseId, organizationId);
+  revalidatePath(`/admin/surveys/${surveyId}/responses`);
+  revalidatePath(`/admin/surveys/${surveyId}/results`);
+}
+
+export async function anonymiseResponsesAction(surveyId: string): Promise<{ count: number }> {
+  const { organizationId } = await requireAdminContext();
+  const count = await anonymiseResponses(surveyId, organizationId);
+  revalidatePath(`/admin/surveys/${surveyId}/responses`);
+  return { count };
+}
+
+export async function purgeExpiredAction(surveyId?: string): Promise<{ removed: number }> {
+  const { organizationId } = await requireAdminContext();
+  const removed = await purgeExpiredResponses(organizationId, surveyId);
+  if (surveyId) revalidatePath(`/admin/surveys/${surveyId}/responses`);
+  return { removed };
 }

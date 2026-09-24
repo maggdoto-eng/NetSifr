@@ -40,7 +40,16 @@ export type Question = {
   options?: Option[];
   scale?: Scale;
   logic?: LogicRule[];
+  /** Personal/contact data — stored apart from analytics answers (spec P2). */
+  pii?: boolean;
+  /** Add a free-text "Other" escape hatch to a choice question (spec P5). */
+  allowOther?: boolean;
+  /** Optional image shown above the question in the runner (spec P5). */
+  imageUrl?: string;
 };
+
+/** Sentinel option value marking an "Other → free text" choice (spec P5). */
+export const OTHER_VALUE = '__other__';
 
 export type Section = {
   id: string;
@@ -139,6 +148,33 @@ export const ENCOURAGEMENTS: string[] = [
 
 export type AnswerValue = string | number | string[];
 export type Answers = Record<string, AnswerValue>;
+
+/* ---- PII separation (spec P2) ---- */
+/** All question ids flagged as personal/contact data. */
+export function piiQuestionIds(content: SurveyContent): Set<string> {
+  const ids = new Set<string>();
+  for (const s of content.sections) for (const q of s.questions) if (q.pii) ids.add(q.id);
+  return ids;
+}
+/** The companion key holding an "Other" free-text value for a choice question. */
+export function otherKey(qid: string): string {
+  return `${qid}__other`;
+}
+/**
+ * Partition a raw answer map into analytics `answers` and separated `contact`
+ * (PII) so the two are stored — and exported — apart. An "Other" free-text
+ * value inherits the PII flag of its parent question.
+ */
+export function splitPII(content: SurveyContent, all: Answers): { answers: Answers; contact: Answers } {
+  const pii = piiQuestionIds(content);
+  const answers: Answers = {};
+  const contact: Answers = {};
+  for (const [k, v] of Object.entries(all)) {
+    const baseId = k.endsWith('__other') ? k.slice(0, -'__other'.length) : k;
+    (pii.has(baseId) ? contact : answers)[k] = v;
+  }
+  return { answers, contact };
+}
 export type SurveyResponseLite = {
   id?: string;
   submittedAt: string | Date;

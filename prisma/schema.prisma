@@ -139,6 +139,7 @@ model User {
   followers                    Follow[]                 @relation("Followee")
   reportsMade                  Report[]                 @relation("Reporter")
   skills                       UserSkill[]
+  ownedSurveys                 Survey[]                 @relation("SurveyOwner")
 }
 
 enum CredentialType {
@@ -1421,19 +1422,27 @@ enum SurveyStatus {
 model Survey {
   id             String       @id @default(uuid())
   organizationId String
+  /// The researcher who created the survey (per-survey ownership, spec P1).
+  /// Nullable so pre-existing rows and system seeds stay valid.
+  ownerUserId    String?
   slug           String       @unique
   title          String
   status         SurveyStatus @default(DRAFT)
   version        Int          @default(1)
   content        Json
+  /// Auto-purge responses older than this many days (data retention, spec P2).
+  /// Null = keep indefinitely.
+  retentionDays  Int?
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
   publishedAt    DateTime?
 
   organization Organization     @relation(fields: [organizationId], references: [id])
+  owner        User?            @relation("SurveyOwner", fields: [ownerUserId], references: [id])
   responses    SurveyResponse[]
 
   @@index([organizationId, status])
+  @@index([ownerUserId])
 }
 
 /// One submission. `answers` is a map of questionId -> value (string, number,
@@ -1444,6 +1453,10 @@ model SurveyResponse {
   /// The survey version at the moment this response was created.
   surveyVersion Int?
   answers       Json
+  /// PII answers (questions flagged `pii`) kept out of `answers` so the main
+  /// analytics/export paths never touch contact data (spec P2). Purged on
+  /// retention sweeps; cleared on anonymisation.
+  contact       Json?
   /// false while the respondent is still answering (partial-save); true once
   /// they reach the finish screen.
   complete      Boolean  @default(true)

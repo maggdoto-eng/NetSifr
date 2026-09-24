@@ -20,6 +20,7 @@ type Row = {
   questionCount: number;
   responseCount: number;
   completeCount: number;
+  ownerName: string | null;
 };
 
 function IconBtn({ title, onClick, danger, children }: { title: string; onClick: () => void; danger?: boolean; children: React.ReactNode }) {
@@ -129,7 +130,7 @@ export function SurveysDashboard({ rows }: { rows: Row[] }) {
                 <div key={r.id} style={{ display: 'grid', gridTemplateColumns: 'minmax(0,2.4fr) 110px 110px 130px 172px', gap: 12, padding: '16px 22px', borderTop: i === 0 ? 'none' : '1px solid var(--border)', alignItems: 'center' }}>
                   <div style={{ minWidth: 0 }}>
                     <div style={{ fontFamily: DISPLAY, fontWeight: 600, fontSize: 16, color: 'var(--ink)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.title}</div>
-                    <div style={{ fontFamily: MONO, fontSize: 12, color: 'var(--text-muted)', marginTop: 3 }}>/s/{r.slug}</div>
+                    <div style={{ fontFamily: MONO, fontSize: 12, color: 'var(--text-muted)', marginTop: 3 }}>/s/{r.slug}{r.ownerName ? ` · by ${r.ownerName}` : ''}</div>
                   </div>
                   <div>
                     <span style={{ fontFamily: DISPLAY, fontSize: 11, fontWeight: 600, letterSpacing: '.05em', textTransform: 'uppercase', padding: '3px 10px', borderRadius: 999, background: pub ? 'var(--green-100)' : 'var(--slate-100)', color: pub ? 'var(--brand-hover)' : 'var(--text-muted)' }}>{r.status}</span>

@@ -22,6 +22,7 @@ export default async function SurveysPage() {
     questionCount: countQuestions(s.content as unknown as SurveyContent),
     responseCount: s._count.responses,
     completeCount: completeMap.get(s.id) ?? 0,
+    ownerName: s.owner?.name ?? null,
   }));
 
   return <SurveysDashboard rows={rows} />;
